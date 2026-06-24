@@ -37,7 +37,7 @@ Sales.init(
       allowNull: false
     },
     paymentMethod: {
-      type: DataTypes.ENUM('efectivo', 'tarjeta', 'transferencia'),
+      type: DataTypes.ENUM('efectivo', 'transferencia', 'combinado'),
       allowNull: false
     },
     cashAmount: {
