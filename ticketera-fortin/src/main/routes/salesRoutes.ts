@@ -9,19 +9,19 @@ import {
 
 const router = Router()
 
-// POST-http://localhost:PORT/api/sales/
+// POST - Registrar una nueva venta
 router.post('/', createSale)
 
-//GET-http://localhost:PORT/api/sales/ (Historial completo)
+// GET - Ver el historial completo de todas las ventas
 router.get('/', getSales)
 
-//GET-http://localhost:PORT/api/sales/:id (Detalle de una venta)
+// GET - Ver el detalle de una sola venta por id
 router.get('/:id', getSaleById)
 
-//GET-http://localhost:PORT/api/sales/cash-register/:cash_register_id (Ventas de una caja)
+// GET - Ver todas las ventas que se hicieron durante un turno
 router.get('/cash-register/:cash_register_id', getSalesByCashRegister)
 
-//DELETE-http://localhost:PORT/api/sales/:id (Eliminar venta)
+// DELETE - Eliminar una venta mal cargada por su ID
 router.delete('/:id', deleteSale)
 
 export default router

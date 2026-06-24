@@ -1,60 +1,53 @@
 import { Request, Response } from 'express'
-import Cash_register from '../model/cash_registers'
+import { cashRegisterService } from '../services/cashRegisterService'
 
-// Abrir una nueva caja
 export const openRegister = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { opening } = req.body
-
-    // Validar si ya hay una caja abierta para no duplicar
-    const activeRegister = await Cash_register.findOne({ where: { status: 'open' } })
-    if (activeRegister) {
-      res.status(400).json({ message: 'Ya existe una caja abierta actualmente.' })
-      return
-    }
-
-    const newRegister = await Cash_register.create({
-      opening,
-      closing: 0,
-      opened_at: new Date(),
-      status: 'open'
-    })
-
+    const newRegister = await cashRegisterService.openRegister(req.body)
     res.status(201).json({ message: 'Caja abierta con éxito.', cashRegister: newRegister })
-  } catch (error) {
-    res.status(500).json({ message: 'Error al abrir la caja.' })
+  } catch (error: any) {
+    res.status(400).json({ message: error.message || 'Error al abrir la caja.' })
   }
 }
 
-// Cerrar la caja activa
 export const closeRegister = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params
-    const { closing } = req.body
-
-    const register = await Cash_register.findByPk(id)
-    if (!register || register.status === 'closed') {
-      res.status(404).json({ message: 'Caja no encontrada o ya cerrada.' })
-      return
-    }
-
-    register.closing = closing
-    register.closed_at = new Date()
-    register.status = 'closed'
-    await register.save()
-
-    res.status(200).json({ message: 'Caja cerrada con éxito.', cashRegister: register })
-  } catch (error) {
-    res.status(500).json({ message: 'Error al cerrar la caja.' })
+    const closedRegister = await cashRegisterService.closeRegister(req.params.id, req.body)
+    res.status(200).json({ message: 'Caja cerrada con éxito.', cashRegister: closedRegister })
+  } catch (error: any) {
+    res.status(400).json({ message: error.message })
   }
 }
 
-// Obtengo el estado de la caja actual
 export const getCurrentRegister = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const current = await Cash_register.findOne({ where: { status: 'open' } })
-    res.status(200).json(current || { status: 'closed', message: 'No hay ninguna caja abierta.' })
+    const current = await cashRegisterService.getCurrentRegister()
+    if (!current) {
+      res.status(200).json({ status: 'closed', message: 'No hay ninguna caja abierta actualmente.' })
+      return
+    }
+    res.status(200).json(current)
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener la caja.' })
+    console.error('Error al obtener la caja actual:', error)
+    res.status(500).json({ message: 'Error interno al obtener la caja.' })
+  }
+}
+
+export const getAllRegisters = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const registers = await cashRegisterService.getAllRegisters()
+    res.status(200).json(registers)
+  } catch (error) {
+    console.error('Error al obtener el historial de cajas:', error)
+    res.status(500).json({ message: 'Error interno al obtener el historial.' })
+  }
+}
+
+export const getRegisterById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const register = await cashRegisterService.getRegisterById(req.params.id)
+    res.status(200).json(register)
+  } catch (error: any) {
+    res.status(404).json({ message: error.message })
   }
 }
