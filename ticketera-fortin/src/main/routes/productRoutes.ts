@@ -10,10 +10,10 @@ import {
 const router = Router()
 
 // GET - http://localhost:PORT/api/products/
-router.get('/', getProducts)
+router.get('/', getProducts) 
 
 // GET - http://localhost:PORT/api/products/:id
-router.get('/:id', getProductById)
+router.get('/:id', getProductById) // es necesartio??
 
 // POST - http://localhost:PORT/api/products/
 router.post('/', createProduct)

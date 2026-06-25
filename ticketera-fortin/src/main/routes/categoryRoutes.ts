@@ -10,10 +10,10 @@ import {
 const router = Router()
 
 // GET - http://localhost:PORT/api/categories/
-router.get('/', getCategories)
+router.get('/', getCategories) //Es necesario
 
 // GET - http://localhost:PORT/api/categories/:id
-router.get('/:id', getCategoryById)
+router.get('/:id', getCategoryById) // Seria para filtrar por categoria?
 
 // POST - http://localhost:PORT/api/categories/
 router.post('/', createCategory)
