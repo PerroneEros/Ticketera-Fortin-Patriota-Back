@@ -11,7 +11,7 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
@@ -52,21 +52,14 @@ app.whenReady().then(async () => {
     await initDB()
   } catch (error) {
     console.error('no se pudo iniciar la base de datos ', error)
+    return
   }
 
   //llama a la funcion para que aparezca la ventana
   createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
 })
 
 // hace que cuando se cierra la ventana deje de andar la app lo de darwin es para mac
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+  app.quit()
 })
