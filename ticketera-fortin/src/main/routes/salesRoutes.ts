@@ -13,15 +13,15 @@ const router = Router()
 router.post('/', createSale)
 
 // GET - Ver el historial completo de todas las ventas
-router.get('/', getSales)
+router.get('/', getSales) // Para que serviria?
 
 // GET - Ver el detalle de una sola venta por id
-router.get('/:id', getSaleById)
+router.get('/:id', getSaleById) //podemos usarlo para ver los productos que se vendieron y usarlo para ver cantidad de cada producto que se vendio
 
 // GET - Ver todas las ventas que se hicieron durante un turno
-router.get('/cash-register/:cash_register_id', getSalesByCashRegister)
+router.get('/cash-register/:cash_register_id', getSalesByCashRegister) 
 
 // DELETE - Eliminar una venta mal cargada por su ID
-router.delete('/:id', deleteSale)
+router.delete('/:id', deleteSale) //ES necesario?
 
 export default router
