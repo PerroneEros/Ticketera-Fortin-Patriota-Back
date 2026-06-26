@@ -28,7 +28,14 @@ export const salesService = {
       }
 
       let calculatedTotal = 0
-      const itemsToCreate = []
+      const itemsToCreate:{
+        id_product: number,
+        quantity: number,
+        unit_price: number,
+        total: number,
+        printed: boolean,
+        created_at: Date
+      }[] = []
 
       // 3. Buscar precios y calcula totales 
       for (const item of items) {
