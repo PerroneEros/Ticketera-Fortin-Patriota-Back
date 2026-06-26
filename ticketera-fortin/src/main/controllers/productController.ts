@@ -11,14 +11,7 @@ export const getProducts = async (_req: Request, res: Response): Promise<void> =
   }
 }
 
-export const getProductById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const product = await productService.getProductById(req.params.id)
-    res.status(200).json(product)
-  } catch (error: any) {
-    res.status(404).json({ message: error.message })
-  }
-}
+
 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {

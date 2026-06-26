@@ -12,9 +12,6 @@ const router = Router()
 // GET - http://localhost:PORT/api/products/
 router.get('/', getProducts) 
 
-// GET - http://localhost:PORT/api/products/:id
-router.get('/:id', getProductById) // es necesartio buscar un proucto por id o por nombre?
-
 // POST - http://localhost:PORT/api/products/
 router.post('/', createProduct)
 

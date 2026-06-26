@@ -19,35 +19,5 @@ export const closeRegister = async (req: Request, res: Response): Promise<void> 
   }
 }
 
-export const getCurrentRegister = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const current = await cashRegisterService.getCurrentRegister()
-    if (!current) {
-      res.status(200).json({ status: 'closed', message: 'No hay ninguna caja abierta actualmente.' })
-      return
-    }
-    res.status(200).json(current)
-  } catch (error) {
-    console.error('Error al obtener la caja actual:', error)
-    res.status(500).json({ message: 'Error interno al obtener la caja.' })
-  }
-}
 
-export const getAllRegisters = async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const registers = await cashRegisterService.getAllRegisters()
-    res.status(200).json(registers)
-  } catch (error) {
-    console.error('Error al obtener el historial de cajas:', error)
-    res.status(500).json({ message: 'Error interno al obtener el historial.' })
-  }
-}
 
-export const getRegisterById = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const register = await cashRegisterService.getRegisterById(req.params.id)
-    res.status(200).json(register)
-  } catch (error: any) {
-    res.status(404).json({ message: error.message })
-  }
-}

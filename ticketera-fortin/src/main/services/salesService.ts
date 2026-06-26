@@ -98,7 +98,7 @@ export const salesService = {
 
   // Trae una sola venta por ID
   async getSaleById(id: string) {
-    // Es necesario la venta por id? porque no las mostramos en niingun momento
+    // Es necesario la venta por id? porque no las mostramos en ningun momento
     const sale = await Sales.findByPk(id, {
       include: [
         { model: Sale_items, include: [{ model: Product, attributes: ['name', 'price'] }] },
