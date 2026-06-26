@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
 import { cashRegisterService } from '../services/cashRegisterService'
 
-export const openRegister = async (req: Request, res: Response): Promise<void> => {
+export const openRegister = async (req: Request, res: Response): Promise<void> => { // Falataria validacion de que sea un numero y sea mayor a 0
   try {
     const newRegister = await cashRegisterService.openRegister(req.body)
     res.status(201).json({ message: 'Caja abierta con éxito.', cashRegister: newRegister })

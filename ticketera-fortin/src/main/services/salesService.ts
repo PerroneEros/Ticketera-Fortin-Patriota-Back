@@ -6,7 +6,9 @@ import Cash_register from '../model/cash_registers'
 import { CreateSaleInput } from '../model/interface/salesInputs' // Importamos el DTO del input
 
 export const salesService = {
-  // Crear una venta con transacciones (Todo o nada)
+  // Crear una venta con transacciones (Todo o nada) 
+
+  //Que significa todo o nada? y como seria una venta con transacciones?
   async executeSale(data: CreateSaleInput) {
     const t = await sequelize.transaction()
 
@@ -14,6 +16,7 @@ export const salesService = {
       const { cash_register_id, paymentMethod, cashAmount, transferAmount, items } = data
 
       // 1. Validar que la caja exista y esté abierta
+      //Es necesario validar esto (la caja abierta supongo que si, pero lo otro?)
       const cashRegister = await Cash_register.findByPk(cash_register_id)
       if (!cashRegister || cashRegister.status !== 'open') {
         throw new Error('La caja especificada no existe o no se encuentra abierta.')
@@ -55,10 +58,11 @@ export const salesService = {
         total: calculatedTotal,
         paymentMethod,
         cashAmount: paymentMethod === 'efectivo' ? calculatedTotal : (cashAmount || 0),
-        transferAmount: paymentMethod === 'transferencia' ? calculatedTotal : (transferAmount || 0)
+        transferAmount: paymentMethod === 'transferencia' ? calculatedTotal : (transferAmount || 0)//Falta pago combinado 
       }, { transaction: t })
 
       // 5. Crear los items
+      //Que items? seran los tickets?
       const finalItems = itemsToCreate.map(item => ({
         ...item,
         sale_id: newSale.sales_id
@@ -67,7 +71,7 @@ export const salesService = {
       await Sale_items.bulkCreate(finalItems, { transaction: t })
       
       // Si todo salió bien (reza malena)
-      await t.commit()
+      await t.commit()//????
 
       return { sale: newSale, items: finalItems }
 
@@ -87,6 +91,7 @@ export const salesService = {
 
   // Trae una sola venta por ID
   async getSaleById(id: string) {
+    // Es necesario la venta por id? porque no las mostramos en niingun momento
     const sale = await Sales.findByPk(id, {
       include: [
         { model: Sale_items, include: [{ model: Product, attributes: ['name', 'price'] }] },
@@ -99,6 +104,7 @@ export const salesService = {
 
   // Trae todas las ventas de una caja
   async getSalesByRegister(cash_register_id: string) {
+    // Hay una sola caja (si hubiera varios usuarios quizas podria servir)
     return await Sales.findAll({
       where: { cash_register_id },
       include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }],
@@ -123,4 +129,4 @@ export const salesService = {
       throw error
     }
   }
-}
+}// FALTAN LAS VALIDACIONES
