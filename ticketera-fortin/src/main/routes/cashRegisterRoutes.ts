@@ -2,17 +2,14 @@ import { Router } from 'express'
 import { 
   openRegister, 
   closeRegister, 
-  getCurrentRegister, 
-  getAllRegisters, 
-  getRegisterById 
 } from '../controllers/cashRegisterController'
 
 const router = Router()
 
 // POST - Abrir una nueva caja
-router.post('/open', openRegister) // Necesitaria importe inicial
+router.post('/open', openRegister) 
 
 // PUT - Cerrar una caja existente
-router.put('/close/:id', closeRegister) // Requeriria un importe por metodo de pago?
+router.put('/close/:id', closeRegister) 
 
 export default router
