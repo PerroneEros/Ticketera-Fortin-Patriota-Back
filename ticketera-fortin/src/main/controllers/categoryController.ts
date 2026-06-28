@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { categoryService } from '../services/categoryService'
+import { categorySchema } from '../schemas/categorySchema' // Importamos el esquema
 
 export const getCategories = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -22,7 +23,17 @@ export const getCategoryById = async (req: Request, res: Response): Promise<void
 
 export const createCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const newCategory = await categoryService.createCategory(req.body)
+    // 1. Validamos req.body con Zod antes de llamar al servicio
+    const validation = categorySchema.safeParse(req.body)
+    
+    if (!validation.success) {
+      // Usamos .issues para que TypeScript no arroje error
+      res.status(400).json({ message: validation.error.issues[0].message })
+      return // Cortamos la ejecución aquí
+    }
+
+    // 2. Si pasa la validación, enviamos los datos limpios (validation.data) al servicio
+    const newCategory = await categoryService.createCategory(validation.data)
     res.status(201).json({ message: 'Categoría creada con éxito.', category: newCategory })
   } catch (error: any) {
     res.status(400).json({ message: error.message || 'Error al crear la categoría.' })
@@ -31,7 +42,16 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
 
 export const updateCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const updatedCategory = await categoryService.updateCategory(req.params.id, req.body)
+    // Reutilizamos el mismo esquema para validar los datos de actualización
+    const validation = categorySchema.safeParse(req.body)
+    
+    if (!validation.success) {
+      res.status(400).json({ message: validation.error.issues[0].message })
+      return
+    }
+
+    // 2. Enviamos los datos validados al servicio
+    const updatedCategory = await categoryService.updateCategory(req.params.id, validation.data)
     res.status(200).json({ message: 'Categoría actualizada.', category: updatedCategory })
   } catch (error: any) {
     res.status(400).json({ message: error.message })

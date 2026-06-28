@@ -1,46 +1,78 @@
 import Category from '../model/category'
+import Product from '../model/product' // Importamos Product para poder reasignar los productos
 import { CreateCategoryInput, UpdateCategoryInput } from '../model/interface/categoryInputs'
 
-export const categoryService = {  //Esto no seria en el front? tema filtros u ordenamiento
-  // Lista todas las categorías ordenadas alfabéticamente
+export const categoryService = {
+  
   async getAllCategories() {
     return await Category.findAll({
       order: [['name', 'ASC']]
     })
   },
 
-  // Trae una sola categoría por ID
   async getCategoryById(id: string) {
-    // Esto seria para filtrar por categoria pero seria necesaario tenerlo en back?
     const category = await Category.findByPk(id)
     if (!category) throw new Error('Categoría no encontrada.')
     return category
   },
 
-  // Crea una categoría nueva
-  async createCategory(data: CreateCategoryInput) { //Habria que validar que no este vacia? y tenga mas de 3 caracteres por ejemplo
+  async createCategory(data: CreateCategoryInput) { 
+    // Buscamos si ya existe una categoría con ese nombre
+    // Usamos data.name porque Zod ya se encargó de enviarlo en el formato correcto
+    const categoryExists = await Category.findOne({ where: { name: data.name } })
+    
+    if (categoryExists) {
+      throw new Error('Ya existe una categoría registrada con este nombre.')
+    }
+
     return await Category.create(data as any)
   },
 
-  // Actualizar el nombre de una categoría
   async updateCategory(id: string, data: UpdateCategoryInput) {
-    //Validar que el nombre no sea vacio ni nulo y la misma validacion que al crearla
     const category = await Category.findByPk(id)
     if (!category) throw new Error('Categoría no encontrada.')
+
+    // Validamos que el nuevo nombre no pertenezca a OTRA categoría ya existente
+    if (data.name) {
+      const categoryExists = await Category.findOne({ where: { name: data.name } })
+      
+      // Si existe y su ID es distinto al que estamos actualizando, hay un conflicto
+      if (categoryExists && categoryExists.category_id.toString() !== id) {
+        throw new Error('El nombre ingresado ya pertenece a otra categoría.')
+      }
+    }
 
     return await category.update(data)
   },
 
-  // Eliminar una categoría
   async deleteCategory(id: string) {
     const category = await Category.findByPk(id)
     if (!category) throw new Error('Categoría no encontrada.')
     
-    // Ojo: En la vida real, si borrás una categoría que ya tiene productos asignados, 
-    // la base de datos va a tirar error por la restricción de la clave foránea. 
+    // BLOQUEO DE SEGURIDAD: Evitar que borren la categoría por defecto
+    // Comparamos en minúsculas por si la guardaron como "general", "General" o "GENERAL"
+    if (category.name.toLowerCase() === 'general') {
+      throw new Error('La categoría "General" es fundamental para el sistema y no puede ser eliminada.')
+    }
 
-    //En este caso al eliminar podriamos hacer que la categoria pueda ser vacio o nulo por ejemplo, en caso de que no exista o no se le asigne
+    // Buscar la categoría "General" en la base de datos para obtener su ID
+    let defaultCategory = await Category.findOne({ where: { name: 'General' } })
+    
+    // Si por algún motivo no existe (ej. base de datos recién creada), la creamos automáticamente
+    if (!defaultCategory) {
+      defaultCategory = await Category.create({ name: 'General' } as any)
+    }
+
+    // REASIGNACIÓN MASIVA:
+    // Actualizamos el category_id a la categoría General SOLO en los 
+    // productos que pertenecían a la categoría que estamos a punto de borrar.
+    await Product.update(
+      { category_id: defaultCategory.category_id },
+      { where: { category_id: id } }
+    )
+
+    // Una vez que los productos están a salvo en "General", borramos la categoría original
     await category.destroy()
     return true
   }
-}// FALTAN LAS VALIDACIONES
+}
