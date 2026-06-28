@@ -3,6 +3,10 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { initDB } from './database/initDb'
+import express from 'express'
+import apiRouter from './routes/index'
+// evita el error de eslint de any porque .listen devuelve server de http
+import { Server } from 'http'
 // es como se crea la ventana
 function createWindow(): void {
   // indica el tamaño de la ventana
@@ -33,7 +37,9 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-
+// variable para guardar el servidor cuando se encuentra y despues poder cerrarlo
+// al asignarle tipo server evitamos que salte el error de eslint por usar la variable any
+let expressServer: Server | null = null
 // este metodo se llama cuando electron se termina de armar
 app.whenReady().then(async () => {
   // Set app user model id for windows
@@ -54,6 +60,15 @@ app.whenReady().then(async () => {
     console.error('no se pudo iniciar la base de datos ', error)
     return
   }
+  //creacion de express
+  const expressAPP = express()
+  // se usa para que express acepte json
+  expressAPP.use(express.json())
+  expressAPP.use('/api', apiRouter)
+  //log para mostrar donde funciona express reemplazar en el futuro para que busque el puerto libre solo
+  expressServer = expressAPP.listen(34567, () => {
+    console.log('el servidor esta escuchando en el puerto http://localhost:34567 ')
+  })
 
   //llama a la funcion para que aparezca la ventana
   createWindow()
@@ -61,5 +76,10 @@ app.whenReady().then(async () => {
 
 // hace que cuando se cierra la ventana deje de andar la app lo de darwin es para mac
 app.on('window-all-closed', () => {
+  // express se para cuando se cierra la ventana
+  if (expressServer) {
+    expressServer.close()
+    console.log('server cerrado')
+  }
   app.quit()
 })
