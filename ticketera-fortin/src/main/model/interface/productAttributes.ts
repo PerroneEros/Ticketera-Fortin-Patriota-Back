@@ -3,5 +3,6 @@ interface ProductAttributes {
   name: string
   price: number
   category_id: number
+  isActive: boolean
 }
 export default ProductAttributes
