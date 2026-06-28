@@ -66,8 +66,8 @@ app.whenReady().then(async () => {
   expressAPP.use(express.json())
   expressAPP.use('/api', apiRouter)
   //log para mostrar donde funciona express reemplazar en el futuro para que busque el puerto libre solo
-  expressServer = expressAPP.listen(3000, () => {
-    console.log('el servidor esta escuchando en el puerto http://localhost:3000 ')
+  expressServer = expressAPP.listen(34567, () => {
+    console.log('el servidor esta escuchando en el puerto http://localhost:34567 ')
   })
 
   //llama a la funcion para que aparezca la ventana
