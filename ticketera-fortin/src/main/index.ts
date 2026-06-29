@@ -1,7 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import icon from '../../resources/logo.jpeg?asset'
 import { initDB } from './database/initDb'
 import express from 'express'
 import apiRouter from './routes/index'
