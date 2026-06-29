@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/logo.jpeg?asset'
 import { initDB } from './database/initDb'
 import express from 'express'
+import cors from 'cors'
 import apiRouter from './routes/index'
 // evita el error de eslint de any porque .listen devuelve server de http
 import { Server } from 'http'
@@ -62,6 +63,7 @@ app.whenReady().then(async () => {
   }
   //creacion de express
   const expressAPP = express()
+  expressAPP.use(cors())
   // se usa para que express acepte json
   expressAPP.use(express.json())
   expressAPP.use('/api', apiRouter)
