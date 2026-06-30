@@ -1,5 +1,5 @@
-import CardProducts from './product/cardProducts'
-export default function Home() {
+import CardProducts from './cardProducts'
+export default function Products() {
   return (
     <>
       <div className="Card-ProductsHome">
