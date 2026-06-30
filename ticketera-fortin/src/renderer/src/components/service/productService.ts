@@ -18,6 +18,16 @@ export const getAllProductsDisable = async () => {
     return []
   }
 }
+export const editProducts = async (id: number, productData: any) => {
+  try {
+    const response = await axios.put(`${API_URL}/products/${id}`, productData)
+    return response.data
+  } catch (error) {
+    console.error(`Error updating product ${id}:`, error)
+    throw error
+  }
+}
+
 export const deleteProducts = async (id: number) => {
   try {
     const response = await axios.delete(`${API_URL}/products/${id}`)

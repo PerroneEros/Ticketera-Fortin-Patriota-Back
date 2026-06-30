@@ -2,9 +2,12 @@ import toast from 'react-hot-toast'
 import { useProductList } from '../context/productListContext'
 import { deleteProducts } from '../service/productService'
 import { useProductListDisable } from '../context/productListDisableContext'
+import { useState } from 'react'
+import EditProduct from './editProduct'
 export default function ListProducts() {
   const { productList, loading, fetchProducts } = useProductList()
   const { fetchProductsDisable } = useProductListDisable()
+  const [productToEdit, setProductToEdit] = useState(null)
   const product = productList
   const eliminateProduct = async (id) => {
     if (!window.confirm('¿Estas seguro de deshabilitar este producto?')) {
@@ -29,7 +32,13 @@ export default function ListProducts() {
           {product.map((product) => (
             <li key={product.id_product}>
               <div>
-                <button>editar</button>
+                <button
+                  onClick={() => {
+                    setProductToEdit(product)
+                  }}
+                >
+                  editar
+                </button>
                 <button onClick={() => eliminateProduct(product.id_product)}>deshabilitar</button>
                 <p>
                   <b>{product.name}</b>
@@ -41,6 +50,15 @@ export default function ListProducts() {
             </li>
           ))}
         </>
+      )}
+      {productToEdit && (
+        <EditProduct
+          product={productToEdit}
+          onClose={() => {
+            setProductToEdit(null)
+            fetchProducts()
+          }}
+        />
       )}
     </>
   )
