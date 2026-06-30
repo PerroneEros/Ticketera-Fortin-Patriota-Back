@@ -1,10 +1,26 @@
 import { Request, Response } from 'express'
 import { salesService } from '../services/salesService'
+import { createSaleSchema } from '../schemas/salesSchema'
 
 export const createSale = async (req: Request, res: Response): Promise<void> => {
   try {
-    const result = await salesService.executeSale(req.body)
-    res.status(201).json({ message: 'Venta registrada con éxito', ...result })
+    // 1. Pasamos el body por el escáner de Zod usando el esquema que armamos
+    const validation = createSaleSchema.safeParse(req.body)
+
+    // 2. Si falla la validación, cortamos acá y le avisamos al front
+    if (!validation.success) {
+      res.status(400).json({ message: validation.error.issues[0].message })
+      return
+    }
+
+    // 3. Si está todo joya, le pasamos la data validada al servicio
+    const result = await salesService.executeSale(validation.data)
+    
+    res.status(201).json({ 
+      message: 'Venta registrada con éxito y tickets generados.', 
+      sale: result.sale,
+      items: result.items
+    })
   } catch (error: any) {
     console.error('Error al registrar la venta:', error)
     res.status(400).json({ message: error.message || 'Error al procesar la venta.' })
@@ -44,7 +60,7 @@ export const getSalesByCashRegister = async (req: Request, res: Response): Promi
 export const deleteSale = async (req: Request, res: Response): Promise<void> => {
   try {
     await salesService.cancelSale(req.params.id)
-    res.status(200).json({ message: 'Venta eliminada correctamente.' })
+    res.status(200).json({ message: 'Venta y tickets eliminados correctamente.' })
   } catch (error: any) {
     console.error('Error al anular la venta:', error)
     res.status(400).json({ message: error.message })

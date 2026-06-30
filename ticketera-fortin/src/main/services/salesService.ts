@@ -3,32 +3,30 @@ import Sales from '../model/sales'
 import Sale_items from '../model/sale_items'
 import Product from '../model/product'
 import Cash_register from '../model/cash_registers'
-import { CreateSaleInput } from '../model/interface/salesInputs' // Importamos el DTO del input
+import { CreateSaleInput } from '../model/interface/salesInputs'
 
 export const salesService = {
-  // Crear una venta con transacciones (Todo o nada) 
-
-  //Que significa todo o nada? y como seria una venta con transacciones?
+  
+  //Registrar venta y generar tickets individuales
   async executeSale(data: CreateSaleInput) {
     const t = await sequelize.transaction()
 
     try {
-      const { cash_register_id, paymentMethod, cashAmount, transferAmount, items } = data
+      const { paymentMethod, cashAmount, transferAmount, items } = data
 
-      // 1. Validar que la caja exista y esté abierta
-      //Es necesario validar esto (la caja abierta supongo que si, pero lo otro?)
-      const cashRegister = await Cash_register.findByPk(cash_register_id)
-      if (!cashRegister || cashRegister.status !== 'open') {
-        throw new Error('La caja especificada no existe o no se encuentra abierta.')
+      // 1.Buscamos automáticamente la única caja que está abierta
+      const activeRegister = await Cash_register.findOne({ where: { status: 'open' } })
+      
+      if (!activeRegister) {
+        throw new Error('No hay ninguna caja abierta actualmente para registrar la venta.')
       }
 
-      // 2. Validar que vengan productos en la petición
       if (!items || items.length === 0) {
         throw new Error('No se puede registrar una venta sin productos.')
       }
 
       let calculatedTotal = 0
-      const itemsToCreate:{
+      const itemsToCreate: {
         id_product: number,
         quantity: number,
         unit_price: number,
@@ -37,7 +35,7 @@ export const salesService = {
         created_at: Date
       }[] = []
 
-      // 3. Buscar precios y calcula totales 
+      //2.Buscamos precios, calcular totales y GENERAR 1 TICKET POR UNIDAD
       for (const item of items) {
         const product = await Product.findByPk(item.id_product)
         if (!product) {
@@ -45,31 +43,50 @@ export const salesService = {
         }
 
         const unitPrice = product.price
-        const itemTotal = unitPrice * item.quantity
-        calculatedTotal += itemTotal
 
-        itemsToCreate.push({
-          id_product: product.id_product,
-          quantity: item.quantity,
-          unit_price: unitPrice,
-          total: itemTotal,
-          printed: false,
-          created_at: new Date()
-        })
+        //Bucle que gira según la cantidad para crear tickets separados
+        //Ej: si compran 3 hamburguesas, entra 3 veces acá y crea 3 items distintos
+        for (let i = 0; i < item.quantity; i++) {
+          calculatedTotal += unitPrice
+
+          itemsToCreate.push({
+            id_product: product.id_product,
+            quantity: 1, // Obligamos a que la cantidad sea 1 por cada ticket
+            unit_price: unitPrice,
+            total: unitPrice,
+            printed: false,
+            created_at: new Date()
+          })
+        }
       }
 
-      // 4. Crear la venta
+      //3.Lógica para el Pago Combinado
+      let finalCash = 0;
+      let finalTransfer = 0;
+
+      if (paymentMethod === 'efectivo') {
+        finalCash = calculatedTotal;
+      } else if (paymentMethod === 'transferencia') {
+        finalTransfer = calculatedTotal;
+      } else if (paymentMethod === 'combinado') {
+        if (((cashAmount || 0) + (transferAmount || 0)) !== calculatedTotal) {
+          throw new Error('En pago combinado, el efectivo y la transferencia deben sumar el total de la venta.')
+        }
+        finalCash = cashAmount || 0;
+        finalTransfer = transferAmount || 0;
+      }
+
+      //4.Crear la venta (Cabecera) usando la caja activa
       const newSale = await Sales.create({
-        cash_register_id,
+        cash_register_id: activeRegister.cash_register_id,
         date: new Date(),
         total: calculatedTotal,
         paymentMethod,
-        cashAmount: paymentMethod === 'efectivo' ? calculatedTotal : (cashAmount || 0),
-        transferAmount: paymentMethod === 'transferencia' ? calculatedTotal : (transferAmount || 0)//Falta pago combinado 
+        cashAmount: finalCash,
+        transferAmount: finalTransfer
       }, { transaction: t })
 
-      // 5. Crear los items
-      //Que items? seran los tickets?
+      //5.Vincular los tickets a la venta y crearlos todos juntos en la BD
       const finalItems = itemsToCreate.map(item => ({
         ...item,
         sale_id: newSale.sales_id
@@ -77,18 +94,19 @@ export const salesService = {
 
       await Sale_items.bulkCreate(finalItems, { transaction: t })
       
-      // Si todo salió bien (reza malena)
-      await t.commit()//????
+      //Si todo salió bien, guardamos definitivamente (Todo o nada)
+      await t.commit() 
 
       return { sale: newSale, items: finalItems }
 
     } catch (error) {
+      //Si falló algo, cancelamos todo el proceso
       await t.rollback()
-      throw error // Pasamos el error al controlador
+      throw error 
     }
   },
 
-  // Trae el historial completo de ventas
+  //Trae el historial completo de ventas
   async getAllSales() {
     return await Sales.findAll({
       include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }],
@@ -96,9 +114,8 @@ export const salesService = {
     })
   },
 
-  // Trae una sola venta por ID
+  //Trae una sola venta por ID 
   async getSaleById(id: string) {
-    // Es necesario la venta por id? porque no las mostramos en ningun momento
     const sale = await Sales.findByPk(id, {
       include: [
         { model: Sale_items, include: [{ model: Product, attributes: ['name', 'price'] }] },
@@ -109,9 +126,8 @@ export const salesService = {
     return sale
   },
 
-  // Trae todas las ventas de una caja
+  //Trae todas las ventas de una caja particular (cierre de caja)
   async getSalesByRegister(cash_register_id: string) {
-    // Hay una sola caja (si hubiera varios usuarios quizas podria servir)
     return await Sales.findAll({
       where: { cash_register_id },
       include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }],
@@ -119,14 +135,17 @@ export const salesService = {
     })
   },
 
-  // Borrar una venta mal cargada
+  //Borrar una venta mal cargada
   async cancelSale(id: string) {
     const t = await sequelize.transaction()
     try {
       const sale = await Sales.findByPk(id)
       if (!sale) throw new Error('La venta no existe.')
 
+      // Primero borramos los tickets (hijos)
       await Sale_items.destroy({ where: { sale_id: id }, transaction: t })
+      
+      // Después la venta (padre)
       await sale.destroy({ transaction: t })
       
       await t.commit()
@@ -136,4 +155,4 @@ export const salesService = {
       throw error
     }
   }
-}// FALTAN LAS VALIDACIONES
+}
