@@ -1,7 +1,7 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import logo from './assets/logo.jpeg'
 import Header from './components/header/header'
 import { ProductListProvider } from './components/context/productListContext'
+import { CategoryProvider } from './components/context/categoryContext' 
 import Routs from './routes'
 
 function App(): React.JSX.Element {
@@ -11,9 +11,10 @@ function App(): React.JSX.Element {
     <>
       <Header />
       <ProductListProvider>
-        <Routs />
+        <CategoryProvider>
+          <Routs />
+        </CategoryProvider>
       </ProductListProvider>
-      <Versions></Versions>
     </>
   )
 }
