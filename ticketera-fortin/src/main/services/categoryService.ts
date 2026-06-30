@@ -1,5 +1,6 @@
+import { Op } from 'sequelize' 
 import Category from '../model/category'
-import Product from '../model/product' // Importamos Product para poder reasignar los productos
+import Product from '../model/product' 
 import { CreateCategoryInput, UpdateCategoryInput } from '../model/interface/categoryInputs'
 
 export const categoryService = {
@@ -17,15 +18,23 @@ export const categoryService = {
   },
 
   async createCategory(data: CreateCategoryInput) { 
-    // Buscamos si ya existe una categoría con ese nombre
-    // Usamos data.name porque Zod ya se encargó de enviarlo en el formato correcto
-    const categoryExists = await Category.findOne({ where: { name: data.name } })
+    // 1. Limpiamos el nombre
+    const cleanedName = data.name.trim();
+
+    // 2. Traemos todas las categorías (LOG PARA DEPURAR)
+    const all = await Category.findAll();
+    console.log("Categorías en BD:", all.map(c => c.name));
+    console.log("Buscando nombre:", cleanedName);
+
+    // 3. Comparamos manualmente para estar seguros
+    const exists = all.some(c => c.name.trim().toLowerCase() === cleanedName.toLowerCase());
     
-    if (categoryExists) {
-      throw new Error('Ya existe una categoría registrada con este nombre.')
+    if (exists) {
+      console.log("¡DUPLICADO DETECTADO!");
+      throw new Error('Ya existe una categoría registrada con este nombre.');
     }
 
-    return await Category.create(data as any)
+    return await Category.create(data as any);
   },
 
   async updateCategory(id: string, data: UpdateCategoryInput) {
@@ -34,10 +43,14 @@ export const categoryService = {
 
     // Validamos que el nuevo nombre no pertenezca a OTRA categoría ya existente
     if (data.name) {
-      const categoryExists = await Category.findOne({ where: { name: data.name } })
+      const categoryExists = await Category.findOne({ 
+        where: { 
+          name: { [Op.iLike]: data.name },
+          category_id: { [Op.ne]: id } // Excluimos la categoría actual para permitir guardar el mismo nombre si no cambió
+        } 
+      })
       
-      // Si existe y su ID es distinto al que estamos actualizando, hay un conflicto
-      if (categoryExists && categoryExists.category_id.toString() !== id) {
+      if (categoryExists) {
         throw new Error('El nombre ingresado ya pertenece a otra categoría.')
       }
     }
