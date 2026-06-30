@@ -7,6 +7,7 @@ export default function ProductsList() {
         <Link to="/activate-products" title="Habilitar productos">
           <button>Habilitar Productos</button>
         </Link>
+        <button>Crear Producto</button>
         <ListProducts />
       </div>
     </>
