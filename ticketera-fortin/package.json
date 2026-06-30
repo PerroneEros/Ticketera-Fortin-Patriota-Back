@@ -28,6 +28,7 @@
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "node-thermal-printer": "^4.6.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.18.1",
     "sequelize": "^6.37.8",
     "sqlite3": "^6.0.1",
