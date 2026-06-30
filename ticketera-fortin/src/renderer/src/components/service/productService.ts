@@ -9,3 +9,30 @@ export const getAllProducts = async () => {
     return []
   }
 }
+export const getAllProductsDisable = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/products/disable`)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching products:', error)
+    return []
+  }
+}
+export const deleteProducts = async (id: number) => {
+  try {
+    const response = await axios.delete(`${API_URL}/products/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('error eliminando producto', error)
+    throw error
+  }
+}
+export const reactivateProducts = async (id: number) => {
+  try {
+    const response = await axios.put(`${API_URL}/products/activate/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('error activando el  producto', error)
+    throw error
+  }
+}
