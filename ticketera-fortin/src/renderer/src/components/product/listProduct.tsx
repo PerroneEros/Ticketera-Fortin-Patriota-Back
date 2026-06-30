@@ -11,6 +11,8 @@ export default function ListProducts() {
           {product.map((product) => (
             <li key={product.id_product}>
               <div>
+                <button>editar</button>
+                <button>eliminar</button>
                 <p>
                   <b>{product.name}</b>
                 </p>
