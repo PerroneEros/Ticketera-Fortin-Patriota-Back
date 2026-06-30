@@ -1,10 +1,12 @@
 import { Route, Routes } from 'react-router-dom'
-import Home from './components/home'
+import Products from './components/product/products'
+import ListProducts from './components/product/listProduct'
 export default function Routs() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/list-products" element={<ListProducts />} />
       </Routes>
     </>
   )
