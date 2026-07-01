@@ -18,6 +18,15 @@ export const getAllProductsDisable = async () => {
     return []
   }
 }
+export const createProducts = async (productData: any) => {
+  try {
+    const response = await axios.post(`${API_URL}/products`, productData)
+    return response.data
+  } catch (error) {
+    console.error('Error fetching products:', error)
+    throw error
+  }
+}
 export const editProducts = async (id: number, productData: any) => {
   try {
     const response = await axios.put(`${API_URL}/products/${id}`, productData)
