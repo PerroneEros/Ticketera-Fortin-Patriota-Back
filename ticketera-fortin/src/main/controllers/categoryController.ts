@@ -36,6 +36,7 @@ export const createCategory = async (req: Request, res: Response): Promise<void>
     const newCategory = await categoryService.createCategory(validation.data)
     res.status(201).json({ message: 'Categoría creada con éxito.', category: newCategory })
   } catch (error: any) {
+    // Capturamos el error lanzado por el servicio (ej. duplicados)
     res.status(400).json({ message: error.message || 'Error al crear la categoría.' })
   }
 }

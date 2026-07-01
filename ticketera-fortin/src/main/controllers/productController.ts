@@ -14,6 +14,18 @@ export const getProducts = async (_req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: 'Error interno al recuperar los productos.' })
   }
 }
+export const getProductsDisable = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    // Llamamos al servicio para obtener la lista.
+    const products = await productService.getAllProductsDisable()
+
+    res.status(200).json(products)
+  } catch (error) {
+    // Si la base de datos falla, atrapamos el error para que el servidor no se caiga
+    console.error('Error al recuperar los productos:', error)
+    res.status(500).json({ message: 'Error interno al recuperar los productos.' })
+  }
+}
 
 export const createProduct = async (req: Request, res: Response): Promise<void> => {
   try {

@@ -1,13 +1,13 @@
 import React from 'react'
-import CardProducts from '../product/cardProducts'
-import { CategoryFilter } from '../category/categoryFilter'
-import { CategoryActions } from '../category/categoryActions'
+import CardProducts from './product/cardProducts'
+import { CategoryFilter } from '../components/category/categoryFilter' 
+import { CategoryActions } from '../components/category/categoryActions'
 
-export default function Products() {
+export default function Home() {
   return (
     <div className="home-container">
       <div className="toolbar-container">
-        <CategoryActions />
+        <CategoryActions /> 
       </div>
       <div className="filters-container">
         <CategoryFilter />
@@ -15,6 +15,7 @@ export default function Products() {
       <div className="Card-ProductsHome">
         <CardProducts />
       </div>
+
     </div>
   )
 }
