@@ -3,7 +3,7 @@ import Sales from '../model/sales'
 import Sale_items from '../model/sale_items'
 import Product from '../model/product'
 import Cash_register from '../model/cash_registers'
-import { CreateSaleInput } from '../model/interface/salesInputs'
+import { CreateSaleInput } from '../schemas/salesSchema' 
 
 export const salesService = {
   
