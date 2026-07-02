@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { CashRegisterContext } from '../context/cashRegisterContext';
 import { openRegister } from '../service/cashRegsiterService';
+import '../Styles/home.css';
 
 export const CashRegisterOpen = () => {
   // Manejo del menú desplegable del botón principal
