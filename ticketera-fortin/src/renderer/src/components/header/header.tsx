@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import logo from '../../assets/logo.jpeg'
+
 export default function Header() {
   return (
     <header>
@@ -23,7 +24,10 @@ export default function Header() {
           <button>Ver productos</button>
         </Link>
 
-        <button>Resumen</button>
+        <Link to="/resumen" title="Resumen">
+          <button>Resumen</button>
+        </Link>
+        
         {/* Agregar un if que si no esta abierta la caja solo se vea resumen */}
         <button>cerrar caja</button>
       </nav>
