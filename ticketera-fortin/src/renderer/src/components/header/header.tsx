@@ -1,12 +1,19 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import logo from '../../assets/logo.jpeg'
+import { CashRegisterClose } from '../cashRegister/cashRegsiterClose'
+
 export default function Header() {
+  const location = useLocation() 
+  if (location.pathname === '/') {
+    return null
+  }
+
   return (
     <header>
       <div className="Logo" style={{ width: '100px', height: '100px', overflow: 'hidden' }}>
         <img
           src={logo}
-          alt="Logo ticketera fortin "
+          alt="Logo ticketera fortin"
           style={{
             width: '100%',
             height: '100%',
@@ -24,8 +31,8 @@ export default function Header() {
         </Link>
 
         <button>Resumen</button>
-        {/* Agregar un if que si no esta abierta la caja solo se vea resumen */}
-        <button>cerrar caja</button>
+        
+        <CashRegisterClose />
       </nav>
     </header>
   )
