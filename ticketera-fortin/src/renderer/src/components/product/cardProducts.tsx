@@ -1,14 +1,23 @@
 import { useProductList } from '../context/productListContext'
+import { useContext } from 'react'
+import { CategoryContext } from '../context/categoryContext'
 export default function CardProducts() {
   const { productList, loading } = useProductList()
-  const product = productList
+  let productFilter
+  const context = useContext(CategoryContext)
+  const { activeCategory } = context
+  if (activeCategory == null) {
+    productFilter = productList
+  } else {
+    productFilter = productList.filter((prod) => prod.category_id == activeCategory)
+  }
   return (
     <>
       {loading ? (
         <p>cargando...</p>
       ) : (
         <>
-          {product.map((product) => (
+          {productFilter.map((product) => (
             <div key={product.id_product}>
               <div>
                 <p>
