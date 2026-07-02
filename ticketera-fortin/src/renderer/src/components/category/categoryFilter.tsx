@@ -1,11 +1,22 @@
-import { useContext } from 'react';
-import { CategoryContext } from '../context/categoryContext';
+import { useContext } from 'react'
+import { CategoryContext } from '../context/categoryContext'
+import { useProductList } from '../context/productListContext'
 
 export const CategoryFilter = () => {
-  const context = useContext(CategoryContext);
-  if (!context) return null;
-
-  const { categories, activeCategory, setActiveCategory } = context;
+  const context = useContext(CategoryContext)
+  if (!context) return null
+  const { productList } = useProductList()
+  const { categories, activeCategory, setActiveCategory } = context
+  const contProducts = (category_id) => {
+    let cantProduct = 0
+    for (let i = 0; i < productList.length; i++) {
+      let product = productList[i]
+      if (category_id == product.category_id) {
+        cantProduct++
+      }
+    }
+    return cantProduct
+  }
 
   return (
     <div className="category-filter-container">
@@ -17,9 +28,9 @@ export const CategoryFilter = () => {
       </button>
 
       {categories.map((cat) => {
-        const isActive = activeCategory === cat.category_id;
-        const count = cat.productCount || 0;
-        const isEmpty = count === 0;
+        const isActive = activeCategory === cat.category_id
+        const count = contProducts(cat.category_id) || 0
+        const isEmpty = count === 0
 
         return (
           <button
@@ -28,11 +39,11 @@ export const CategoryFilter = () => {
             onClick={() => setActiveCategory(cat.category_id)}
             className={`category-pill ${isActive ? 'active' : ''} ${isEmpty ? 'empty' : ''}`}
           >
-            {cat.name} 
+            {cat.name}
             <span className="product-count">({count})</span>
           </button>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
