@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const PAY_METHODS = ['efectivo', 'transferencia', 'combinado'] as const
+
 // Validamos cada ítem que viene en el array de productos
 const itemSchema = z.object({
   id_product: z.number({
@@ -12,8 +14,8 @@ const itemSchema = z.object({
 })
 
 export const createSaleSchema = z.object({ 
-  paymentMethod: z.enum(['efectivo', 'transferencia', 'combinado'], {
-    errorMap: () => ({ message: "El método de pago debe ser 'efectivo', 'transferencia' o 'combinado'." })
+  paymentMethod: z.enum(PAY_METHODS, {
+    message: "El método de pago es obligatorio y debe ser 'efectivo', 'transferencia' o 'combinado'."
   }),
   
   // Hacemos que los montos sean opcionales y por defecto 0 para facilitar el envío desde el front
@@ -22,3 +24,5 @@ export const createSaleSchema = z.object({
   
   items: z.array(itemSchema).min(1, 'La venta debe incluir al menos un producto.')
 })
+
+export type CreateSaleInput = z.infer<typeof createSaleSchema>

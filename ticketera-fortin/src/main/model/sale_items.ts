@@ -34,7 +34,7 @@ Sale_items.init(
     id_product: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'Product',
+        model: 'Products',
         key: 'id_product'
       },
       allowNull: false
