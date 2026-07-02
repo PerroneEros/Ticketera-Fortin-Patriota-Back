@@ -1,15 +1,20 @@
 import toast from 'react-hot-toast'
 import { editProducts } from '../service/productService'
-import { useState } from 'react'
+import { useContext, useState } from 'react'
+import { CategoryContext } from '../context/categoryContext'
 
 export default function EditProduct({ product, onClose }) {
   const [name, setName] = useState(product.name)
   const [price, setPrice] = useState(product.price)
+  const [category, setCategory] = useState(product.category_id)
+  const context = useContext(CategoryContext)
+  const { categories } = context
   const handleSave = async () => {
     try {
       await editProducts(product.id_product, {
         name: name,
-        price: price
+        price: Number(price),
+        category_id: Number(category)
       })
       toast.success('producto editado correctamente')
       onClose()
@@ -25,6 +30,14 @@ export default function EditProduct({ product, onClose }) {
         <input value={name} onChange={(e) => setName(e.target.value)} />
         <label>Precio:</label>
         <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <label>Categoria</label>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          {categories.map((c) => (
+            <option key={c.category_id} value={c.category_id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
         <div>
           <button onClick={handleSave}>Guardar cambios</button>
           <button onClick={onClose}>Cancelar cambios</button>
