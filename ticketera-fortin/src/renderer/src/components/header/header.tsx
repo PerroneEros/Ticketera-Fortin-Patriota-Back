@@ -4,7 +4,7 @@ import { CashRegisterClose } from '../cashRegister/cashRegsiterClose'
 import '../Styles/header.css'
 
 export default function Header() {
-  const location = useLocation() 
+  const location = useLocation()
   if (location.pathname === '/') {
     return null
   }
@@ -31,8 +31,10 @@ export default function Header() {
           <button>Ver productos</button>
         </Link>
 
-        <button>Resumen</button>
-        
+        <Link to="/resumen" title="Resumen">
+          <button>Resumen</button>
+        </Link>
+        {/* Agregar un if que si no esta abierta la caja solo se vea resumen */}
         <CashRegisterClose />
       </nav>
     </header>

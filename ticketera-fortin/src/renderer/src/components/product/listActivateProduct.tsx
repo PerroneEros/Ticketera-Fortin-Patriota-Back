@@ -28,19 +28,23 @@ export default function ListActivateProducts() {
         <p>cargando...</p>
       ) : (
         <>
-          {product.map((product) => (
-            <li key={product.id_product}>
-              <div>
-                <button onClick={() => activate(product.id_product)}>habilitar producto</button>
-                <p>
-                  <b>{product.name}</b>
-                </p>
-              </div>
-              <div>{product.price}</div>
-              <div>{product.Category ? product.Category.name : 'Sin categoría'}</div>
-              <div>{product.isActive ? 'activado' : 'desactivado'}</div>
-            </li>
-          ))}
+          {product.length === 0 ? (
+            <p>No hay productos para habilitar</p>
+          ) : (
+            product.map((product) => (
+              <li key={product.id_product}>
+                <div>
+                  <button onClick={() => activate(product.id_product)}>habilitar producto</button>
+                  <p>
+                    <b>{product.name}</b>
+                  </p>
+                </div>
+                <div>{product.price}</div>
+                <div>{product.Category ? product.Category.name : 'Sin categoría'}</div>
+                <div>{product.isActive ? 'activado' : 'desactivado'}</div>
+              </li>
+            ))
+          )}
         </>
       )}
     </>
