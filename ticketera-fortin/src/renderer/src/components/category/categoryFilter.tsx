@@ -1,6 +1,7 @@
 import { useContext } from 'react'
 import { CategoryContext } from '../context/categoryContext'
 import { useProductList } from '../context/productListContext'
+import '../Styles/category.css'
 
 export const CategoryFilter = () => {
   const context = useContext(CategoryContext)

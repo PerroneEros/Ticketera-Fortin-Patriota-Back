@@ -1,0 +1,197 @@
+/* ==============================================================
+   1. BOTÓN DE AGREGAR Y DESPLEGABLE (Dropdown)
+   ============================================================== */
+
+/* Contenedor del botón y el menú */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* El botón principal de acción */
+.btn-orange {
+  background-color: #38bdf8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+
+.btn-orange:hover {
+  background-color: #0ea5e9;
+}
+
+/* El menú que se despliega */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  min-width: 180px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  z-index: 1000;
+  padding: 8px 0;
+  margin-top: 8px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column; /* Apila los botones verticalmente */
+}
+
+/* Estilo individual de los botones dentro del menú */
+.dropdown-menu button {
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+
+.dropdown-menu button:hover {
+  background-color: #f8fafc;
+  color: #38bdf8;
+}
+
+.dropdown-menu button.danger {
+  color: #ef4444;
+}
+
+/* ==============================================================
+   2. PÍLDORAS DE CATEGORÍAS (Filtros)
+   ============================================================== */
+
+.category-filter-container {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.category-pill {
+  padding: 8px 20px;
+  border-radius: 25px;
+  border: 1px solid #dcd7c9;
+  background-color: #fff;
+  color: #555843;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.category-pill.active {
+  background-color: #38bdf8;
+  color: white;
+  border-color: #38bdf8;
+}
+
+/* ==============================================================
+   3. MODALES UNIFICADOS (Crear, Editar, Eliminar)
+   ============================================================== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(3px);
+}
+
+.modal-content {
+  background: white;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.modal-header {
+  background: #555843;
+  color: white;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.input-group label { font-size: 14px; font-weight: 600; color: #334155; }
+
+.input-group input, .input-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f1ede3;
+  font-size: 15px;
+}
+
+.modal-actions {
+  padding: 0 24px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-confirm {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background-color: #38bdf8 !important;
+  color: white !important;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel {
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background-color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Botón de cierre 'X' estilizado */
+.btn-close {
+  background: rgba(255, 255, 255, 0.1); /* Fondo muy sutil */
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* Lo hacemos un círculo perfecto */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.btn-close:hover {
+  background: red; /* Se ilumina al pasar el mouse */
+  transform: rotate(90deg); /* Un pequeño giro al pasar el mouse para darle dinamismo */
+  color: white;
+}

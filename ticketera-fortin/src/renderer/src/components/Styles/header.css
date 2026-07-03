@@ -1,0 +1,94 @@
+/* ==============================================================
+   HEADER PRINCIPAL (Barra superior oscura)
+   ============================================================== */
+
+header {
+  /* Color de fondo igual al de tu diseño (oliva oscuro) */
+  background-color: #555843;
+  height: 70px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Forzamos el redimensionamiento del logo ignorando el style en línea del .tsx */
+header .Logo {
+  width: 45px !important;
+  height: 45px !important;
+  border-radius: 50%;
+  background-color: white;
+  padding: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+header .Logo img {
+  border-radius: 50%;
+}
+
+/* Contenedor de los botones (Menú derecho) */
+header nav {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Quitamos el subrayado azul feo de los Links de React Router */
+header nav a {
+  text-decoration: none;
+}
+
+/* Estilo general para los botones del menú (Resumen, Ver productos) */
+header nav button {
+  background-color: transparent;
+  border: none;
+  color: #d5cfbd; /* Color crema apagado, no tan fuerte como el blanco puro */
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+header nav button:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Hacemos que el primer botón ("Productos") parezca el botón activo blanco de tu diseño */
+header nav a:first-child button {
+  background-color: white;
+  color: #555843;
+  border-radius: 20px; /* Forma de píldora redondeada */
+}
+
+header nav a:first-child button:hover {
+  background-color: #f1ede3;
+}
+
+/* ==============================================================
+ ESTILO DEL BOTÓN "CERRAR CAJA"
+  (Se engancha a la clase que le pusimos en CashRegisterClose.tsx)
+   ============================================================== */
+.btn-header-close {
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-header-close:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: white !important;
+}
