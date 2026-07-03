@@ -1,0 +1,47 @@
+/* --- Layout principal --- */
+.home-container {
+  background-color: #f6f4ee;
+  min-height: 100vh;
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box; /* Fundamental para el ancho total */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* --- Grilla de productos (Aprovecha todo el ancho) --- */
+.Card-ProductsHome {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+/* --- Tarjeta del producto limpia --- */
+.Card-ProductsHome > div {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.Card-ProductsHome b { 
+  color: #1e293b; 
+  font-size: 16px; 
+}
+
+.Card-ProductsHome div:nth-child(2) { 
+  color: #38bdf8; 
+  font-weight: 800; 
+  font-size: 18px; 
+}
+
+.Card-ProductsHome div:nth-child(3) { 
+  color: #94a3b8; 
+  font-size: 13px; 
+  margin-top: 5px; 
+}

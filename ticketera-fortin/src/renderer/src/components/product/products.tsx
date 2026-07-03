@@ -2,6 +2,7 @@ import React from 'react'
 import CardProducts from '../product/cardProducts'
 import { CategoryFilter } from '../category/categoryFilter'
 import { CategoryActions } from '../category/categoryActions'
+import '../Styles/products.css'
 
 export default function Products() {
   return (

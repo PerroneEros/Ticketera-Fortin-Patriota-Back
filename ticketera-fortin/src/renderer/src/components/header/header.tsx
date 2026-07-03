@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import logo from '../../assets/logo.jpeg'
 import { CashRegisterClose } from '../cashRegister/cashRegsiterClose'
+import '../Styles/header.css'
 
 export default function Header() {
   const location = useLocation() 

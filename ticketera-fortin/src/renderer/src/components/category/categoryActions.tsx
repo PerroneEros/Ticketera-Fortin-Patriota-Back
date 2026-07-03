@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useContext } from 'react'
 import { CategoryContext } from '../context/categoryContext'
 import { createCategory, updateCategory, deleteCategory } from '../service/categoryService'
 import { useProductList } from '../context/productListContext'
+import '../Styles/category.css'
 
 type ModalType = 'none' | 'agregar' | 'editar' | 'eliminar'
 
