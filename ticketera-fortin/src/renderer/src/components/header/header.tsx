@@ -5,36 +5,44 @@ import '../Styles/header.css'
 
 export default function Header() {
   const location = useLocation()
-  if (location.pathname === '/') {
-    return null
-  }
+  const currentPath = location.pathname
+
+  if (currentPath === '/') return null
 
   return (
-    <header>
-      <div className="Logo" style={{ width: '100px', height: '100px', overflow: 'hidden' }}>
-        <img
-          src={logo}
-          alt="Logo ticketera fortin"
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain'
-          }}
-        />
+    <header className="main-header">
+      {/* Contenedor que bloquea el tamaño del logo */}
+      <div className="header-logo-container">
+        <img src={logo} alt="Logo ticketera fortin" className="header-logo-img" />
       </div>
-      <nav>
-        <Link to="/products" title="Productos">
-          <button>Productos</button>
+      
+      {/* El recuadro blanco que agrupa los botones */}
+      <nav className="segmented-nav">
+        <Link 
+          to="/products" 
+          className={`seg-item ${currentPath === '/products' ? 'active' : ''}`}
+        >
+          Productos
         </Link>
-
-        <Link to="/list-products" title="Ver Lista de Productos">
-          <button>Ver productos</button>
+        
+        <Link 
+          to="/list-products" 
+          className={`seg-item ${currentPath === '/list-products' ? 'active' : ''}`}
+        >
+          Ver productos
         </Link>
-
-        <Link to="/resumen" title="Resumen">
-          <button>Resumen</button>
+        
+        <Link 
+          to="/resumen" 
+          className={`seg-item ${currentPath === '/resumen' ? 'active' : ''}`}
+        >
+          Resumen
         </Link>
-        {/* Agregar un if que si no esta abierta la caja solo se vea resumen */}
+        
+        {/* Una pequeña línea gris para separar el botón de cerrar caja */}
+        <div className="seg-divider"></div>
+        
+        {/* Cerrar caja */}
         <CashRegisterClose />
       </nav>
     </header>

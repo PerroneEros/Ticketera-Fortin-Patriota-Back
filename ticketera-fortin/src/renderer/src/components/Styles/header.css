@@ -1,94 +1,112 @@
 /* ==============================================================
-   HEADER PRINCIPAL (Barra superior oscura)
+   HEADER BASE CON GUARDA PAMPA
    ============================================================== */
-
-header {
-  /* Color de fondo igual al de tu diseño (oliva oscuro) */
-  background-color: #555843;
-  height: 70px;
+.main-header {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 70px;
+  background-color: #555843;
+  /*background-image: url('../../assets/guarda_pampa.jpeg');*/
+  background-repeat: repeat-x;
+  background-position: left center;
+  background-size: auto 100%;
+  z-index: 1000;
+  
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
+  padding: 0 30px;
   box-sizing: border-box;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-/* Forzamos el redimensionamiento del logo ignorando el style en línea del .tsx */
-header .Logo {
-  width: 45px !important;
-  height: 45px !important;
-  border-radius: 50%;
-  background-color: white;
-  padding: 2px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-header .Logo img {
-  border-radius: 50%;
-}
-
-/* Contenedor de los botones (Menú derecho) */
-header nav {
-  display: flex;
-  gap: 15px;
-  align-items: center;
-}
-
-/* Quitamos el subrayado azul feo de los Links de React Router */
-header nav a {
-  text-decoration: none;
-}
-
-/* Estilo general para los botones del menú (Resumen, Ver productos) */
-header nav button {
-  background-color: transparent;
-  border: none;
-  color: #d5cfbd; /* Color crema apagado, no tan fuerte como el blanco puro */
-  font-size: 14px;
-  font-weight: 600;
-  padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-header nav button:hover {
-  color: white;
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Hacemos que el primer botón ("Productos") parezca el botón activo blanco de tu diseño */
-header nav a:first-child button {
-  background-color: white;
-  color: #555843;
-  border-radius: 20px; /* Forma de píldora redondeada */
-}
-
-header nav a:first-child button:hover {
-  background-color: #f1ede3;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
 }
 
 /* ==============================================================
- ESTILO DEL BOTÓN "CERRAR CAJA"
-  (Se engancha a la clase que le pusimos en CashRegisterClose.tsx)
+   ARREGLO DEFINITIVO DEL LOGO (Lo obliga a ser chico)
    ============================================================== */
-.btn-header-close {
-  background-color: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.4) !important;
-  color: white !important;
-  border-radius: 8px !important;
+.header-logo-container {
+  width: 55px !important;
+  height: 55px !important;
+  min-width: 55px; /* Evita que se aplaste */
+  border-radius: 50%;
+  background-color: white;
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 6px;
+  overflow: hidden; /* Corta el cuadrado blanco de la imagen original */
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
 
-.btn-header-close:hover {
-  background-color: rgba(255, 255, 255, 0.1) !important;
-  border-color: white !important;
+.header-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; 
+}
+
+/* ==============================================================
+   RECUADRO BLANCO ESTILO "Día/Semana/Mes"
+   ============================================================== */
+.segmented-nav {
+  display: flex;
+  align-items: center;
+  background-color: rgb(64, 70, 34); /* El fondo blanco del recuadro */
+  padding: 6px; /* Margen interno */
+  border-radius: 12px; /* Bordes redondeados del contenedor */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  gap: 4px;
+}
+
+/* Botones individuales (Inactivos por defecto) */
+.seg-item, .segmented-nav button {
+  appearance: none;
+  text-decoration: none;
+  background-color: transparent;
+  color: #ffffff; /* Gris oscuro para texto no seleccionado */
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px; /* Redondeo interior */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Efecto al pasar el mouse (Gris clarito) */
+.seg-item:hover, .segmented-nav button:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+/* BOTÓN ACTIVO (Celeste con texto blanco) */
+.seg-item.active {
+  background-color: #38bdf8 !important; /* El celeste de tu diseño */
+  color: #ffffff !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ==============================================================
+   DIVISOR Y BOTÓN CERRAR CAJA
+   ============================================================== */
+.seg-divider {
+  width: 1px;
+  height: 24px;
+  background-color: #cbd5e1;
+  margin: 0 4px;
+}
+
+/* El botón Cerrar Caja se ve igual a los inactivos... */
+.segmented-nav .btn-header-close {
+  background-color: transparent !important;
+  color: #38bdf8 !important;
+  border: none !important;
+  
+}
+
+/* ...Hasta que le pasás el mouse, ahí se pone rojo */
+.segmented-nav .btn-header-close:hover {
+  background-color: #ef4444 !important; /* Rojo alerta */
+  color: #ffffff !important;
 }

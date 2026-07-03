@@ -1,15 +1,41 @@
 @import './base.css';
 
+/* =========================================
+   1. FONDO GLOBAL CON EFECTO DESENFOQUE
+   ========================================= */
 body {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  background-image: url('./wavy-lines.svg');
-  background-size: cover;
+  overflow: hidden; /* Evita barras de scroll en la app de escritorio */
+  margin: 0;
+  min-height: 100vh;
+  background-color: #2b2b2b; /* Color de respaldo */
   user-select: none;
+  position: relative; /* Necesario para la capa falsa */
+  z-index: 1; 
 }
 
+/* Capa falsa de fondo: aquí ocurre la magia del desenfoque */
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('./fondo2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  /* Desenfoque (blur) y oscurecimiento (brightness) */
+  filter: blur(6px) brightness(0.65); 
+  z-index: -1; /* Lo manda detrás de toda la aplicación */
+}
+
+/* =========================================
+   2. RESTO DE TU CÓDIGO (Plantilla original)
+   ========================================= */
 code {
   font-weight: 600;
   padding: 3px 5px;
@@ -32,6 +58,7 @@ code {
   justify-content: center;
   flex-direction: column;
   margin-bottom: 80px;
+  width: 100%;
 }
 
 .logo {
@@ -146,9 +173,10 @@ code {
   font-size: 14px;
   line-height: 14px;
   opacity: 0.8;
-  &:last-child {
-    border: none;
-  }
+}
+
+.versions li:last-child {
+  border: none;
 }
 
 @media (max-width: 720px) {
