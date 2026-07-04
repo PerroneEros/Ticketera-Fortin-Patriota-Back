@@ -6,6 +6,7 @@ import { ProductListProviderDisable } from './components/context/productListDisa
 import { CashRegisterProvider } from './components/context/cashRegisterContext'
 import Routs from './routes'
 
+
 function App(): React.JSX.Element {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 

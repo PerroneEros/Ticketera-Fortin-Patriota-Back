@@ -15,33 +15,33 @@ export default function Header() {
       <div className="header-logo-container">
         <img src={logo} alt="Logo ticketera fortin" className="header-logo-img" />
       </div>
-      
+
       {/* El recuadro blanco que agrupa los botones */}
       <nav className="segmented-nav">
-        <Link 
-          to="/products" 
+        <Link
+          to="/products"
           className={`seg-item ${currentPath === '/products' ? 'active' : ''}`}
         >
           Productos
         </Link>
-        
-        <Link 
-          to="/list-products" 
+
+        <Link
+          to="/list-products"
           className={`seg-item ${currentPath === '/list-products' ? 'active' : ''}`}
         >
           Ver productos
         </Link>
-        
-        <Link 
-          to="/resumen" 
+
+        <Link
+          to="/resumen"
           className={`seg-item ${currentPath === '/resumen' ? 'active' : ''}`}
         >
           Resumen
         </Link>
-        
+
         {/* Una pequeña línea gris para separar el botón de cerrar caja */}
         <div className="seg-divider"></div>
-        
+
         {/* Cerrar caja */}
         <CashRegisterClose />
       </nav>
