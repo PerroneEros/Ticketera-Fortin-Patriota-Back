@@ -3,6 +3,7 @@ import { useContext } from 'react'
 import { CategoryContext } from '../context/categoryContext'
 import '../Styles/products.css'
 import '../Styles/productModals.css'
+import { useCartList } from '../context/cartListContext'
 
 export default function CardProducts() {
   const { productList, loading } = useProductList()
