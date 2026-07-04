@@ -1,28 +1,22 @@
-import { Link } from 'react-router-dom'
-import ListProducts from './listProduct'
 import { useState } from 'react'
+import ListProducts from './listProduct'
 import CreateProduct from './createProduct'
 import { useProductList } from '../context/productListContext'
+import '../Styles/productList.css'
+
 export default function ProductsList() {
   const [productToCreate, setProductToCreate] = useState(false)
   const { fetchProducts } = useProductList()
+
   return (
-    <>
+    <div className="products-manager">
       <div className="Card-ProductsList">
-        <Link to="/activate-products" title="Habilitar productos">
-          <button>Habilitar Productos</button>
-        </Link>
         <button onClick={() => setProductToCreate(true)}>Crear Producto</button>
-        <ListProducts />
       </div>
+      <ListProducts />
       {productToCreate && (
-        <CreateProduct
-          onClose={() => {
-            setProductToCreate(false)
-            fetchProducts()
-          }}
-        />
+        <CreateProduct onClose={() => { setProductToCreate(false); fetchProducts(); }} />
       )}
-    </>
+    </div>
   )
 }

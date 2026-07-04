@@ -1,65 +1,67 @@
-import toast from 'react-hot-toast'
-import { useProductList } from '../context/productListContext'
-import { deleteProducts } from '../service/productService'
-import { useProductListDisable } from '../context/productListDisableContext'
-import { useState } from 'react'
-import EditProduct from './editProduct'
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { useProductList } from '../context/productListContext';
+import { useProductListDisable } from '../context/productListDisableContext';
+import { deleteProducts, reactivateProducts } from '../service/productService';
+import EditProduct from './editProduct';
+import '../Styles/productList.css';
+
 export default function ListProducts() {
-  const { productList, loading, fetchProducts } = useProductList()
-  const { fetchProductsDisable } = useProductListDisable()
-  const [productToEdit, setProductToEdit] = useState(null)
-  const product = productList
-  const eliminateProduct = async (id) => {
-    if (!window.confirm('¿Estas seguro de deshabilitar este producto?')) {
-      return
-    }
+  const { productList, loading, fetchProducts } = useProductList();
+  const { productListDisable, fetchProductsDisable } = useProductListDisable();
+  const [filter, setFilter] = useState('active');
+  const [productToEdit, setProductToEdit] = useState(null);
+
+  const handleToggle = async (p) => {
     try {
-      await deleteProducts(id)
-      toast.success('producto eliminado correctamente')
-      await fetchProducts()
-      await fetchProductsDisable()
-    } catch (error) {
-      console.error(error)
-      toast.error('Error al eliminar el producto')
+      if (p.isActive) {
+        await deleteProducts(p.id_product);
+        toast.success('Producto desactivado');
+      } else {
+        await reactivateProducts(p.id_product);
+        toast.success('Producto habilitado');
+      }
+      await fetchProducts();
+      await fetchProductsDisable();
+    } catch {
+      toast.error('Error al actualizar estado');
     }
-  }
+  };
+
+  const currentList = filter === 'active' ? productList : productListDisable;
+
   return (
     <>
-      {loading ? (
-        <p>cargando...</p>
-      ) : (
-        <>
-          {product.map((product) => (
-            <li key={product.id_product}>
-              <div>
-                <button
-                  onClick={() => {
-                    setProductToEdit(product)
-                  }}
-                >
-                  editar
-                </button>
-                <button onClick={() => eliminateProduct(product.id_product)}>deshabilitar</button>
-                <p>
-                  <b>{product.name}</b>
-                </p>
-              </div>
-              <div>{product.price}</div>
-              <div>{product.Category ? product.Category.name : 'Sin categoría'}</div>
-              <div>{product.isActive ? 'activado' : 'desactivado'}</div>
-            </li>
-          ))}
-        </>
+      <div className="filter-container">
+        <button className={`filter-btn ${filter === 'active' ? 'active' : ''}`} onClick={() => setFilter('active')}>Activos</button>
+        <button className={`filter-btn ${filter === 'disabled' ? 'active' : ''}`} onClick={() => setFilter('disabled')}>Desactivados</button>
+      </div>
+
+      {loading ? <p>Cargando...</p> : (
+        <table className="product-table">
+          <thead>
+            <tr><th>Nombre</th><th>Precio</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr>
+          </thead>
+          <tbody>
+            {currentList.map((p) => (
+              <tr key={p.id_product} className={!p.isActive ? 'product-row-disabled' : ''}>
+                <td><b>{p.name}</b></td>
+                <td>$ {p.price}</td>
+                <td>{p.Category?.name || 'Sin categoría'}</td>
+                <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
+                <td>
+                  {p.isActive && <button onClick={() => setProductToEdit(p)}>Editar</button>}
+                  <button onClick={() => handleToggle(p)}>{p.isActive ? 'Desactivar' : 'Habilitar'}</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
+
       {productToEdit && (
-        <EditProduct
-          product={productToEdit}
-          onClose={() => {
-            setProductToEdit(null)
-            fetchProducts()
-          }}
-        />
+        <EditProduct product={productToEdit} onClose={() => { setProductToEdit(null); fetchProducts(); }} />
       )}
     </>
-  )
+  );
 }
