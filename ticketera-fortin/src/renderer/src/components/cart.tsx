@@ -42,12 +42,10 @@ export default function Cart() {
           <div class="ticket-page">
             <div class="center">
               <h2>Fortin</h2>
-              <p>Fecha: ${new Date().toLocaleString()}</p>
             </div>
             <div class="divider"></div>
             <div class="center">
               <h2>1x ${prod.name}</h2>
-              <p>Valor: $${prod.price}</p>
             </div>
             <div class="divider"></div>
             <div class="center">
