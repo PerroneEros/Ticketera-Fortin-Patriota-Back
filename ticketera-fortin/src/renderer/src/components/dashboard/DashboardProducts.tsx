@@ -6,13 +6,22 @@ export const DashboardProducts = () => {
     { id: 2, name: 'Café Americano', qty: 2, total: 70.00, percentage: 90 },
     { id: 3, name: 'Quesadilla', qty: 1, total: 50.00, percentage: 40 },
     { id: 4, name: 'Tacos (3 pzs)', qty: 1, total: 60.00, percentage: 45 },
+    { id: 5, name: 'Agua Mineral', qty: 3, total: 30.00, percentage: 20 },
+    { id: 6, name: 'Cerveza', qty: 2, total: 100.00, percentage: 60 },
   ]
 
   return (
     <div className="dashboard-products" style={{ background: 'white', padding: '20px', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
       <h3 style={{ margin: '0 0 20px 0', color: 'gray', fontSize: '16px' }}>Productos vendidos</h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '15px',
+        maxHeight: '220px', 
+        overflowY: 'auto',
+        paddingRight: '10px'
+      }}>
         {mockProducts.map(prod => (
           <div key={prod.id}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
