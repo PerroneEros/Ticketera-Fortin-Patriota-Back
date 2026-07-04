@@ -7,6 +7,9 @@ import '../Styles/productModals.css'
 export default function CardProducts() {
   const { productList, loading } = useProductList()
   const context = useContext(CategoryContext)
+  const { addOrUpdateItem } = useCartList()
+  // en caso de que tarde en cargar category evita que todo explote
+  if (!context) return null
   const { activeCategory } = context
 
   let productFilter
@@ -22,7 +25,11 @@ export default function CardProducts() {
         <p>Cargando...</p>
       ) : (
         productFilter.map((product) => (
-          <div key={product.id_product} className="product-card">
+          <div
+            key={product.id_product}
+            className="product-card"
+            onClick={() => addOrUpdateItem(product)}
+          >
             <div className="product-name">
               <b>{product.name}</b>
             </div>

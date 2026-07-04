@@ -3,6 +3,7 @@ import CardProducts from '../product/cardProducts'
 import { CategoryFilter } from '../category/categoryFilter'
 import { CategoryActions } from '../category/categoryActions'
 import '../Styles/products.css'
+import Cart from '../cart'
 
 export default function Products() {
   return (
@@ -16,6 +17,9 @@ export default function Products() {
       {/* Sección Tarjetas (El estándar para la venta) */}
       <div className="Card-ProductsHome">
         <CardProducts />
+      </div>
+      <div>
+        <Cart />
       </div>
     </div>
   )
