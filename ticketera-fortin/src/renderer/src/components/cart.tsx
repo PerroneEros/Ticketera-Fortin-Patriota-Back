@@ -1,15 +1,23 @@
 import toast from 'react-hot-toast'
 import { useCartList } from './context/cartListContext'
+import { useState } from 'react'
+import Method from './method'
 export default function Cart() {
   const { cartList, updateQuantity, setCartList } = useCartList()
   const total = cartList.reduce((acumulador, product) => {
     return acumulador + product.price * (product.quantity || 1)
   }, 0)
-  const handlePrintandSell = async () => {
+  const [showPaymentonMethod, setShowPaymentMethod] = useState(false)
+  const handleOpenShowPayment = () => {
     if (cartList.length === 0) {
       toast.error('el carrito esta vacio')
       return
     }
+    setShowPaymentMethod(true)
+  }
+  const handlePrintandSell = async (paymentDetails) => {
+    console.log('detalle del pago', paymentDetails)
+    toast.success('pago confirmado', paymentDetails)
     let ticketHTML = `
    <html>
         <head>
@@ -57,7 +65,6 @@ export default function Cart() {
     })
     // cierre del ticket
     ticketHTML += `
-          </table>
         </body>
       </html>
     `
@@ -82,6 +89,8 @@ export default function Cart() {
       }, 1000)
     }
     setCartList([])
+    setShowPaymentMethod(false)
+    toast.success('venta finalizada')
   }
   return (
     <>
@@ -107,8 +116,15 @@ export default function Cart() {
         <p>
           <b>Total: {total}</b>
         </p>
-        <button onClick={handlePrintandSell}>Imprimir ticket</button>
+        <button onClick={handleOpenShowPayment}>Imprimir ticket</button>
       </div>
+      {showPaymentonMethod && (
+        <Method
+          total={total}
+          onClose={() => setShowPaymentMethod(false)}
+          onConfirm={handlePrintandSell}
+        />
+      )}
     </>
   )
 }
