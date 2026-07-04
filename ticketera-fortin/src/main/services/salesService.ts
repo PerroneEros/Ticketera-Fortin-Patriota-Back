@@ -1,8 +1,10 @@
 import sequelize from '../database/db'
+import { Op } from 'sequelize'
 import Sales from '../model/sales'
 import Sale_items from '../model/sale_items'
 import Product from '../model/product'
 import Cash_register from '../model/cash_registers'
+import Cash_movements from '../model/cash_movements'
 import { CreateSaleInput } from '../schemas/salesSchema' 
 
 export const salesService = {
@@ -14,7 +16,6 @@ export const salesService = {
     try {
       const { paymentMethod, cashAmount, transferAmount, items } = data
 
-      // 1.Buscamos automáticamente la única caja que está abierta
       const activeRegister = await Cash_register.findOne({ where: { status: 'open' } })
       
       if (!activeRegister) {
@@ -35,7 +36,7 @@ export const salesService = {
         created_at: Date
       }[] = []
 
-      //2.Buscamos precios, calcular totales y GENERAR 1 TICKET POR UNIDAD
+      //Buscamos precios, calcular totales y GENERAR 1 TICKET POR UNIDAD
       for (const item of items) {
         const product = await Product.findByPk(item.id_product)
         if (!product) {
@@ -60,7 +61,7 @@ export const salesService = {
         }
       }
 
-      //3.Lógica para el Pago Combinado
+      //Lógica para el Pago Combinado
       let finalCash = 0;
       let finalTransfer = 0;
 
@@ -76,7 +77,7 @@ export const salesService = {
         finalTransfer = transferAmount || 0;
       }
 
-      //4.Crear la venta (Cabecera) usando la caja activa
+      //Crear la venta  usando la caja activa
       const newSale = await Sales.create({
         cash_register_id: activeRegister.cash_register_id,
         date: new Date(),
@@ -86,7 +87,7 @@ export const salesService = {
         transferAmount: finalTransfer
       }, { transaction: t })
 
-      //5.Vincular los tickets a la venta y crearlos todos juntos en la BD
+      //Vincular los tickets a la venta y crearlos todos juntos en la BD
       const finalItems = itemsToCreate.map(item => ({
         ...item,
         sale_id: newSale.sales_id
@@ -106,11 +107,65 @@ export const salesService = {
     }
   },
 
-  //Trae el historial completo de ventas
-  async getAllSales() {
-    return await Sales.findAll({
-      include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }],
-      order: [['date', 'DESC']]
+  //Trae el historial completo unificado y filtrado por tiempo
+  async getAllSales(filter?: string) {
+    let whereClause = {}
+    
+    if (filter && filter !== 'todo') {
+      const now = new Date()
+      let startDate = new Date()
+
+      if (filter === 'día' || filter === 'dia') {
+        // Desde las 00:00 del día de hoy
+        startDate.setHours(0, 0, 0, 0)
+      } else if (filter === 'semana') {
+        // Desde hace 7 días exactos
+        startDate.setDate(now.getDate() - 7)
+      } else if (filter === 'mes') {
+        // Desde hace 30 días
+        startDate.setMonth(now.getMonth() - 1)
+      }
+
+      //Le decimos a Sequelize que la fecha debe ser Mayor o Igual a la fecha de inicio
+      whereClause = { date: { [Op.gte]: startDate } }
+    }
+
+    //Buscamos todas las ventas aplicando el filtro
+    const sales = await Sales.findAll({
+      where: whereClause,
+      include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }]
+    })
+
+    //Buscamos todos los movimientos manuales aplicando el mismo filtro
+    const movements = await Cash_movements.findAll({
+      where: whereClause
+    })
+
+// Formateamos las ventas para el frontend
+    const formattedSales = sales.map(sale => ({
+      sales_id: sale.sales_id,
+      total: Number(sale.total),
+      paymentMethod: sale.paymentMethod,
+      cashAmount: Number(sale.cashAmount),
+      transferAmount: Number(sale.transferAmount),
+      date: sale.date,
+      Sale_items: (sale as any).Sale_items 
+    }))
+
+    //Formateamos los movimientos para que tengan la misma estructura visual
+    const formattedMovements = movements.map(mov => ({
+      sales_id: mov.movement_id,
+      total: Number(mov.amount),
+      paymentMethod: mov.type,
+      cashAmount: mov.method === 'efectivo' ? Number(mov.amount) : 0,
+      transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
+      date: mov.date,
+      Sale_items: []
+    }))
+
+    //Unificamos todo y lo ordenamos de más nuevo a más viejo
+    return [...formattedSales, ...formattedMovements].sort((a, b) => {
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
   },
 
@@ -126,12 +181,42 @@ export const salesService = {
     return sale
   },
 
-  //Trae todas las ventas de una caja particular (cierre de caja)
+  //Trae todas las ventas y movimientos de una caja particular 
   async getSalesByRegister(cash_register_id: string) {
-    return await Sales.findAll({
+    //Buscamos ventas de esta caja específica
+    const sales = await Sales.findAll({
       where: { cash_register_id },
-      include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }],
-      order: [['date', 'ASC']]
+      include: [{ model: Sale_items, include: [{ model: Product, attributes: ['name'] }] }]
+    })
+
+    //Buscamos movimientos de esta caja específica
+    const movements = await Cash_movements.findAll({
+      where: { cash_register_id }
+    })
+
+const formattedSales = sales.map(sale => ({
+      sales_id: sale.sales_id,
+      total: Number(sale.total),
+      paymentMethod: sale.paymentMethod,
+      cashAmount: Number(sale.cashAmount),
+      transferAmount: Number(sale.transferAmount),
+      date: sale.date,
+      Sale_items: (sale as any).Sale_items
+    }))
+
+    const formattedMovements = movements.map(mov => ({
+      sales_id: mov.movement_id,
+      total: Number(mov.amount),
+      paymentMethod: mov.type,
+      cashAmount: mov.method === 'efectivo' ? Number(mov.amount) : 0,
+      transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
+      date: mov.date,
+      Sale_items: []
+    }))
+
+    //Unificamos y ordenamos de más viejo a más nuevo 
+    return [...formattedSales, ...formattedMovements].sort((a, b) => {
+      return new Date(a.date).getTime() - new Date(b.date).getTime()
     })
   },
 

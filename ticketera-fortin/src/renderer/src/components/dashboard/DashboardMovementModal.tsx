@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import axios from 'axios'
+import { useDashboardContext } from '../context/dashboardContext'
 
 interface Props {
   onClose: () => void
@@ -10,25 +12,50 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
   const [description, setDescription] = useState('')
   const [method, setMethod] = useState<'efectivo' | 'transferencia'>('efectivo')
   const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Nos traemos el trigger para recargar el panel una vez que se guarde el movimiento
+  const { setTimeFilter, timeFilter } = useDashboardContext()
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // La clase cliente verifica los datos antes de accionar
+    // CLÁUSULA REQUIRE: El cliente verifica la validez del estado antes de actuar.
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount) || numAmount <= 0) {
       setError('El monto debe ser mayor a 0.')
       return
     }
     if (!description.trim()) {
-      setError('La descripción es obligatoria.')
+      setError('La descripción es obligatoria para justificar el movimiento.')
       return
     }
 
-    // Acá iría la llamada al backend en el futuro
-    console.log({ type, amount: numAmount, description, method })
-    onClose() 
+    setIsSubmitting(true)
+
+    try {
+      // ACA VA LA RUTA NUEVA: Esta es la que tienen que armar en el backend
+      const ENDPOINT_MOVIMIENTOS = 'http://localhost:34567/api/movements' 
+
+      await axios.post(ENDPOINT_MOVIMIENTOS, {
+        type,
+        amount: numAmount,
+        description,
+        method,
+        date: new Date().toISOString()
+      })
+
+      // Forzamos una recarga del contexto pisando el filtro actual
+      setTimeFilter(timeFilter) 
+      onClose() 
+
+    } catch (err: any) {
+      console.error(err)
+      setError(err.response?.data?.message || 'Error al conectar con el servidor. Revisá que el backend soporte este endpoint.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -43,7 +70,6 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
         position: 'relative'
       }}>
         
-        {/* Header del modal */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px', marginBottom: '20px' }}>
           <h2 style={{ margin: 0, fontSize: '18px', color: '#1f2937' }}>Registrar movimiento</h2>
           <button onClick={onClose} style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'gray' }}>✕</button>
@@ -51,7 +77,6 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           
-          {/* Toggle Ingreso / Egreso */}
           <div style={{ display: 'flex', gap: '10px' }}>
             <button type="button" onClick={() => setType('ingreso')}
               style={{
@@ -73,21 +98,18 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
             </button>
           </div>
 
-          {/* Monto */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Monto ($)</label>
             <input type="number" step="0.01" placeholder="$ 0.00" value={amount} onChange={(e) => setAmount(e.target.value)}
               style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f4f0ec', fontSize: '16px', outline: 'none' }} />
           </div>
 
-          {/* Descripción */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Descripción</label>
             <input type="text" placeholder="Ej: Compra de insumos..." value={description} onChange={(e) => setDescription(e.target.value)}
               style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f4f0ec', fontSize: '16px', outline: 'none' }} />
           </div>
 
-          {/* Toggle Método */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Método</label>
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -98,7 +120,7 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
                   color: method === 'efectivo' ? 'white' : 'gray',
                   border: method === 'efectivo' ? 'none' : '1px solid #e5e7eb'
                 }}>
-                💵 Efectivo
+                Efectivo
               </button>
               <button type="button" onClick={() => setMethod('transferencia')}
                 style={{
@@ -107,25 +129,23 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
                   color: method === 'transferencia' ? 'white' : 'gray',
                   border: method === 'transferencia' ? 'none' : '1px solid #e5e7eb'
                 }}>
-                📱 Transferencia
+                Transferencia
               </button>
             </div>
           </div>
 
-          {/* Error Message */}
           {error && <p style={{ color: '#ef4444', margin: 0, fontSize: '14px', textAlign: 'center' }}>{error}</p>}
 
-          {/* Footer Actions */}
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-            <button type="button" onClick={onClose}
+            <button type="button" onClick={onClose} disabled={isSubmitting}
               style={{ flex: 1, padding: '14px', borderRadius: '8px', cursor: 'pointer', background: 'white', color: 'gray', border: '1px solid #e5e7eb', fontWeight: 'bold' }}>
               Cancelar
             </button>
-            <button type="submit"
-              style={{ flex: 1, padding: '14px', borderRadius: '8px', cursor: 'pointer', color: 'white', border: 'none', fontWeight: 'bold',
-                background: type === 'ingreso' ? '#10b981' : '#ef4444'
+            <button type="submit" disabled={isSubmitting}
+              style={{ flex: 1, padding: '14px', borderRadius: '8px', cursor: isSubmitting ? 'not-allowed' : 'pointer', color: 'white', border: 'none', fontWeight: 'bold',
+                background: type === 'ingreso' ? '#10b981' : '#ef4444', opacity: isSubmitting ? 0.7 : 1
               }}>
-              Registrar {type}
+              {isSubmitting ? 'Guardando...' : `Registrar ${type}`}
             </button>
           </div>
 
