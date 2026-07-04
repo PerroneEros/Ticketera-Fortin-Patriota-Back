@@ -9,14 +9,13 @@ type ModalType = 'none' | 'agregar' | 'editar' | 'eliminar'
 export const CategoryActions = () => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-
   const [modalType, setModalType] = useState<ModalType>('none')
   const [inputValue, setInputValue] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const { fetchProducts } = useProductList()
 
+  const { fetchProducts } = useProductList()
   const context = useContext(CategoryContext)
 
   useEffect(() => {
@@ -44,7 +43,6 @@ export const CategoryActions = () => {
     e.preventDefault()
     setIsLoading(true)
     setErrorMsg('')
-
     try {
       if (modalType === 'agregar') {
         if (!inputValue.trim()) throw new Error('El nombre no puede estar vacío.')
@@ -61,7 +59,7 @@ export const CategoryActions = () => {
       await fetchProducts()
       setModalType('none')
     } catch (error: any) {
-      setErrorMsg(error.response?.data?.message || error.message || 'Ocurrió un error inesperado')
+      setErrorMsg(error.response?.data?.message || error.message || 'Ocurrió un error')
     } finally {
       setIsLoading(false)
     }
@@ -73,18 +71,11 @@ export const CategoryActions = () => {
         <button className="btn-orange" onClick={() => setIsOpen(!isOpen)}>
           + Agregar <span className="chevron">⌄</span>
         </button>
-
         {isOpen && (
           <div className="dropdown-menu">
-            <button onClick={() => handleActionClick('agregar')} className="dropdown-item">
-              Agregar categoría
-            </button>
-            <button onClick={() => handleActionClick('editar')} className="dropdown-item">
-              Editar categoría
-            </button>
-            <button onClick={() => handleActionClick('eliminar')} className="dropdown-item danger">
-              Eliminar categoría
-            </button>
+            <button className="dropdown-menu-add" onClick ={() => handleActionClick('agregar')}>Agregar categoría</button>
+            <button className="dropdown-menu-edit" onClick={() => handleActionClick('editar')}>Editar categoría</button>
+            <button className="dropdown-menu-delete" onClick={() => handleActionClick('eliminar')}>Eliminar categoría</button>
           </div>
         )}
       </div>
@@ -98,9 +89,7 @@ export const CategoryActions = () => {
                 {modalType === 'editar' && 'Editar Categoría'}
                 {modalType === 'eliminar' && 'Eliminar Categoría'}
               </h3>
-              <button className="btn-close" onClick={() => setModalType('none')}>
-                ✕
-              </button>
+              <button className="btn-close" onClick={() => setModalType('none')}>✕</button>
             </div>
 
             <form onSubmit={handleSubmit}>
@@ -108,60 +97,26 @@ export const CategoryActions = () => {
                 {(modalType === 'editar' || modalType === 'eliminar') && (
                   <div className="input-group">
                     <label>Selecciona la categoría</label>
-                    <select
-                      value={selectedCategoryId}
-                      onChange={(e) => setSelectedCategoryId(e.target.value)}
-                      disabled={isLoading}
-                    >
-                      <option value="" disabled>
-                        Seleccione...
-                      </option>
+                    <select value={selectedCategoryId} onChange={(e) => setSelectedCategoryId(e.target.value)}>
                       {categories.map((cat) => (
-                        <option key={cat.category_id} value={cat.category_id}>
-                          {cat.name}
-                        </option>
+                        <option key={cat.category_id} value={cat.category_id}>{cat.name}</option>
                       ))}
                     </select>
                   </div>
                 )}
-
                 {(modalType === 'agregar' || modalType === 'editar') && (
                   <div className="input-group">
-                    <label>
-                      {modalType === 'editar'
-                        ? 'Nuevo nombre de la categoría'
-                        : 'Nombre de la categoría'}
-                    </label>
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Ej: Postres"
-                      disabled={isLoading}
-                    />
+                    <label>Nombre de la categoría</label>
+                    <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Ej: Bebidas" />
                   </div>
                 )}
-
                 {errorMsg && <p className="error-text">{errorMsg}</p>}
               </div>
 
               <div className="modal-actions">
-                <button
-                  type="button"
-                  className="btn-cancel"
-                  onClick={() => setModalType('none')}
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className={`btn-confirm ${modalType === 'eliminar' ? 'btn-danger' : ''}`}
-                  disabled={isLoading}
-                >
-                  {modalType === 'agregar' && (isLoading ? 'Agregando...' : 'Agregar')}
-                  {modalType === 'editar' && (isLoading ? 'Guardando...' : 'Guardar')}
-                  {modalType === 'eliminar' && (isLoading ? 'Eliminando...' : 'Eliminar')}
+                <button type="button" className="btn-cancel" onClick={() => setModalType('none')}>Cancelar</button>
+                <button type="submit" className={`btn-confirm ${modalType === 'eliminar' ? 'btn-danger' : ''}`} disabled={isLoading}>
+                  {isLoading ? 'Procesando...' : (modalType === 'agregar' ? 'Agregar' : modalType === 'editar' ? 'Guardar' : 'Eliminar')}
                 </button>
               </div>
             </form>

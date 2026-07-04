@@ -7,12 +7,13 @@ import '../Styles/products.css'
 export default function Products() {
   return (
     <div className="home-container">
-      <div className="toolbar-container">
+      {/* Sección Filtros */}
+      <div className="filtros-y-acciones">
         <CategoryActions />
-      </div>
-      <div className="filters-container">
         <CategoryFilter />
       </div>
+
+      {/* Sección Tarjetas (El estándar para la venta) */}
       <div className="Card-ProductsHome">
         <CardProducts />
       </div>

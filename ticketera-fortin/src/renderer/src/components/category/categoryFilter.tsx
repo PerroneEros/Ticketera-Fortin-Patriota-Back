@@ -8,7 +8,7 @@ export const CategoryFilter = () => {
   if (!context) return null
   const { productList } = useProductList()
   const { categories, activeCategory, setActiveCategory } = context
-  const contProducts = (category_id) => {
+  const contProducts = (category_id: number) => {
     let cantProduct = 0
     for (let i = 0; i < productList.length; i++) {
       let product = productList[i]
