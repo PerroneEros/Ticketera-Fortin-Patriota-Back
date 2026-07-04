@@ -1,0 +1,182 @@
+/* =========================================
+   ESTILOS PARA HOME.TSX (APERTURA DE CAJA)
+   ========================================= */
+
+/* Centra la tarjeta en la pantalla por encima del fondo difuminado */
+.home-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  z-index: 10; 
+}
+
+/* La tarjeta principal */
+.login-card {
+  width: 100%;
+  max-width: 400px; /* Tamaño compacto como en la imagen 2 */
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* =========================================
+   MITAD SUPERIOR (Fondo Oscuro y Logo)
+   ========================================= */
+.card-header-black {
+  background-color: #000000; /* Verde oliva oscuro */
+  padding: 30px 20px 20px 20px;
+  text-align: center;
+  color: #ffffff;
+}
+
+/* Truco para volver el logo redondo y tapar el fondo blanco de la foto */
+.home-logo {
+  width: 120px; /* Un poco más grande para que se lea mejor */
+  height: 120px;
+  margin: 0 auto 15px auto;
+  border-radius: 50%;
+  background-color: #ffffff;
+  object-fit: contain; /* CLAVE: Fuerza a que la imagen entera entre en el círculo */
+  padding: 12px; /* CLAVE: Le da margen interno para que las letras no toquen el borde */
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: block;
+}
+
+.home-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.home-subtitle {
+  margin: 4px 0 16px 0;
+  font-size: 13px;
+  color: #d5cfbd;
+  font-weight: normal;
+}
+
+.home-date {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* =========================================
+   MITAD INFERIOR (Formulario Blanco)
+   ========================================= */
+.card-body-white {
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+.open-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Espaciado automático entre elementos */
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: -8px; /* Acerca el texto al input */
+}
+
+/* Contenedor del input estilo beige */
+.input-container {
+  display: flex;
+  align-items: center;
+  background-color: #f1ede3;
+  border: 1px solid #d5cfbd;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 50px;
+}
+
+.currency-symbol {
+  color: #64748b;
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.amount-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  font-weight: bold;
+  color: #334155;
+  width: 100%;
+}
+
+.amount-input:focus {
+  outline: none;
+}
+
+/* Quita las flechitas feas del input de números en algunos navegadores */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-helper {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+/* =========================================
+   BOTONES
+   ========================================= */
+.btn-open-register {
+  width: 100%;
+  padding: 16px;
+  background-color: #555843; /* Verde Oliva forzado */
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-open-register:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-open-register:hover:not(:disabled) {
+  background-color: #38bdf8;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 14px;
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: -6px;
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  color: #334155;
+}

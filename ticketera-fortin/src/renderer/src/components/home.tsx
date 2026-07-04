@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import { CashRegisterContext } from '../components/context/cashRegisterContext'
 import { openRegister } from '../components/service/cashRegsiterService'
 import logo from '../assets/logo.jpeg'
-import './Styles/home.css'
+import './Styles/cashRegisterOpen.css'
 
 export default function Home() {
   const navigate = useNavigate()
-  
+
   // Extraemos el contexto de la caja
   const context = useContext(CashRegisterContext)
-  
+
   // Estados locales para manejar el input y la carga
   const [openingAmount, setOpeningAmount] = useState<string>('')
   const [isLoading, setIsLoading] = useState(false)
@@ -59,7 +59,7 @@ export default function Home() {
       }
       // El useEffect de arriba detectará este cambio y hará el navigate automáticamente,
       // pero dejar este navigate aquí también es una buena red de seguridad.
-      navigate('/products') 
+      navigate('/products')
     } catch (error: any) {
       setErrorMsg(error.response?.data?.message || error.message)
     } finally {
@@ -71,7 +71,7 @@ export default function Home() {
   if (!context) {
     return (
       <div className="home-wrapper">
-        <h2 style={{color: 'white'}}>Error: CashRegisterContext no encontrado. Revisa tu App.tsx</h2>
+        <h2 style={{ color: 'white' }}>Error: CashRegisterContext no encontrado. Revisa tu App.tsx</h2>
       </div>
     )
   }
@@ -89,40 +89,40 @@ export default function Home() {
 
         <div className="card-body-white">
           <form onSubmit={handleOpenSubmit} className="open-register-form">
-            
+
             <label className="input-label">Fondo inicial en efectivo ($)</label>
             <div className="input-container">
               <span className="currency-symbol">$</span>
-              <input 
-                type="number" 
+              <input
+                type="number"
                 className="amount-input"
-                min="0" 
-                step="0.01" 
+                min="0"
+                step="0.01"
                 placeholder="0.00"
-                value={openingAmount} 
-                onChange={(e) => setOpeningAmount(e.target.value)} 
+                value={openingAmount}
+                onChange={(e) => setOpeningAmount(e.target.value)}
                 required
               />
             </div>
-            
+
             <p className="input-helper">
               Ingresa el efectivo físico con el que inicias el turno.
             </p>
 
-            {errorMsg && <p className="error-text" style={{color: 'red', fontSize: '0.8rem'}}>{errorMsg}</p>}
+            {errorMsg && <p className="error-text" style={{ color: 'red', fontSize: '0.8rem' }}>{errorMsg}</p>}
 
-            <button 
-              type="submit" 
-              className="btn-open-register" 
+            <button
+              type="submit"
+              className="btn-open-register"
               disabled={isLoading}
             >
               {isLoading ? 'Abriendo...' : 'Abrir Caja'}
             </button>
-            
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               className="btn-secondary"
-              onClick={() => navigate('/products')} 
+              onClick={() => navigate('/products')}
             >
               Ver reportes sin abrir caja
             </button>

@@ -1,24 +1,20 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { CashRegisterContext } from '../context/cashRegisterContext';
 import { openRegister } from '../service/cashRegsiterService';
-import '../Styles/home.css';
+import '../Styles/cashRegisterOpen.css';
 
 export const CashRegisterOpen = () => {
-  // Manejo del menú desplegable del botón principal
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Estados generales del Modal
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Guarda lo que escribe el usuario en el input de "Fondo Inicial"
   const [openingAmount, setOpeningAmount] = useState<string>('');
 
   const context = useContext(CashRegisterContext);
 
-  // Si el usuario hace clic fuera del menú se cierra
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -29,8 +25,7 @@ export const CashRegisterOpen = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Medida de seguridad por si el componente está fuera del Provider
-  if (!context) return null; 
+  if (!context) return null;
   const { activeRegister, loadActiveRegister } = context;
 
   const handleOpenSubmit = async (e: React.FormEvent) => {
@@ -46,10 +41,10 @@ export const CashRegisterOpen = () => {
     }
 
     try {
-      await openRegister(numericAmount); // Guarda en base de datos
-      await loadActiveRegister();        // Actualiza el botón a "Caja Abierta"
-      setShowModal(false);               // Cierra el modal
-      setOpeningAmount('');              // Limpia el input
+      await openRegister(numericAmount);
+      await loadActiveRegister();
+      setShowModal(false);
+      setOpeningAmount('');
     } catch (error: any) {
       setErrorMsg(error.response?.data?.message || error.message);
     } finally {
@@ -60,30 +55,27 @@ export const CashRegisterOpen = () => {
   return (
     <>
       <div className="dropdown-container" ref={dropdownRef}>
-        <button 
-          className="btn-orange" 
+        <button
+          className="btn-orange"
           onClick={() => {
-            // Si la caja ya está abierta, el botón no hace nada (no abre menú)
             if (!activeRegister) setIsOpen(!isOpen);
           }}
-          // Si la caja está abierta lo pintamos oscuro/verde y quitamos el cursor de la mano
-          style={{ 
+          style={{
             backgroundColor: activeRegister ? '#555843' : 'var(--color-acento)',
             cursor: activeRegister ? 'default' : 'pointer'
           }}
         >
-          {activeRegister ? 'Caja Abierta' : 'Caja Cerrada'} 
-          {/* Solo muestra la flechita si la caja está cerrada */}
+          {activeRegister ? 'Caja Abierta' : 'Caja Cerrada'}
           {!activeRegister && <span className="chevron">⌄</span>}
         </button>
 
         {isOpen && !activeRegister && (
           <div className="dropdown-menu">
-            <button 
+            <button
               onClick={() => {
                 setShowModal(true);
                 setIsOpen(false);
-              }} 
+              }}
               className="dropdown-item"
             >
               Abrir Caja
@@ -92,31 +84,55 @@ export const CashRegisterOpen = () => {
         )}
       </div>
 
-      {/* Modal de Apertura de caja */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Apertura de Caja</h3>
-              <button className="btn-close" onClick={() => setShowModal(false)}>✕</button>
+        <div className="open-modal-overlay">
+          <div className="open-modal-card">
+
+            <div className="open-card-top">
+              <button className="open-btn-close-x" onClick={() => setShowModal(false)}>✕</button>
+
+              <div className="open-logo-wrapper">
+                {/* AQUÍ VA TU IMAGEN */}
+                <img src="/ruta-a-tu-logo.png" alt="Logo Fortín" className="open-logo-img" />
+              </div>
+
+              <h2 className="open-title">Fortín Patriotas</h2>
+              <p className="open-subtitle">Centro Tradicionalista · Casbas</p>
+
+              <p className="open-date">
+                {new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              </p>
             </div>
-            <form onSubmit={handleOpenSubmit}>
-              <div className="modal-body">
-                <div className="input-group">
-                  <label>Monto inicial de apertura ($)</label>
-                  <input 
-                    type="number" min="0" step="0.01" value={openingAmount} 
-                    onChange={(e) => setOpeningAmount(e.target.value)} required
+
+            <form onSubmit={handleOpenSubmit} className="open-card-bottom">
+
+              <div className="open-input-group">
+                <label>Fondo inicial en efectivo ($)</label>
+                <div className="open-input-wrapper">
+                  <span className="open-currency-symbol">$</span>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={openingAmount}
+                    onChange={(e) => setOpeningAmount(e.target.value)}
+                    required
+                    placeholder="0.00"
                   />
                 </div>
-                {errorMsg && <p className="error-text">{errorMsg}</p>}
               </div>
-              <div className="modal-actions">
-                <button type="button" className="btn-cancel" onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn-confirm" disabled={isLoading}>
+
+              <p className="open-helper-text">Ingresa el efectivo físico con el que inicias el turno.</p>
+
+              {errorMsg && <p className="open-error-text">{errorMsg}</p>}
+
+              <div className="open-actions">
+                <button type="submit" className="open-btn-submit" disabled={isLoading}>
                   {isLoading ? 'Abriendo...' : 'Abrir Caja'}
                 </button>
+                <button type="button" className="open-btn-cancel" onClick={() => setShowModal(false)}>
+                  Ver reportes sin abrir caja
+                </button>
               </div>
+
             </form>
           </div>
         </div>
