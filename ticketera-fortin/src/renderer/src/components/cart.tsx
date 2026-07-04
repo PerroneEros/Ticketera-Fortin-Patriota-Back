@@ -1,7 +1,7 @@
 import toast from 'react-hot-toast'
 import { useCartList } from './context/cartListContext'
 export default function Cart() {
-  const { cartList, updateQuantity } = useCartList()
+  const { cartList, updateQuantity, setCartList } = useCartList()
   const total = cartList.reduce((acumulador, product) => {
     return acumulador + product.price * (product.quantity || 1)
   }, 0)
@@ -83,6 +83,7 @@ export default function Cart() {
         document.body.removeChild(iframe)
       }, 1000)
     }
+    setCartList([])
   }
   return (
     <>
