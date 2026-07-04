@@ -11,8 +11,8 @@ export default function Payment({ method, total, onClose, onConfirm }) {
     })
   }
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-prod-overlay">
+      <div className="modal-prod-content">
         <div>
           <h3>Ingrese el monto (Total: ${total})</h3>
           <button className="btn-prod-close" onClick={onClose}>

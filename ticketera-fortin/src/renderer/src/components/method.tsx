@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import Payment from './payment'
-
+import './Styles/productModals.css'
 export default function Method({ total, onClose, onConfirm }) {
   const [selectMethod, setSelectMethod] = useState(null)
   if (selectMethod) {
     return <Payment method={selectMethod} total={total} onClose={onClose} onConfirm={onConfirm} />
   }
   return (
-    <div className="modal-overlay">
-      <div className="modal-content">
+    <div className="modal-prod-overlay">
+      <div className="modal-prod-content">
         <div>
           <h3>Seleccione metodo de pago:</h3>
         </div>
