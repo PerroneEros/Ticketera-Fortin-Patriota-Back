@@ -1,12 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardCards } from './DashboardCards'
 import { DashboardPayments } from './DashboardPayments'
 import { DashboardProducts } from './DashboardProducts'
 import { DashboardHistory } from './DashboardHistory'
+import { DashboardMovementModal } from './DashboardMovementModal'
 import { DashboardProvider } from '../context/dashboardContext'
 
 export const DashboardView = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
   return (
     <DashboardProvider>
       
@@ -28,7 +31,7 @@ export const DashboardView = () => {
         }}>
 
           {/*Botonera de arriba (Día, Semana, Mes y Movimiento) */}
-          <DashboardHeader />
+          <DashboardHeader onOpenModal={() => setIsModalOpen(true)} />
 
           {/*Tarjetitas de Resumen */}
           <DashboardCards />
@@ -45,6 +48,10 @@ export const DashboardView = () => {
         </div>
         
       </div>
+
+      {isModalOpen && (
+        <DashboardMovementModal onClose={() => setIsModalOpen(false)} />
+      )}
 
     </DashboardProvider>
   )
