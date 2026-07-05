@@ -3,8 +3,30 @@ import { useState } from 'react'
 export default function Payment({ method, total, onClose, onConfirm }) {
   const [cash, setCash] = useState(0)
   const [transfer, setTransfer] = useState(0)
+  const [errorMsg, setErrorMsg] = useState('')
   const handlePayment = async (e) => {
     e.preventDefault()
+    setErrorMsg('')
+    //Validaciones según el método elegido
+    if (method === 'efectivo' && cash <= 0) {
+      setErrorMsg('El monto en efectivo debe ser mayor a 0.')
+      return
+    }
+    if (method === 'transferencia' && transfer <= 0) {
+      setErrorMsg('El monto por transferencia debe ser mayor a 0.')
+      return
+    }
+    if (method === 'combinado') {
+      if (cash <= 0 || transfer <= 0) {
+        setErrorMsg('Debes ingresar ambos montos para el pago combinado.')
+        return
+      }
+      //valida que no paguen de mas
+      if (cash + transfer !== total) {
+        setErrorMsg(`La suma de los montos debe ser exactamente $${total}.`)
+        return
+      }
+    }
     onConfirm({
       method: method,
       cashAmount: cash,
@@ -47,6 +69,7 @@ export default function Payment({ method, total, onClose, onConfirm }) {
                   />
                 </>
               )}
+              {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
             <div>
               <button type="submit">Confirmar</button>

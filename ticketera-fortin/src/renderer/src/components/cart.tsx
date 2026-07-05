@@ -6,18 +6,20 @@ import { getCurrentRegister } from './service/cashRegsiterService'
 import { salesServiceFront } from './service/salesService'
 export default function Cart() {
   const { cartList, updateQuantity, setCartList } = useCartList()
+  const [errorMsg, setErrorMsg] = useState('')
   const total = cartList.reduce((acumulador, product) => {
     return acumulador + product.price * (product.quantity || 1)
   }, 0)
   const [showPaymentonMethod, setShowPaymentMethod] = useState(false)
   const handleOpenShowPayment = () => {
     if (cartList.length === 0) {
-      toast.error('el carrito esta vacio')
+      setErrorMsg('el carrito esta vacio')
       return
     }
     setShowPaymentMethod(true)
   }
   const handlePrintandSell = async (paymentDetails) => {
+    setErrorMsg('')
     console.log('detalle del pago', paymentDetails)
     toast.success('pago confirmado', paymentDetails)
     try {
@@ -115,7 +117,7 @@ export default function Cart() {
       toast.success('venta finalizada')
     } catch (error) {
       console.error(error)
-      toast.error('Error al guardar en la base de datos. No se imprimió.')
+      setErrorMsg('Error no se imprimió.')
     }
   }
   return (
@@ -143,6 +145,7 @@ export default function Cart() {
           <b>Total: {total}</b>
         </p>
         <button onClick={handleOpenShowPayment}>Imprimir ticket</button>
+        {errorMsg && <p className="error-text">{errorMsg}</p>}
       </div>
       {showPaymentonMethod && (
         <Method
