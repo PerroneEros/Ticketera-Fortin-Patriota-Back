@@ -13,8 +13,8 @@ export function initAssociations(): void {
   Product.hasMany(Sale_items, { foreignKey: 'id_product' })
   Sale_items.belongsTo(Product, { foreignKey: 'id_product' })
   // 3. sale_items <--> sales
-  Sales.hasMany(Sale_items, { foreignKey: 'sales_id' })
-  Sale_items.belongsTo(Sales, { foreignKey: 'sales_id' })
+  Sales.hasMany(Sale_items, { foreignKey: 'sale_id' })
+  Sale_items.belongsTo(Sales, { foreignKey: 'sale_id' })
 
   // 4. sale_items <--> cash_register
   Cash_register.hasMany(Sales, { foreignKey: 'cash_register_id' })
