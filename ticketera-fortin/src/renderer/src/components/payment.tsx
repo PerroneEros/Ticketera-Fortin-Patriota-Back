@@ -6,6 +6,7 @@ export default function Payment({ method, total, onClose, onConfirm }) {
   const handlePayment = async (e) => {
     e.preventDefault()
     onConfirm({
+      method: method,
       cashAmount: cash,
       transferAmount: transfer
     })
