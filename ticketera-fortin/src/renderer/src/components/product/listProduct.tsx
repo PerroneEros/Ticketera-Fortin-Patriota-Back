@@ -1,34 +1,40 @@
-import { useState } from 'react';
-import toast from 'react-hot-toast';
-import { useProductList } from '../context/productListContext';
-import { useProductListDisable } from '../context/productListDisableContext';
-import { deleteProducts, reactivateProducts } from '../service/productService';
-import EditProduct from './editProduct';
-import '../Styles/products.css';
-
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { useProductList } from '../context/productListContext'
+import { useProductListDisable } from '../context/productListDisableContext'
+import { deleteProducts, reactivateProducts } from '../service/productService'
+import EditProduct from './editProduct'
+import '../Styles/products.css'
+import WindowConfirm from '../windowConfirm'
 export default function ListProducts() {
-  const { productList, loading, fetchProducts } = useProductList();
-  const { productListDisable, fetchProductsDisable } = useProductListDisable();
-  const [filter, setFilter] = useState('active');
-  const [productToEdit, setProductToEdit] = useState(null);
-
+  const { productList, loading, fetchProducts } = useProductList()
+  const { productListDisable, fetchProductsDisable } = useProductListDisable()
+  const [filter, setFilter] = useState('active')
+  const [productToEdit, setProductToEdit] = useState(null)
+  const [productToToggle, setProductToToggle] = useState(null)
+  const handleOpenConfirm = (p: any) => {
+    setProductToToggle(p)
+  }
   const handleToggle = async (p: any) => {
+    if (!productToToggle) return
     try {
-      if (p.isActive) {
-        await deleteProducts(p.id_product);
-        toast.success('Producto desactivado');
+      if (productToToggle.isActive) {
+        await deleteProducts(productToToggle.id_product)
+        toast.success('Producto desactivado')
       } else {
-        await reactivateProducts(p.id_product);
-        toast.success('Producto habilitado');
+        await reactivateProducts(productToToggle.id_product)
+        toast.success('Producto habilitado')
       }
-      await fetchProducts();
-      await fetchProductsDisable();
+      await fetchProducts()
+      await fetchProductsDisable()
     } catch {
-      toast.error('Error al actualizar estado');
+      toast.error('Error al actualizar estado')
+    } finally {
+      setProductToToggle(null)
     }
-  };
+  }
 
-  const currentList = filter === 'active' ? productList : productListDisable;
+  const currentList = filter === 'active' ? productList : productListDisable
 
   return (
     <>
@@ -72,15 +78,15 @@ export default function ListProducts() {
               /* PRODUCTOS REALES */
               currentList.map((p: any) => (
                 <tr key={p.id_product} className={!p.isActive ? 'product-row-disabled' : ''}>
-                  <td><b>{p.name}</b></td>
+                  <td>
+                    <b>{p.name}</b>
+                  </td>
                   <td>$ {p.price}</td>
                   <td>{p.Category?.name || 'Sin categoría'}</td>
                   <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
                   <td>
-                    {p.isActive && (
-                      <button onClick={() => setProductToEdit(p)}>Editar</button>
-                    )}
-                    <button onClick={() => handleToggle(p)}>
+                    {p.isActive && <button onClick={() => setProductToEdit(p)}>Editar</button>}
+                    <button onClick={() => handleOpenConfirm(p)}>
                       {p.isActive ? 'Desactivar' : 'Habilitar'}
                     </button>
                   </td>
@@ -95,11 +101,18 @@ export default function ListProducts() {
         <EditProduct
           product={productToEdit}
           onClose={() => {
-            setProductToEdit(null);
-            fetchProducts();
+            setProductToEdit(null)
+            fetchProducts()
           }}
         />
       )}
+      {productToToggle && (
+        <WindowConfirm
+          text={productToToggle.isActive ? 'desactivar este producto' : 'habilitar este producto'}
+          onConfirm={handleToggle}
+          onClose={() => setProductToToggle(null)} // ¡Corregido de onCancel a onClose!
+        />
+      )}
     </>
-  );
+  )
 }
