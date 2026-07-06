@@ -101,7 +101,7 @@ export const salesService = {
       await t.commit()
       const savedSaleWithProducts = await salesService.getSaleById(newSale.sales_id.toString())
       
-      // ---> ACÁ ESTÁ EL FIX APLICADO <---
+    
       printerService.printTickets((savedSaleWithProducts as any).Sale_items).catch((err) => {
         console.error('Error silencioso de impresión:', err)
       })
