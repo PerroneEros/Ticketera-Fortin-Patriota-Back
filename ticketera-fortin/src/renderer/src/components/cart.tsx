@@ -21,7 +21,7 @@ export default function Cart() {
   const handlePrintandSell = async (paymentDetails) => {
     setErrorMsg('')
     console.log('detalle del pago', paymentDetails)
-    toast.success('pago confirmado', paymentDetails)
+    toast.success('pago confirmado')
     try {
       console.log(paymentDetails.method)
       const cash_register = await getCurrentRegister()
@@ -42,76 +42,6 @@ export default function Cart() {
         }))
       }
       await salesServiceFront.createSale(newSale)
-      let ticketHTML = `
-   <html>
-        <head>
-          <style>
-            body { 
-              font-family: monospace; /* Letra de ticket */
-              width: 80mm; /* Ancho típico de ticketera */
-              margin: 0; 
-              padding: 0;
-              color: black;
-              font-size: 15px
-            }
-            .center { text-align: center; }
-            .right { text-align: right; }
-            .divider { border-bottom: 1px dashed black; margin: 10px 0; }
-            /*Esta clase obliga a que el contenido siguiente vaya en otro ticket*/
-            .ticket-page { 
-              page-break-after: always; 
-              padding-bottom: 10px;
-            }
-          </style>
-        </head>
-        <body>
-    `
-      //recorre la lista para agregarla al ticket
-      cartList.forEach((prod) => {
-        //Por cada producto repetimos el diseño según su cantidad
-        for (let i = 0; i < prod.quantity; i++) {
-          ticketHTML += `
-          <div class="ticket-page">
-            <div class="center">
-              <h2>Fortin</h2>
-            </div>
-            <div class="divider"></div>
-            <div class="center">
-              <h2>1x ${prod.name}</h2>
-            </div>
-            <div class="divider"></div>
-            <div class="center">
-              <p>Válido por un canje</p>
-            </div>
-          </div>
-        `
-        }
-      })
-      // cierre del ticket
-      ticketHTML += `
-        </body>
-      </html>
-    `
-      //abre la ventana de impresion usamos iframe y no windows.print porque da error
-      //iframe abre una ventana virtual que no se ve en pantalla
-      const iframe = document.createElement('iframe')
-      iframe.style.display = 'none'
-      document.body.appendChild(iframe)
-
-      // 2. Le inyectamos tu ticketHTML adentro
-      iframe.contentDocument.write(ticketHTML)
-      iframe.contentDocument.close()
-
-      // 3. Le decimos que apenas termine de cargar, mande a imprimir
-      iframe.onload = () => {
-        iframe.contentWindow.focus()
-        iframe.contentWindow.print()
-
-        // 4. Limpiamos la basura: después de 1 segundo, borramos el iframe invisible
-        setTimeout(() => {
-          document.body.removeChild(iframe)
-        }, 1000)
-      }
       setCartList([])
       setShowPaymentMethod(false)
       toast.success('venta finalizada')
