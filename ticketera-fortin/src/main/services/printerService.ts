@@ -5,7 +5,7 @@ export const printerService = {
     try {
       const printer = new ThermalPrinter({
         type: PrinterTypes.EPSON, // EPSON es el estándar para el 90% de las ticketeras chinas y de marca
-        interface: '\\\\localhost\\Ticketera', // ¡IMPORTANTE! Acá debes poner el nombre exacto de la impresora en Windows
+        interface: '\\\\localhost\\POSPrinterPOS80', // ¡IMPORTANTE! Acá debes poner el nombre exacto de la impresora en Windows
         characterSet: CharacterSet.PC850_MULTILINGUAL, // Para que salgan bien los acentos
         removeSpecialCharacters: false,
         lineCharacter: '-',
