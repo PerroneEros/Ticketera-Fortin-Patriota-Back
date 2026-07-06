@@ -8,13 +8,25 @@ export default function Payment({ method, total, onClose, onConfirm }) {
     e.preventDefault()
     setErrorMsg('')
     //Validaciones según el método elegido
-    if (method === 'efectivo' && cash <= 0) {
-      setErrorMsg('El monto en efectivo debe ser mayor a 0.')
-      return
+    if (method === 'efectivo') {
+      if (cash <= 0) {
+        setErrorMsg('El monto en efectivo debe ser mayor a 0.')
+        return
+      }
+      if (cash !== total) {
+        setErrorMsg(`La suma de los montos debe ser exactamente $${total}.`)
+        return
+      }
     }
-    if (method === 'transferencia' && transfer <= 0) {
-      setErrorMsg('El monto por transferencia debe ser mayor a 0.')
-      return
+    if (method === 'transferencia') {
+      if (transfer <= 0) {
+        setErrorMsg('El monto por transferencia debe ser mayor a 0.')
+        return
+      }
+      if (transfer !== total) {
+        setErrorMsg(`El monto por transferencia debe ser exactamente $${total}.`)
+        return
+      }
     }
     if (method === 'combinado') {
       if (cash <= 0 || transfer <= 0) {
@@ -27,6 +39,7 @@ export default function Payment({ method, total, onClose, onConfirm }) {
         return
       }
     }
+
     onConfirm({
       method: method,
       cashAmount: cash,
