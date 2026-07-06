@@ -19,6 +19,8 @@ export const DashboardHistory = () => {
       bgColor = '#dcfce7'; color = '#16a34a' 
     } else if (method === 'egreso') {
       bgColor = '#fee2e2'; color = '#ef4444' 
+    } else if (method === 'apertura') {
+      bgColor = '#fef08a'; color = '#a16207' 
     }
 
     return (
@@ -92,7 +94,8 @@ export const DashboardHistory = () => {
           sales.map((sale, index) => {
             // Contamos los productos dentro de este ticket
             const itemsCount = sale.Sale_items ? sale.Sale_items.reduce((sum, item) => sum + item.quantity, 0) : 0
-            const isMovement = sale.paymentMethod === 'ingreso' || sale.paymentMethod === 'egreso'
+            
+            const isMovement = sale.paymentMethod === 'ingreso' || sale.paymentMethod === 'egreso' || sale.paymentMethod === 'apertura'
 
             return (
               <div key={sale.sales_id} style={{ 
@@ -106,7 +109,9 @@ export const DashboardHistory = () => {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: '5px' }}>
                     <strong style={{ fontSize: '15px' }}>
-                      {isMovement ? `Movimiento #${sale.sales_id}` : `Ticket #${sale.sales_id}`}
+                      {sale.paymentMethod === 'apertura' 
+                        ? 'Apertura de Caja' 
+                        : (isMovement ? `Movimiento #${sale.sales_id}` : `Ticket #${sale.sales_id}`)}
                     </strong>
                     {getMethodBadge(sale.paymentMethod)}
                   </div>
@@ -137,7 +142,7 @@ export const DashboardHistory = () => {
                     {sale.paymentMethod === 'egreso' ? '-' : ''}${sale.total.toFixed(2)}
                   </strong>
                   <span style={{ color: 'gray', fontSize: '13px' }}>
-                    {isMovement ? 'Ajuste de caja' : `${itemsCount} productos`}
+                    {sale.paymentMethod === 'apertura' ? 'Apertura de caja' : (isMovement ? 'Ajuste de caja' : `${itemsCount} productos`)}
                   </span>
                 </div>
 

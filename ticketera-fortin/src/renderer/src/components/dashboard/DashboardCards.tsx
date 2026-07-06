@@ -4,9 +4,14 @@ import { useDashboardContext } from '../context/dashboardContext'
 export const DashboardCards = () => {
   //Nos traemos la lista de ventas y el estado de carga desde el contexto
   const { sales, isLoading } = useDashboardContext()
+
   
-  //Filtro para separar las ventas reales de los movimientos de caja
-  const ventasReales = sales.filter(sale => sale.paymentMethod !== 'ingreso' && sale.paymentMethod !== 'egreso')
+  // Filtro para separar las ventas reales de los movimientos de caja Y de la apertura
+  const ventasReales = sales.filter(sale => 
+    sale.paymentMethod !== 'ingreso' && 
+    sale.paymentMethod !== 'egreso' && 
+    sale.paymentMethod !== 'apertura' 
+  )
 
   // Total de tickets vendidos 
   const totalVentas = ventasReales.length

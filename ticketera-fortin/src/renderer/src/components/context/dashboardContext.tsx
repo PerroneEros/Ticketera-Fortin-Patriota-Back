@@ -15,7 +15,7 @@ export interface SaleItem {
 export interface Sale {
   sales_id: number
   total: number
-  paymentMethod: 'efectivo' | 'transferencia' | 'combinado' | 'ingreso' | 'egreso'
+  paymentMethod: 'efectivo' | 'transferencia' | 'combinado' | 'ingreso' | 'egreso'| 'apertura'
   cashAmount: number
   transferAmount: number
   date: string
