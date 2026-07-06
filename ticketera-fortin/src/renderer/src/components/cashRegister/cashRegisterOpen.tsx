@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. IMPORTAMOS NAVIGATE
 import { CashRegisterContext } from '../context/cashRegisterContext';
 import { openRegister } from '../service/cashRegsiterService';
 import '../Styles/cashRegisterOpen.css';
 
 export const CashRegisterOpen = () => {
+  const navigate = useNavigate(); // 2. INICIALIZAMOS NAVIGATE
+
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const [showModal, setShowModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-
   const [openingAmount, setOpeningAmount] = useState<string>('');
 
   const context = useContext(CashRegisterContext);
@@ -45,6 +46,7 @@ export const CashRegisterOpen = () => {
       await loadActiveRegister();
       setShowModal(false);
       setOpeningAmount('');
+      // Opcional: navigate('/products') aquí si quieres que al abrir vaya directo a vender
     } catch (error: any) {
       setErrorMsg(error.response?.data?.message || error.message);
     } finally {
@@ -92,7 +94,6 @@ export const CashRegisterOpen = () => {
               <button className="open-btn-close-x" onClick={() => setShowModal(false)}>✕</button>
 
               <div className="open-logo-wrapper">
-                {/* AQUÍ VA TU IMAGEN */}
                 <img src="/ruta-a-tu-logo.png" alt="Logo Fortín" className="open-logo-img" />
               </div>
 
@@ -128,7 +129,8 @@ export const CashRegisterOpen = () => {
                 <button type="submit" className="open-btn-submit" disabled={isLoading}>
                   {isLoading ? 'Abriendo...' : 'Abrir Caja'}
                 </button>
-                <button type="button" className="open-btn-cancel" onClick={() => setShowModal(false)}>
+                {/* 3. CAMBIAMOS EL ONCLICK PARA NAVEGAR A RESUMEN */}
+                <button type="button" className="open-btn-cancel" onClick={() => navigate('/resumen')}>
                   Ver reportes sin abrir caja
                 </button>
               </div>

@@ -14,8 +14,8 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Nos traemos el trigger para recargar el panel una vez que se guarde el movimiento
-  const { setTimeFilter, timeFilter } = useDashboardContext()
+  const { refreshData } = useDashboardContext()
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,8 +46,8 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
         date: new Date().toISOString()
       })
 
-      // Forzamos una recarga del contexto pisando el filtro actual
-      setTimeFilter(timeFilter) 
+      refreshData() 
+      
       onClose() 
 
     } catch (err: any) {

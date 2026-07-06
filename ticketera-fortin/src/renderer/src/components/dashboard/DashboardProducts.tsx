@@ -46,8 +46,15 @@ export const DashboardProducts = () => {
       <h3 style={{ margin: '0 0 20px 0', color: 'gray', fontSize: '16px' }}>
         Productos vendidos
       </h3>
-      
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '15px',
+        maxHeight: '300px', 
+        overflowY: 'auto', 
+        paddingRight: '10px'
+      }}>
         
         {sortedProducts.length === 0 ? (
           <p style={{ color: 'gray', textAlign: 'center', padding: '10px 0' }}>No hay productos registrados en este periodo.</p>

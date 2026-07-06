@@ -22,6 +22,7 @@ export const salesService = {
         throw new Error('No hay ninguna caja abierta actualmente para registrar la venta.')
       }
 
+      // REQUIRE: Verificamos que haya productos antes de avanzar
       if (!items || items.length === 0) {
         throw new Error('No se puede registrar una venta sin productos.')
       }
@@ -141,7 +142,7 @@ export const salesService = {
       where: whereClause
     })
 
-// Formateamos las ventas para el frontend
+    // Formateamos las ventas para el frontend
     const formattedSales = sales.map(sale => ({
       sales_id: sale.sales_id,
       total: Number(sale.total),
@@ -160,7 +161,9 @@ export const salesService = {
       cashAmount: mov.method === 'efectivo' ? Number(mov.amount) : 0,
       transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
       date: mov.date,
-      Sale_items: []
+      Sale_items: [],
+      description: mov.description, 
+      movementMethod: mov.method
     }))
 
     //Unificamos todo y lo ordenamos de más nuevo a más viejo
@@ -194,7 +197,7 @@ export const salesService = {
       where: { cash_register_id }
     })
 
-const formattedSales = sales.map(sale => ({
+    const formattedSales = sales.map(sale => ({
       sales_id: sale.sales_id,
       total: Number(sale.total),
       paymentMethod: sale.paymentMethod,
@@ -211,7 +214,9 @@ const formattedSales = sales.map(sale => ({
       cashAmount: mov.method === 'efectivo' ? Number(mov.amount) : 0,
       transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
       date: mov.date,
-      Sale_items: []
+      Sale_items: [],
+      description: mov.description, 
+      movementMethod: mov.method
     }))
 
     //Unificamos y ordenamos de más viejo a más nuevo 
@@ -227,10 +232,10 @@ const formattedSales = sales.map(sale => ({
       const sale = await Sales.findByPk(id)
       if (!sale) throw new Error('La venta no existe.')
 
-      // Primero borramos los tickets (hijos)
+      // Primero borramos los tickets 
       await Sale_items.destroy({ where: { sale_id: id }, transaction: t })
       
-      // Después la venta (padre)
+      // Después la venta
       await sale.destroy({ transaction: t })
       
       await t.commit()
