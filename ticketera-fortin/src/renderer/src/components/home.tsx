@@ -122,7 +122,7 @@ export default function Home() {
             <button
               type="button"
               className="btn-secondary"
-              onClick={() => navigate('/products')}
+              onClick={() => navigate('/resumen')}
             >
               Ver reportes sin abrir caja
             </button>
