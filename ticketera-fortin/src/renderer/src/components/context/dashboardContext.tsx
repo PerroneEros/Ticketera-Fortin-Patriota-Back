@@ -26,7 +26,8 @@ interface DashboardContextType {
   timeFilter: TimeFilter
   setTimeFilter: (filter: TimeFilter) => void
   sales: Sale[]         
-  isLoading: boolean    
+  isLoading: boolean
+  refreshData: () => void   
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined)
@@ -35,6 +36,11 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('Día')
   const [sales, setSales] = useState<Sale[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  const refreshData = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -57,14 +63,14 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
 
     fetchSales()
-  }, [timeFilter])
+  }, [timeFilter, refreshTrigger])
 
   return (
-    <DashboardContext.Provider value={{ timeFilter, setTimeFilter, sales, isLoading }}>
-      {children}
-    </DashboardContext.Provider>
-  )
-}
+  <DashboardContext.Provider value={{ timeFilter, setTimeFilter, sales, isLoading, refreshData }}>
+        {children}
+      </DashboardContext.Provider>
+    )
+  }
 
 export const useDashboardContext = () => {
   const context = useContext(DashboardContext)

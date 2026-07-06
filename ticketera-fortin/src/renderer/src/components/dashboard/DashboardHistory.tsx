@@ -2,7 +2,7 @@ import React from 'react'
 import { useDashboardContext } from '../context/dashboardContext'
 
 export const DashboardHistory = () => {
-  // Nos traemos las ventas reales desde tu contexto
+  // Nos traemos las ventas reales desde el contexto
   const { sales, isLoading } = useDashboardContext()
 
   const getMethodBadge = (method: string) => {
@@ -73,7 +73,14 @@ export const DashboardHistory = () => {
         Historial de tickets y movimientos
       </h3>
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '0',
+        maxHeight: '400px', 
+        overflowY: 'auto',
+        paddingRight: '10px'
+      }}>
         
         {/* Si no hay ventas, mostramos un aviso */}
         {sales.length === 0 ? (
@@ -107,6 +114,12 @@ export const DashboardHistory = () => {
                     {formatDate(sale.date)}
                   </div>
                   
+                  {isMovement && (sale as any).description && (
+                    <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                      Detalle: <strong>{(sale as any).description}</strong> | <strong style={{ textTransform: 'capitalize' }}>{(sale as any).movementMethod}</strong>
+                    </div>
+                  )}
+
                   {/* Desglose para pagos combinados */}
                   {sale.paymentMethod === 'combinado' && (
                     <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
