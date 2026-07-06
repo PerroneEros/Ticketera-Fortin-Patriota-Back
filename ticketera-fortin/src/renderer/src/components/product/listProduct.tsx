@@ -110,7 +110,7 @@ export default function ListProducts() {
         <WindowConfirm
           text={productToToggle.isActive ? 'desactivar este producto' : 'habilitar este producto'}
           onConfirm={handleToggle}
-          onClose={() => setProductToToggle(null)} // ¡Corregido de onCancel a onClose!
+          onClose={() => setProductToToggle(null)}
         />
       )}
     </>
