@@ -5,10 +5,10 @@ import Sale_items from '../model/sale_items'
 import Product from '../model/product'
 import Cash_register from '../model/cash_registers'
 import Cash_movements from '../model/cash_movements'
-import { CreateSaleInput } from '../schemas/salesSchema' 
+import { CreateSaleInput } from '../schemas/salesSchema'
+import { printerService } from './printerService'
 
 export const salesService = {
-  
   //Registrar venta y generar tickets individuales
   async executeSale(data: CreateSaleInput) {
     const t = await sequelize.transaction()
@@ -17,7 +17,7 @@ export const salesService = {
       const { paymentMethod, cashAmount, transferAmount, items } = data
 
       const activeRegister = await Cash_register.findOne({ where: { status: 'open' } })
-      
+
       if (!activeRegister) {
         throw new Error('No hay ninguna caja abierta actualmente para registrar la venta.')
       }
@@ -29,11 +29,11 @@ export const salesService = {
 
       let calculatedTotal = 0
       const itemsToCreate: {
-        id_product: number,
-        quantity: number,
-        unit_price: number,
-        total: number,
-        printed: boolean,
+        id_product: number
+        quantity: number
+        unit_price: number
+        total: number
+        printed: boolean
         created_at: Date
       }[] = []
 
@@ -63,55 +63,62 @@ export const salesService = {
       }
 
       //Lógica para el Pago Combinado
-      let finalCash = 0;
-      let finalTransfer = 0;
+      let finalCash = 0
+      let finalTransfer = 0
 
       if (paymentMethod === 'efectivo') {
-        finalCash = calculatedTotal;
+        finalCash = calculatedTotal
       } else if (paymentMethod === 'transferencia') {
-        finalTransfer = calculatedTotal;
+        finalTransfer = calculatedTotal
       } else if (paymentMethod === 'combinado') {
-        if (((cashAmount || 0) + (transferAmount || 0)) !== calculatedTotal) {
-          throw new Error('En pago combinado, el efectivo y la transferencia deben sumar el total de la venta.')
+        if ((cashAmount || 0) + (transferAmount || 0) !== calculatedTotal) {
+          throw new Error(
+            'En pago combinado, el efectivo y la transferencia deben sumar el total de la venta.'
+          )
         }
-        finalCash = cashAmount || 0;
-        finalTransfer = transferAmount || 0;
+        finalCash = cashAmount || 0
+        finalTransfer = transferAmount || 0
       }
 
       //Crear la venta  usando la caja activa
-      const newSale = await Sales.create({
-        cash_register_id: activeRegister.cash_register_id,
-        date: new Date(),
-        total: calculatedTotal,
-        paymentMethod,
-        cashAmount: finalCash,
-        transferAmount: finalTransfer
-      }, { transaction: t })
+      const newSale = await Sales.create(
+        {
+          cash_register_id: activeRegister.cash_register_id,
+          date: new Date(),
+          total: calculatedTotal,
+          paymentMethod,
+          cashAmount: finalCash,
+          transferAmount: finalTransfer
+        },
+        { transaction: t }
+      )
 
       //Vincular los tickets a la venta y crearlos todos juntos en la BD
-      const finalItems = itemsToCreate.map(item => ({
+      const finalItems = itemsToCreate.map((item) => ({
         ...item,
         sale_id: newSale.sales_id
       }))
 
       await Sale_items.bulkCreate(finalItems, { transaction: t })
-      
+
       //Si todo salió bien, guardamos definitivamente (Todo o nada)
-      await t.commit() 
-
+      await t.commit()
+      const savedSaleWithProducts = await salesService.getSaleById(newSale.sales_id.toString())
+      printerService.printTickets(savedSaleWithProducts.Sale_items).catch((err) => {
+        console.error('Error silencioso de impresión:', err)
+      })
       return { sale: newSale, items: finalItems }
-
     } catch (error) {
       //Si falló algo, cancelamos todo el proceso
       await t.rollback()
-      throw error 
+      throw error
     }
   },
 
   //Trae el historial completo unificado y filtrado por tiempo
   async getAllSales(filter?: string) {
     let whereClause = {}
-    
+
     if (filter && filter !== 'todo') {
       const now = new Date()
       let startDate = new Date()
@@ -143,18 +150,18 @@ export const salesService = {
     })
 
     // Formateamos las ventas para el frontend
-    const formattedSales = sales.map(sale => ({
+    const formattedSales = sales.map((sale) => ({
       sales_id: sale.sales_id,
       total: Number(sale.total),
       paymentMethod: sale.paymentMethod,
       cashAmount: Number(sale.cashAmount),
       transferAmount: Number(sale.transferAmount),
       date: sale.date,
-      Sale_items: (sale as any).Sale_items 
+      Sale_items: (sale as any).Sale_items
     }))
 
     //Formateamos los movimientos para que tengan la misma estructura visual
-    const formattedMovements = movements.map(mov => ({
+    const formattedMovements = movements.map((mov) => ({
       sales_id: mov.movement_id,
       total: Number(mov.amount),
       paymentMethod: mov.type,
@@ -162,7 +169,7 @@ export const salesService = {
       transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
       date: mov.date,
       Sale_items: [],
-      description: mov.description, 
+      description: mov.description,
       movementMethod: mov.method
     }))
 
@@ -172,7 +179,7 @@ export const salesService = {
     })
   },
 
-  //Trae una sola venta por ID 
+  //Trae una sola venta por ID
   async getSaleById(id: string) {
     const sale = await Sales.findByPk(id, {
       include: [
@@ -184,7 +191,7 @@ export const salesService = {
     return sale
   },
 
-  //Trae todas las ventas y movimientos de una caja particular 
+  //Trae todas las ventas y movimientos de una caja particular
   async getSalesByRegister(cash_register_id: string) {
     //Buscamos ventas de esta caja específica
     const sales = await Sales.findAll({
@@ -197,7 +204,7 @@ export const salesService = {
       where: { cash_register_id }
     })
 
-    const formattedSales = sales.map(sale => ({
+    const formattedSales = sales.map((sale) => ({
       sales_id: sale.sales_id,
       total: Number(sale.total),
       paymentMethod: sale.paymentMethod,
@@ -207,7 +214,7 @@ export const salesService = {
       Sale_items: (sale as any).Sale_items
     }))
 
-    const formattedMovements = movements.map(mov => ({
+    const formattedMovements = movements.map((mov) => ({
       sales_id: mov.movement_id,
       total: Number(mov.amount),
       paymentMethod: mov.type,
@@ -215,11 +222,11 @@ export const salesService = {
       transferAmount: mov.method === 'transferencia' ? Number(mov.amount) : 0,
       date: mov.date,
       Sale_items: [],
-      description: mov.description, 
+      description: mov.description,
       movementMethod: mov.method
     }))
 
-    //Unificamos y ordenamos de más viejo a más nuevo 
+    //Unificamos y ordenamos de más viejo a más nuevo
     return [...formattedSales, ...formattedMovements].sort((a, b) => {
       return new Date(a.date).getTime() - new Date(b.date).getTime()
     })
@@ -232,12 +239,12 @@ export const salesService = {
       const sale = await Sales.findByPk(id)
       if (!sale) throw new Error('La venta no existe.')
 
-      // Primero borramos los tickets 
+      // Primero borramos los tickets
       await Sale_items.destroy({ where: { sale_id: id }, transaction: t })
-      
+
       // Después la venta
       await sale.destroy({ transaction: t })
-      
+
       await t.commit()
       return true
     } catch (error) {
