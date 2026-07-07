@@ -1,0 +1,297 @@
+/* ==============================================================
+   1. OVERLAY (Fondo oscuro desenfocado para todos los modales)
+   ============================================================== */
+.modal-prod-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.6); /* Un tono más azulado/oscuro */
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* ==============================================================
+   2. CONTENEDOR PRINCIPAL DEL TICKET (App de Pagos)
+   ============================================================== */
+.modal-ticket-content {
+    background: #ffffff;
+    width: 90%;
+    max-width: 480px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Encabezado oscuro tipo barra de estado */
+.modal-ticket-header {
+    background-color: #1e293b;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-ticket-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Botones de navegación en el header */
+.btn-ticket-cancel, .btn-ticket-back {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-ticket-cancel:hover { color: #ef4444; }
+.btn-ticket-back:hover { color: #38bdf8; }
+
+/* Cuerpo del modal */
+.modal-ticket-body {
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ==============================================================
+   3. VISUALIZACIÓN DEL TOTAL
+   ============================================================== */
+.ticket-total-display {
+    text-align: center;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 20px;
+}
+
+.ticket-total-display p {
+    margin: 0 0 5px 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+.ticket-total-display h2 {
+    margin: 0;
+    color: #38bdf8;
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.ticket-subtitle {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* ==============================================================
+   4. TARJETAS DE SELECCIÓN DE MÉTODO (Efectivo, Transf, Comb)
+   ============================================================== */
+.ticket-methods-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.ticket-method-card {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    background: white;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ticket-method-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+}
+
+.method-icon-box {
+    width: 45px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    margin-right: 15px;
+}
+
+.method-text-box {
+    flex: 1;
+}
+
+.method-text-box h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.method-text-box p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.method-arrow {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Colores específicos de cada tarjeta */
+.ticket-method-card.cash {
+    border: 2px solid #a7f3d0;
+    background-color: #f0fdf4;
+}
+.ticket-method-card.cash .method-icon-box { background-color: #10b981; color: white; }
+.ticket-method-card.cash h4 { color: #047857; }
+.ticket-method-card.cash p, .ticket-method-card.cash .method-arrow { color: #10b981; }
+
+.ticket-method-card.transfer {
+    border: 2px solid #bfdbfe;
+    background-color: #eff6ff;
+}
+.ticket-method-card.transfer .method-icon-box { background-color: #3b82f6; color: white; }
+.ticket-method-card.transfer h4 { color: #1d4ed8; }
+.ticket-method-card.transfer p, .ticket-method-card.transfer .method-arrow { color: #3b82f6; }
+
+.ticket-method-card.mixed {
+    border: 2px solid #e9d5ff;
+    background-color: #faf5ff;
+}
+.ticket-method-card.mixed .method-icon-box { background-color: #a855f7; color: white; }
+.ticket-method-card.mixed h4 { color: #7e22ce; }
+.ticket-method-card.mixed p, .ticket-method-card.mixed .method-arrow { color: #a855f7; }
+
+
+/* ==============================================================
+   5. FORMULARIO DE INGRESO DE MONTOS (payment.tsx AISLADO)
+   ============================================================== */
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.payment-inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.payment-input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.payment-input-group label {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* El contenedor del input aislado (no afecta a apertura de caja) */
+.payment-modal-wrapper {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.payment-modal-wrapper:focus-within {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+}
+
+/* El cuadradito gris con el símbolo $ aislado */
+.payment-modal-currency {
+    padding: 14px 18px;
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 700;
+    font-size: 20px;
+    border-right: 2px solid #cbd5e1;
+}
+
+/* El campo de texto numérico aislado */
+.payment-modal-wrapper input {
+    flex: 1;
+    border: none !important;
+    padding: 14px 15px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    outline: none;
+    background: transparent;
+    width: 100%;
+}
+
+/* Ocultar las flechitas de subir/bajar número */
+.payment-modal-wrapper input[type="number"]::-webkit-inner-spin-button,
+.payment-modal-wrapper input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* ==============================================================
+   6. MENSAJES DE ERROR Y BOTÓN CONFIRMAR
+   ============================================================== */
+.payment-error {
+    text-align: center;
+    font-size: 14px;
+    color: #ef4444;
+    background: #fef2f2;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+    margin: 0;
+}
+
+.center-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.btn-confirm-payment {
+    background-color: #38bdf8 !important;
+    color: #ffffff !important;
+    border: none !important;
+    padding: 16px 24px !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(56, 189, 248, 0.3);
+}
+
+.btn-confirm-payment:hover {
+    background-color: #0284c7 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(56, 189, 248, 0.4);
+}
+
+.btn-confirm-payment:active {
+    transform: translateY(1px);
+}

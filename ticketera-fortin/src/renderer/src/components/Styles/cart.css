@@ -1,0 +1,223 @@
+/* ==============================================================
+   AJUSTE DE LAYOUT (products.css)
+   ============================================================== */
+/* Asegúrate de que .home-container tenga flex-direction: row ahora */
+.home-container {
+  display: flex;
+  flex-direction: row; /* Cambio CLAVE: lado a lado */
+  gap: 20px;
+  background-color: #f6f4ee;
+  min-height: 100vh;
+  width: 100%;
+  padding: 90px 30px 30px 30px; 
+  box-sizing: border-box;
+}
+
+.products-main-section {
+  flex: 1; /* Ocupa el espacio restante */
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-sidebar-section {
+  width: 320px; /* Ancho fijo para el ticket */
+  flex-shrink: 0;
+}
+
+/* ==============================================================
+   ESTILOS DEL CARRITO (TICKET)
+   ============================================================== */
+.cart-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px); /* Ocupa toda la altura menos el header */
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+/* Cabecera */
+.cart-header {
+  background-color: #555843;
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cart-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.cart-icon {
+  font-size: 18px;
+}
+
+/* Lista de ítems (Scroll) */
+.cart-items-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  background-color: #fdfdfd;
+}
+
+/* Scrollbar estilizado para el carrito */
+.cart-items-wrapper::-webkit-scrollbar { width: 6px; }
+.cart-items-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+/* Estado vacío */
+.cart-empty-state {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Ítem individual */
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px dashed #e2e8f0; /* Línea punteada tipo ticket */
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cart-item-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.cart-item-price {
+  margin: 0;
+  font-size: 14px;
+  color: #555843;
+  font-weight: 700;
+}
+
+/* Controles de cantidad (+ / -) */
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.cart-item-controls button {
+  background: white;
+  border: 1px solid #e2e8f0;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #475569;
+  font-weight: bold;
+}
+
+.cart-item-controls button:hover {
+  background-color: #38bdf8;
+  color: white;
+  border-color: #38bdf8;
+}
+
+.cart-item-qty {
+  width: 24px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Pie del ticket */
+.cart-footer {
+  padding: 20px;
+  background-color: white;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cart-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.cart-total-amount {
+  color: #38bdf8;
+  font-size: 22px;
+}
+
+/* Botones de acción */
+.cart-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-clear-cart, .btn-charge-cart {
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btn-clear-cart {
+  flex: 1;
+  background-color: #f1f5f9;
+  color: #64748b;
+}
+
+.btn-clear-cart:hover:not(:disabled) {
+  background-color: #e2e8f0;
+  color: #ef4444; /* Rojo al hover para indicar borrado */
+}
+
+.btn-charge-cart {
+  flex: 2;
+  background-color: #38bdf8;
+  color: white;
+}
+
+.btn-charge-cart:hover:not(:disabled) {
+  background-color: #0284c7;
+}
+
+.btn-clear-cart:disabled, .btn-charge-cart:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-error-text {
+  color: #ef4444;
+  font-size: 13px;
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+}

@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Method from './method'
 import { getCurrentRegister } from './service/cashRegsiterService'
 import { salesServiceFront } from './service/salesService'
+import './Styles/cart.css'
+
 export default function Cart() {
   const { cartList, updateQuantity, setCartList } = useCartList()
   const [errorMsg, setErrorMsg] = useState('')
@@ -11,19 +13,20 @@ export default function Cart() {
     return acumulador + product.price * (product.quantity || 1)
   }, 0)
   const [showPaymentonMethod, setShowPaymentMethod] = useState(false)
+
   const handleOpenShowPayment = () => {
     if (cartList.length === 0) {
-      setErrorMsg('el carrito esta vacio')
+      setErrorMsg('El carrito esta vacio')
       return
     }
     setShowPaymentMethod(true)
   }
+
   const handlePrintandSell = async (paymentDetails) => {
     setErrorMsg('')
     console.log('detalle del pago', paymentDetails)
-    toast.success('pago confirmado')
+    toast.success('Pago confirmado')
     try {
-      console.log(paymentDetails.method)
       const cash_register = await getCurrentRegister()
       const newSale = {
         cash_register_id: cash_register.cash_register_id,
@@ -44,39 +47,68 @@ export default function Cart() {
       await salesServiceFront.createSale(newSale)
       setCartList([])
       setShowPaymentMethod(false)
-      toast.success('venta finalizada')
+      toast.success('Venta finalizada')
     } catch (error) {
       console.error(error)
-      setErrorMsg('Error no se imprimió.')
+      setErrorMsg('Error: no se imprimió.')
     }
   }
+
   return (
     <>
-      <div>
-        {cartList.map((product) => (
-          <div key={product.id_product}>
-            <p>
-              <b>
-                {product.name} (x{product.quantity})
-              </b>
-            </p>
-            <p>
-              <b>${product.price * product.quantity}</b>
-            </p>
-            <button onClick={() => updateQuantity(product.id_product, product.quantity - 1)}>
-              -
+      <div className="cart-container">
+        {/* Cabecera del ticket */}
+        <div className="cart-header">
+          <span className="cart-icon">🧾</span>
+          <h3>Ticket Actual</h3>
+        </div>
+
+        {/* Lista de productos (con scroll si hay muchos) */}
+        <div className="cart-items-wrapper">
+          {cartList.length === 0 ? (
+            <div className="cart-empty-state">
+              <p>Selecciona productos<br />para agregar al ticket</p>
+            </div>
+          ) : (
+            cartList.map((product) => (
+              <div key={product.id_product} className="cart-item">
+                <div className="cart-item-info">
+                  <p className="cart-item-name">{product.name}</p>
+                  <p className="cart-item-price">${product.price * product.quantity}</p>
+                </div>
+                <div className="cart-item-controls">
+                  <button onClick={() => updateQuantity(product.id_product, product.quantity - 1)}>
+                    -
+                  </button>
+                  <span className="cart-item-qty">{product.quantity}</span>
+                  <button onClick={() => updateQuantity(product.id_product, product.quantity + 1)}>
+                    +
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Pie del ticket: Total y Botones */}
+        <div className="cart-footer">
+          {errorMsg && <p className="cart-error-text">{errorMsg}</p>}
+          <div className="cart-total-row">
+            <span>Total a pagar:</span>
+            <span className="cart-total-amount">${total}</span>
+          </div>
+
+          <div className="cart-actions">
+            <button className="btn-clear-cart" onClick={() => setCartList([])} disabled={cartList.length === 0}>
+              Limpiar
             </button>
-            <button onClick={() => updateQuantity(product.id_product, product.quantity + 1)}>
-              +
+            <button className="btn-charge-cart" onClick={handleOpenShowPayment} disabled={cartList.length === 0}>
+              Cobrar
             </button>
           </div>
-        ))}
-        <p>
-          <b>Total: {total}</b>
-        </p>
-        <button onClick={handleOpenShowPayment}>Imprimir ticket</button>
-        {errorMsg && <p className="error-text">{errorMsg}</p>}
+        </div>
       </div>
+
       {showPaymentonMethod && (
         <Method
           total={total}

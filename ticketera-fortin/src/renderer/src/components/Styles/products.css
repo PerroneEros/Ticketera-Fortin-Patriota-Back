@@ -1,15 +1,25 @@
 /* ==============================================================
    1. LAYOUT GENERAL
    ============================================================== */
-.home-container {
-  background-color: #f6f4ee;
-  min-height: 100vh;
-  width: 100%;
-  padding: 90px 30px 30px 30px; 
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+  .home-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center; 
+    gap: 30px; 
+    background-color: #f6f4ee;
+    height: 100vh; 
+    overflow: hidden; 
+    /* CAMBIO AQUÍ: Subimos de 90px a 130px el primer valor */
+    padding: 130px 30px 30px 30px; 
+    box-sizing: border-box;
+}
+  
+.products-main-section {
+    width: 100%;
+    max-width: 950px; /* Limita el ancho para que no se aleje del ticket */
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Toma la altura disponible dentro del home-container */
 }
 
 .filtros-y-acciones {
@@ -83,31 +93,55 @@
 /* ==============================================================
    3. ESTILOS DE TARJETAS (CardProducts - Vista Venta)
    ============================================================== */
-.Card-ProductsHome {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1000px;
-  padding-top: 10px;
-}
+   .Card-ProductsHome {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+    flex: 1; 
+    overflow-y: auto; 
+    align-content: start; 
+    padding-right: 10px; 
+    padding-bottom: 30px; 
+    
+    /* CAMBIO AQUÍ: Agregamos margen arriba para separarlo de los filtros */
+    margin-top: 25px; 
+    padding-top: 10px; /* Un poquito de aire interno extra para el scroll */
+  }
+  
+  /* Scrollbar estilizado para la grilla de productos */
+  .Card-ProductsHome::-webkit-scrollbar { 
+    width: 8px; 
+  }
+  .Card-ProductsHome::-webkit-scrollbar-thumb { 
+    background-color: #cbd5e1; 
+    border-radius: 10px; 
+  }
+  .Card-ProductsHome::-webkit-scrollbar-thumb:hover { 
+    background-color: #94a3b8; 
+  }
 
-.product-card {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border: 1px solid #f1f5f9;
-  transition: transform 0.2s;
-}
+  .product-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Le damos 2px de borde por defecto para que al hacer hover no "salte" el tamaño */
+    border: 2px solid #f1f5f9; 
+    cursor: pointer; /* ¡Acá está la magia del cursor en forma de mano! */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
 
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 12px rgba(0,0,0,0.1);
-}
+  .product-card:hover {
+    transform: translateY(-5px);
+    /* Sombra más pronunciada con un leve tono celeste */
+    box-shadow: 0 12px 20px rgba(56, 189, 248, 0.15); 
+    /* Borde celeste brillante al pasar el mouse */
+    border-color: #38bdf8; 
+  }
 
 .product-name { 
   font-size: 16px; 
