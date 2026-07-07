@@ -56,45 +56,45 @@ export default function ListProducts() {
       {loading ? (
         <p>Cargando...</p>
       ) : (
-        <table className="product-table">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Precio</th>
-              <th>Categoría</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentList.length === 0 ? (
-              /* ESTADO VACÍO: Si hay 0 productos */
+        <div className="table-scroll-wrapper">
+          <table className="admin-product-table">
+            <thead>
               <tr>
-                <td colSpan={5} className="empty-state-row">
-                  📦 No hay productos para mostrar en esta lista.
-                </td>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Categoría</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ) : (
-              /* PRODUCTOS REALES */
-              currentList.map((p: any) => (
-                <tr key={p.id_product} className={!p.isActive ? 'product-row-disabled' : ''}>
-                  <td>
-                    <b>{p.name}</b>
-                  </td>
-                  <td>$ {p.price}</td>
-                  <td>{p.Category?.name || 'Sin categoría'}</td>
-                  <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
-                  <td>
-                    {p.isActive && <button onClick={() => setProductToEdit(p)}>Editar</button>}
-                    <button onClick={() => handleOpenConfirm(p)}>
-                      {p.isActive ? 'Desactivar' : 'Habilitar'}
-                    </button>
+            </thead>
+            <tbody>
+              {currentList.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="empty-state-row">
+                    📦 No hay productos para mostrar en esta lista.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                currentList.map((p: any) => (
+                  <tr key={p.id_product} className={!p.isActive ? 'product-row-disabled' : ''}>
+                    <td>
+                      <b>{p.name}</b>
+                    </td>
+                    <td>$ {p.price}</td>
+                    <td>{p.Category?.name || 'Sin categoría'}</td>
+                    <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
+                    <td>
+                      {p.isActive && <button onClick={() => setProductToEdit(p)}>Editar</button>}
+                      <button onClick={() => handleOpenConfirm(p)}>
+                        {p.isActive ? 'Desactivar' : 'Habilitar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {productToEdit && (
@@ -114,5 +114,5 @@ export default function ListProducts() {
         />
       )}
     </>
-  )
+  );
 }

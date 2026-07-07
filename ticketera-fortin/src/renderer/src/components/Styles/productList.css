@@ -1,12 +1,12 @@
 /* ==============================================================
-   1. LAYOUT GENERAL
+   1. LAYOUT GENERAL (Liberamos la pantalla)
    ============================================================== */
 .products-manager { 
   display: flex;
   flex-direction: column;
   align-items: center; 
   width: 100%;
-  padding: 90px 20px 20px 20px; 
+  padding: 130px 20px 20px 20px; 
   box-sizing: border-box;
 }
 
@@ -19,8 +19,7 @@
   display: flex; 
   justify-content: flex-end; 
   gap: 15px; 
-  margin-top: 10px; 
-  margin-bottom: 10px; 
+  margin-bottom: 15px; 
 }
 
 .Card-ProductsList button {
@@ -44,7 +43,7 @@
   max-width: 1000px; 
   display: flex; 
   gap: 10px; 
-  margin-bottom: 20px; 
+  margin-bottom: 15px; 
 }
 
 .filter-btn {
@@ -70,50 +69,69 @@
 }
 
 /* ==============================================================
-   3. TABLA DE PRODUCTOS (Tarjeta Dinámica)
+   3. CONTENEDOR CON SCROLL PARA LA TABLA (Altura Estricta)
    ============================================================== */
-.product-table {
-  width: 100%; 
-  max-width: 1000px; 
-  /* Crucial: 'separate' permite redondear las celdas directamente */
-  border-collapse: separate; 
-  border-spacing: 0;
-  background-color: transparent; /* Eliminamos el bloque blanco gigante */
-  border-radius: 16px; 
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2); /* Sombra un poquito más fuerte */
+.table-scroll-wrapper {
+  width: 100%;
+  max-width: 1000px;
+  max-height: 55vh !important; 
+  overflow-y: auto !important; 
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  
+  /* Pintamos el fondo verde oliva arriba para rellenar el carril del scroll, 
+     y blanco abajo. (Ajustado a 56px para que coincida exacto con el alto del TH) */
+  background-color: #ffffff;
+  background-image: linear-gradient(to bottom, #555843 56px, #ffffff 56px);
+  
+  margin-bottom: 20px;
+  border: 1px solid #e2e8f0; 
 }
 
-.product-table th { 
-  background-color: #555843; 
-  padding: 18px; 
+/* Barra de scroll estilizada */
+.table-scroll-wrapper::-webkit-scrollbar { width: 8px; }
+.table-scroll-wrapper::-webkit-scrollbar-track { background: transparent; } 
+.table-scroll-wrapper::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover { background-color: #94a3b8; }
+
+/* ==============================================================
+   4. TABLA DE PRODUCTOS (Blindada y Fija)
+   ============================================================== */
+.admin-product-table {
+  width: 100%; 
+  border-collapse: separate !important; 
+  border-spacing: 0;
+  background-color: transparent; 
+}
+
+.admin-product-table th { 
+  background-color: #555843 !important; 
+  padding: 0 18px; 
+  height: 56px; /* Altura forzada exacta para sincronizar con el degradado de fondo */
+  box-sizing: border-box;
   text-align: left; 
   color: white; 
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-/* Redondeamos solo las esquinas superiores del Header */
-.product-table th:first-child { border-top-left-radius: 16px; }
-.product-table th:last-child { border-top-right-radius: 16px; }
-
-.product-table td { 
-  padding: 16px; 
+.admin-product-table td { 
+  padding: 16px 18px; 
   border-bottom: 1px solid #e2e8f0; 
-  background-color: #ffffff; /* El fondo blanco ahora pertenece a las filas */
+  background-color: #ffffff; 
   color: #334155; 
   font-weight: 500; 
 }
 
-/* Redondeamos solo las esquinas inferiores de la ÚLTIMA fila */
-.product-table tr:last-child td:first-child { border-bottom-left-radius: 16px; }
-.product-table tr:last-child td:last-child { border-bottom-right-radius: 16px; }
+.admin-product-table tr:last-child td { border-bottom: none; }
 
-/* Quitamos la línea divisoria de la última fila para que quede limpia */
-.product-table tr:last-child td { border-bottom: none; }
-
-.product-table tr:hover:not(:empty) td { 
+.admin-product-table tr:hover:not(:empty) td { 
   background-color: #fafaf8; 
 }
 
-.product-table button {
+.admin-product-table button {
   background-color: #555843; 
   border: none; 
   color: white;
@@ -123,22 +141,21 @@
   margin-right: 8px;
 }
 
-.product-table button:hover { 
+.admin-product-table button:hover { 
   background-color: #38bdf8; 
 }
 
-/* Efecto desactivado para las filas */
 .product-row-disabled td { 
   opacity: 0.7; 
   background-color: #f8fafc; 
 }
 
 /* ==============================================================
-   ESTADO VACÍO DE LA TABLA (Si hay 0 productos)
+   5. ESTADO VACÍO DE LA TABLA
    ============================================================== */
 .empty-state-row {
   text-align: center !important;
-  padding: 80px 20px !important; /* Buen padding para que se vea como una tarjeta, pero sin exagerar */
+  padding: 80px 20px !important; 
   color: #64748b !important; 
   font-size: 16px;
   font-weight: 500 !important;
