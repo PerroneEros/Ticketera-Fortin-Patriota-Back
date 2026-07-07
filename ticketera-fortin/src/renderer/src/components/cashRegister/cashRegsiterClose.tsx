@@ -35,7 +35,7 @@ export const CashRegisterClose = () => {
   const fondoInicial = activeRegister ? Number(activeRegister.opening) : 0
   const esperadoEfectivo = fondoInicial + ventasEfectivo
   const esperadoTransferencia = ventasTransferencia
-  const totalFacturado = ventasEfectivo + ventasTransferencia
+  const totalFacturado = ventasEfectivo + ventasTransferencia + fondoInicial;
 
   const diffEfectivo = Number(countedCash) - esperadoEfectivo
   const diffTransferencia = Number(countedTransfers) - esperadoTransferencia
