@@ -67,14 +67,20 @@ export default function Cart() {
         <div className="cart-items-wrapper">
           {cartList.length === 0 ? (
             <div className="cart-empty-state">
-              <p>Selecciona productos<br />para agregar al ticket</p>
+              <p>
+                Selecciona productos
+                <br />
+                para agregar al ticket
+              </p>
             </div>
           ) : (
             cartList.map((product) => (
               <div key={product.id_product} className="cart-item">
                 <div className="cart-item-info">
                   <p className="cart-item-name">{product.name}</p>
-                  <p className="cart-item-price">${product.price * product.quantity}</p>
+                  <p className="cart-item-price">
+                    ${(product.price * product.quantity).toLocaleString('es-AR')}
+                  </p>
                 </div>
                 <div className="cart-item-controls">
                   <button onClick={() => updateQuantity(product.id_product, product.quantity - 1)}>
@@ -95,14 +101,22 @@ export default function Cart() {
           {errorMsg && <p className="cart-error-text">{errorMsg}</p>}
           <div className="cart-total-row">
             <span>Total a pagar:</span>
-            <span className="cart-total-amount">${total}</span>
+            <span className="cart-total-amount">${total.toLocaleString('es-AR')}</span>
           </div>
 
           <div className="cart-actions">
-            <button className="btn-clear-cart" onClick={() => setCartList([])} disabled={cartList.length === 0}>
+            <button
+              className="btn-clear-cart"
+              onClick={() => setCartList([])}
+              disabled={cartList.length === 0}
+            >
               Limpiar
             </button>
-            <button className="btn-charge-cart" onClick={handleOpenShowPayment} disabled={cartList.length === 0}>
+            <button
+              className="btn-charge-cart"
+              onClick={handleOpenShowPayment}
+              disabled={cartList.length === 0}
+            >
               Cobrar
             </button>
           </div>

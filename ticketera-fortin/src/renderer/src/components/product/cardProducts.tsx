@@ -34,7 +34,7 @@ export default function CardProducts() {
             <div className="product-name">
               <b>{product.name}</b>
             </div>
-            <div className="product-price">$ {product.price}</div>
+            <div className="product-price">$ {product.price.toLocaleString('es-AR')}</div>
             <div className="product-category">
               {product.Category ? product.Category.name : 'Sin categoría'}
             </div>

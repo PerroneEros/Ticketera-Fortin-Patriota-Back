@@ -80,7 +80,7 @@ export default function ListProducts() {
                     <td>
                       <b>{p.name}</b>
                     </td>
-                    <td>$ {p.price}</td>
+                    <td>$ {(p.price || 0).toLocaleString('es-AR')}</td>
                     <td>{p.Category?.name || 'Sin categoría'}</td>
                     <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
                     <td>
@@ -114,5 +114,5 @@ export default function ListProducts() {
         />
       )}
     </>
-  );
+  )
 }

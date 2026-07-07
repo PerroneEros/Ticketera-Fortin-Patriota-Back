@@ -4,13 +4,14 @@ import toast from 'react-hot-toast'
 import { createProducts } from '../service/productService'
 //import '../Styles/products.css'
 import '../Styles/productModals.css'
+import { parseInputValue } from '../utils/formatters'
 
 export default function CreateProduct({ onClose }) {
   const context = useContext(CategoryContext)
   const { categories } = context
 
   const [name, setName] = useState('')
-  const [price, setPrice] = useState('')
+  const [price, setPrice] = useState(0)
   const [category, setCategory] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
@@ -28,7 +29,7 @@ export default function CreateProduct({ onClose }) {
       setErrorMsg('El precio es obligatorio.')
       return
     }
-    if (Number(price) <= 0) {
+    if (price <= 0) {
       setErrorMsg('El precio debe ser mayor a 0.')
       return
     }
@@ -40,7 +41,7 @@ export default function CreateProduct({ onClose }) {
     try {
       await createProducts({
         name: name,
-        price: Number(price),
+        price: price,
         category_id: Number(category)
       })
       toast.success('Producto creado exitosamente')
@@ -77,9 +78,10 @@ export default function CreateProduct({ onClose }) {
             <div className="prod-input-group">
               <label>Precio:</label>
               <input
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                type="text"
+                inputMode="numeric"
+                value={price === 0 ? '' : price.toLocaleString('es-AR')}
+                onChange={(e) => setPrice(parseInputValue(e.target.value))}
                 disabled={isLoading}
               />
             </div>
