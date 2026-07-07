@@ -22,7 +22,6 @@ export default function CartListProvider({ children }) {
     } else {
       const newItem = { ...productToAdd, quantity: 1 }
       setCartList([...cartList, newItem])
-      toast.success('Producto añadido al carrito')
     }
   }
   const updateQuantity = (productId, newQuantity) => {
