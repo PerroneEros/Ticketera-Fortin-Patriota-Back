@@ -25,10 +25,6 @@ export default function CreateProduct({ onClose }) {
       setErrorMsg('El nombre es obligatorio.')
       return
     }
-    if (!price) {
-      setErrorMsg('El precio es obligatorio.')
-      return
-    }
     if (price <= 0) {
       setErrorMsg('El precio debe ser mayor a 0.')
       return
@@ -80,7 +76,7 @@ export default function CreateProduct({ onClose }) {
               <input
                 type="text"
                 inputMode="numeric"
-                value={price === 0 ? '' : price.toLocaleString('es-AR')}
+                value={price.toLocaleString('es-AR')}
                 onChange={(e) => setPrice(parseInputValue(e.target.value))}
                 disabled={isLoading}
               />

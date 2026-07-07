@@ -20,10 +20,6 @@ export default function EditProduct({ product, onClose }) {
       toast.error('El nombre es obligatorio')
       return
     }
-    if (price <= 0) {
-      toast.error('El precio debe ser mayor a 0')
-      return
-    }
     if (!category) {
       toast.error('Debes seleccionar una categoría')
       return
@@ -72,7 +68,7 @@ export default function EditProduct({ product, onClose }) {
               <input
                 type="text"
                 inputMode="numeric"
-                value={price === 0 ? '' : price.toLocaleString('es-AR')}
+                value={price.toLocaleString('es-AR')}
                 onChange={(e) => setPrice(parseInputValue(e.target.value))}
                 disabled={isLoading}
               />
