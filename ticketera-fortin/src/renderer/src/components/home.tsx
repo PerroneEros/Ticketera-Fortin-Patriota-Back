@@ -92,7 +92,7 @@ export default function Home() {
 
             <label className="input-label">Fondo inicial en efectivo ($)</label>
             <div className="input-container">
-              <span className="currency-symbol">$</span>
+              <span className="open-currency-symbol">$</span>
               <input
                 type="number"
                 className="amount-input"
