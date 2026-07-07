@@ -19,28 +19,50 @@ export const printerService = {
 
       // 2. Armamos todos los tickets en la memoria
       for (const item of items) {
-        const productName = item.Product?.name || `Producto ID ${item.id_product}`
-
+        const productName = item.Product?.name
+        // --- ENCABEZADO ---
         printer.alignCenter()
-        printer.setTextDoubleHeight()
-        printer.setTextDoubleWidth()
-        printer.println('Fortin')
+        printer.bold(true) // Activamos la negrita
+        printer.setTextQuadArea() // Texto gigante (doble alto y doble ancho a la vez)
+        printer.println('FORTIN')
 
-        printer.setTextNormal()
+        printer.bold(false) // Apagamos la negrita
+        printer.setTextNormal() // Reseteamos el tamaño a normal
         printer.drawLine()
 
-        printer.setTextDoubleHeight()
-        printer.println(`1x ${productName}`)
+        // --- PRODUCTO ---
+        printer.newLine() // Dejamos un renglón en blanco para que respire
+        printer.alignCenter()
+        printer.bold(true)
 
+        // Hacemos que el nombre del producto destaque muchísimo
+        printer.setTextSize(3,3) 
+
+        // Cortamos el nombre por cada espacio en blanco
+        // "corona porron" se transforma en una lista: ['corona', 'porron']
+        const palabras = productName.split(' ')
+
+        // Imprimimos el "1x" pegado a la primera palabra (Ej: "1x corona")
+        if (palabras.length > 0) {
+          printer.println(`1x ${palabras[0]}`)
+        }
+
+        // Si el producto tiene más palabras (Ej: "porron"), las manda abajo
+        for (let i = 1; i < palabras.length; i++) {
+          printer.println(palabras[i])
+        }
+
+        printer.bold(false)
         printer.setTextNormal()
+        printer.newLine() // Otro renglón en blanco abajo
         printer.drawLine()
 
+        // --- PIE DE TICKET ---
         printer.alignCenter()
-        printer.println('Valido por un canje')
+        printer.newLine()
 
         printer.cut() // Agrega el comando de corte
       }
-
       // 3. En vez de ejecutar, extraemos el código crudo (buffer)
       const buffer = printer.getBuffer()
 
