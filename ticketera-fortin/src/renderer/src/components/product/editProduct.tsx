@@ -10,18 +10,20 @@ export default function EditProduct({ product, onClose }) {
   const [price, setPrice] = useState(Number(product.price) || 0)
   const [category, setCategory] = useState(product.category_id)
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
   const context = useContext(CategoryContext)
   const { categories } = context
 
   const handleSave = async (e) => {
     e.preventDefault()
+    setErrorMsg('')
     if (!name.trim()) {
-      toast.error('El nombre es obligatorio')
+      setErrorMsg('El nombre es obligatorio')
       return
     }
     if (!category) {
-      toast.error('Debes seleccionar una categoría')
+      setErrorMsg('Debes seleccionar una categoría')
       return
     }
 
@@ -35,7 +37,7 @@ export default function EditProduct({ product, onClose }) {
       toast.success('Producto editado correctamente')
       onClose()
     } catch (error) {
-      toast.error('Error al editar el producto')
+      setErrorMsg(error.response?.data?.message || error.message || 'Ocurrió un error')
     } finally {
       setIsLoading(false)
     }
@@ -87,6 +89,7 @@ export default function EditProduct({ product, onClose }) {
                   </option>
                 ))}
               </select>
+              {errorMsg && <p className="error-text">{errorMsg}</p>}
             </div>
           </div>
 
