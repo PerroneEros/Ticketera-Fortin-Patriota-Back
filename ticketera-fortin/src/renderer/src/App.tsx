@@ -6,13 +6,14 @@ import { ProductListProviderDisable } from './components/context/productListDisa
 import { CashRegisterProvider } from './components/context/cashRegisterContext'
 import Routs from './routes'
 import CartListProvider from './components/context/cartListContext'
-
+import { Toaster } from 'react-hot-toast'
 
 function App(): React.JSX.Element {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
     <>
+      <Toaster position="bottom-center" reverseOrder={false} />
       <CashRegisterProvider>
         <CategoryProvider>
           <CartListProvider>
