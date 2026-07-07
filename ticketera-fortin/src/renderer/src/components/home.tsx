@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { CashRegisterContext } from '../components/context/cashRegisterContext'
-import { openRegister } from '../components/service/cashRegsiterService'
+import { openRegister } from './service/cashRegisterService'
 import logo from '../assets/logo.jpeg'
 import './Styles/cashRegisterOpen.css'
 

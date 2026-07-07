@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 Wimport { useNavigate } from 'react-router-dom';
 import { CashRegisterContext } from '../context/cashRegisterContext';
-import { openRegister } from '../service/cashRegsiterService';
+import { openRegister } from '../service/cashRegisterService';
 import '../Styles/cashRegisterOpen.css';
 
 export const CashRegisterOpen = () => {
