@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, ReactNode } from 'react';
-import { getCurrentRegister } from '../service/cashRegsiterService';
+import { getCurrentRegister } from '../service/cashRegisterService';
 
 // Tipado de la caja para TypeScript
 export interface CashRegister {

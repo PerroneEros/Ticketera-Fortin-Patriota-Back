@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // 1. IMPORTAMOS NAVIGATE
 import { CashRegisterContext } from '../context/cashRegisterContext';
-import { openRegister } from '../service/cashRegsiterService';
+import { openRegister } from '../service/cashRegisterService';
 import '../Styles/cashRegisterOpen.css';
 
 export const CashRegisterOpen = () => {

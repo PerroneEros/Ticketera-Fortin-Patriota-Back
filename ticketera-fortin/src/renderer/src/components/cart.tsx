@@ -2,7 +2,7 @@ import toast from 'react-hot-toast'
 import { useCartList } from './context/cartListContext'
 import { useState } from 'react'
 import Method from './method'
-import { getCurrentRegister } from './service/cashRegsiterService'
+import { getCurrentRegister } from './service/cashRegisterService'
 import { salesServiceFront } from './service/salesService'
 export default function Cart() {
   const { cartList, updateQuantity, setCartList } = useCartList()

@@ -2,7 +2,11 @@ import React from 'react'
 import { useDashboardContext } from '../context/dashboardContext'
 
 export const DashboardHistory = () => {
-  const { sales, isLoading } = useDashboardContext()
+  const { sales, isLoading, currentCashBox, timeFilter } = useDashboardContext()
+
+  const filteredSales = (timeFilter === 'Día' && currentCashBox) 
+    ? sales.filter(s => new Date(s.date).getTime() >= new Date(currentCashBox.opened_at).getTime())
+    : sales
 
   const getMethodBadge = (method: string) => {
     let bgColor = '#e5e7eb'; let color = 'gray'
@@ -15,50 +19,53 @@ export const DashboardHistory = () => {
 
     return (
       <span style={{ 
-        background: bgColor, 
-        color: color, 
-        padding: '2px 8px',
-        borderRadius: '12px', 
-        fontSize: '10px', 
-        fontWeight: 'bold',
-        marginLeft: '8px',
-        textTransform: 'uppercase',
-        display: 'inline-block',
-        verticalAlign: 'middle'
+        background: bgColor, color: color, padding: '2px 8px', borderRadius: '12px', 
+        fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase',
+        display: 'inline-block'
       }}>
         {method}
       </span>
     )
   }
 
-  if (isLoading) return <p>Cargando...</p>
+  const renderMethodDetails = (sale: any) => {
+    if (sale.paymentMethod === 'combinado') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
+          {getMethodBadge('combinado')}
+          <span style={{ fontSize: '9px', color: '#6b7280' }}>
+            Efectivo: ${sale.cashAmount?.toFixed(2)} | Transf: ${sale.transferAmount?.toFixed(2)}
+          </span>
+        </div>
+      )
+    }
+    return getMethodBadge(sale.paymentMethod)
+  }
+
+  if (isLoading) return <p>Cargando historial...</p>
 
   return (
     <div className="dashboard-history" style={{ background: 'white', padding: '25px', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-      <h3 style={{ margin: '0 0 20px 0', color: 'gray', fontSize: '16px' }}>Historial</h3>
+      <h3 style={{ margin: '0 0 20px 0', color: 'gray', fontSize: '16px' }}>
+        Historial {currentCashBox && timeFilter === 'Día' ? '(Turno Actual)' : '(General)'}
+      </h3>
+      
       <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '400px', overflowY: 'auto' }}>
-        
-        {sales.map((sale) => (
+        {filteredSales.map((sale) => (
           <div key={sale.sales_id} style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            padding: '16px 0',
-            borderBottom: '1px solid #f3f4f6'
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '16px 0', borderBottom: '1px solid #f3f4f6'
           }}>
-            
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                {getMethodBadge(sale.paymentMethod)}
-              </div>
+              {renderMethodDetails(sale)}
               
-              <span style={{ fontSize: '12px', color: '#9ca3af', marginTop: '6px', marginLeft: '10px' }}>
+              <span style={{ fontSize: '12px', color: '#9ca3af', marginTop: '6px' }}>
                 {new Date(sale.date).toLocaleString()}
               </span>
               
-              {(sale as any).description && (
-                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px', marginLeft: '10px' }}>
-                  Detalle: <strong>{(sale as any).description}</strong>
+              {sale.description && (
+                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  Descripción: <strong>{sale.description}</strong>
                 </div>
               )}
             </div>
@@ -68,7 +75,6 @@ export const DashboardHistory = () => {
                 {sale.paymentMethod === 'egreso' ? '-' : ''}${sale.total.toFixed(2)}
               </strong>
             </div>
-
           </div>
         ))}
       </div>

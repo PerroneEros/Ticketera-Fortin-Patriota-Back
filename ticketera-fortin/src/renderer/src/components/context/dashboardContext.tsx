@@ -1,5 +1,6 @@
 import React, { createContext, useState, ReactNode, useContext, useEffect } from 'react'
 import { salesServiceFront } from '../service/salesService'
+import * as cashRegisterService from '../service/cashRegisterService'
 
 export type TimeFilter = 'Día' | 'Semana' | 'Mes' | 'Todo'
 
@@ -20,6 +21,7 @@ export interface Sale {
   transferAmount: number
   date: string
   Sale_items: SaleItem[]
+  description?: string
 }
 
 interface DashboardContextType {
@@ -27,7 +29,8 @@ interface DashboardContextType {
   setTimeFilter: (filter: TimeFilter) => void
   sales: Sale[]         
   isLoading: boolean
-  refreshData: () => void   
+  refreshData: () => void 
+  currentCashBox: any | null 
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined)
@@ -37,40 +40,40 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [sales, setSales] = useState<Sale[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [currentCashBox, setCurrentCashBox] = useState<any | null>(null) // MODIFICACIÓN: Estado inicial para la caja
 
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1)
   }
 
-  useEffect(() => {
-    const fetchSales = async () => {
-      setIsLoading(true)
-      try {
-        let data;
-        if (timeFilter === 'Todo') {
-          data = await salesServiceFront.getSales()
-        } else {
-          data = await salesServiceFront.getSalesByFilter(timeFilter.toLowerCase())
-        }
+useEffect(() => {
+  const fetchSales = async () => {
+    setIsLoading(true)
+    try {
+      const [salesData, activeBox] = await Promise.all([
+          timeFilter === 'Todo' ? salesServiceFront.getSales() : salesServiceFront.getSalesByFilter(timeFilter.toLowerCase()),
+          cashRegisterService.getCurrentRegister() // ¡Ahora sí llama a tu servicio real!
+      ])
 
-        setSales(Array.isArray(data) ? data : [])
-      } catch (error) {
-        console.error('Error al traer las ventas desde el back:', error)
-        setSales([]) 
-      } finally {
-        setIsLoading(false)
-      }
+      setSales(Array.isArray(salesData) ? salesData : [])
+      setCurrentCashBox(activeBox)
+    } catch (error) {
+      console.error('Error al traer los datos:', error)
+      setSales([]) 
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    fetchSales()
-  }, [timeFilter, refreshTrigger])
+  fetchSales()
+}, [timeFilter, refreshTrigger])
 
   return (
-  <DashboardContext.Provider value={{ timeFilter, setTimeFilter, sales, isLoading, refreshData }}>
-        {children}
-      </DashboardContext.Provider>
-    )
-  }
+    <DashboardContext.Provider value={{ timeFilter, setTimeFilter, sales, isLoading, refreshData, currentCashBox }}>
+      {children}
+    </DashboardContext.Provider>
+  )
+}
 
 export const useDashboardContext = () => {
   const context = useContext(DashboardContext)
