@@ -61,3 +61,12 @@ export const closeRegister = async (req: Request, res: Response): Promise<void> 
     res.status(400).json({ message: error.message })
   }
 }
+
+export const getTurnTotals = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const totals = await cashRegisterService.getTurnTotals(req.params.id)
+    res.status(200).json(totals)
+  } catch (error: any) {
+    res.status(500).json({ message: 'Error al calcular totales.' })
+  }
+}

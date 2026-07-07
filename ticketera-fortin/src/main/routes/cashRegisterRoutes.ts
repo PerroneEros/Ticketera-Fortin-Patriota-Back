@@ -3,7 +3,8 @@ import {
   openRegister, 
   closeRegister,
   getCurrentRegister,
-  getAllRegisters
+  getAllRegisters,
+  getTurnTotals
 } from '../controllers/cashRegisterController'
 
 const router = Router()
@@ -20,4 +21,5 @@ router.post('/open', openRegister)
 // PUT - Cerrar una caja existente usando su ID
 router.put('/close/:id', closeRegister) 
 
+router.get('/totals/:id', getTurnTotals)
 export default router
