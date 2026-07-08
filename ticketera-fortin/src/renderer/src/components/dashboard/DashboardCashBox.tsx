@@ -11,79 +11,79 @@ interface Props {
 }
 
 export const DashboardCashBox = ({ cashBox, sales }: Props) => {
-  
   const [isExpanded, setIsExpanded] = useState(cashBox.status === 'open');
 
   const boxSales = sales.filter(s => {
     const saleTime = new Date(s.date).getTime();
     const openTime = new Date(cashBox.opened_at).getTime();
     const closeTime = cashBox.closed_at ? new Date(cashBox.closed_at).getTime() : new Date().getTime();
-    
     return saleTime >= openTime && saleTime <= closeTime;
   });
 
   return (
     <div style={{ 
-      border: '2px solid #000', 
-      padding: '20px', 
-      borderRadius: '8px',
-      marginBottom: '30px', 
+      background: 'white',
+      borderRadius: '12px',
+      marginBottom: '20px', 
       display: 'flex',
       flexDirection: 'column',
-      background: '#f8fafc',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
       transition: 'all 0.3s ease' 
     }}>
       
-      {/* CABECERA (AHORA ES CLICKLEABLE) */}
       <div 
         onClick={() => setIsExpanded(!isExpanded)}
         style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center', 
-          // Si está desplegado mostramos la raya gris, si está colapsado la sacamos para que quede limpio
-          borderBottom: isExpanded ? '2px solid #e2e8f0' : 'none', 
-          paddingBottom: isExpanded ? '15px' : '0',
-          cursor: 'pointer', // Hace que el mouse se ponga en formita de mano
-          userSelect: 'none' // Evita que el texto se pinte de azul si hacés doble clic
+          background: '#555843', 
+          color: 'white',        
+          padding: '16px 24px',
+          borderRadius: isExpanded ? '12px 12px 0 0' : '12px',
+          cursor: 'pointer',
+          userSelect: 'none'
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold', color: '#334155', textTransform: 'uppercase' }}>
+          <h2 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
               CAJA DEL: {new Date(cashBox.opened_at).toLocaleString()}
           </h2>
+          
           <span style={{ 
-              background: cashBox.status === 'open' ? '#dcfce7' : '#fee2e2', 
-              color: cashBox.status === 'open' ? '#16a34a' : '#ef4444', 
-              padding: '6px 16px', 
+              background: cashBox.status === 'open' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(239, 68, 68, 0.2)', 
+              color: cashBox.status === 'open' ? '#86efac' : '#fca5a5', 
+              padding: '4px 12px', 
               borderRadius: '20px', 
-              fontSize: '12px', 
+              fontSize: '11px', 
               fontWeight: 'bold',
               textTransform: 'uppercase',
-              border: `1px solid ${cashBox.status === 'open' ? '#16a34a' : '#ef4444'}`
+              border: `1px solid ${cashBox.status === 'open' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(239, 68, 68, 0.5)'}`
           }}>
               {cashBox.status === 'open' ? 'ABIERTA' : 'CERRADA'}
           </span>
         </div>
 
-        {/* FLECHA INDICADORA */}
         <div style={{ 
-          fontSize: '16px', 
-          color: '#64748b', 
-          // Gira la flecha animadamente dependiendo de si está abierto o cerrado
+          fontSize: '14px', 
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform 0.3s ease',
-          background: '#e2e8f0',
-          padding: '8px 12px',
-          borderRadius: '8px'
+          background: 'rgba(255,255,255,0.15)',
+          color: 'white',
+          padding: '6px 10px',
+          borderRadius: '6px'
         }}>
           ▼
         </div>
       </div>
 
-      {/* CONTENIDO DESPLEGABLE (Se oculta o se muestra según el isExpanded) */}
       {isExpanded && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+        <div style={{ 
+          display: 'flex', flexDirection: 'column', gap: '20px', 
+          padding: '24px', 
+          background: '#fafafa', 
+          borderRadius: '0 0 12px 12px' 
+        }}>
           <DashboardCards sales={boxSales} />
           <DashboardPayments sales={boxSales} />
           <DashboardProducts sales={boxSales} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardMovementModal } from './DashboardMovementModal'
 import { DashboardProvider, useDashboardContext } from '../context/dashboardContext'
@@ -11,9 +11,14 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
     ? registersList 
     : (currentCashBox ? [currentCashBox] : []);
 
-  const ventasReales = sales.filter(s => s.paymentMethod !== 'apertura' && s.paymentMethod !== 'cierre' && s.paymentMethod !== 'ingreso' && s.paymentMethod !== 'egreso');
-  const totalSalesCount = ventasReales.length;
+  const ventasReales = sales.filter(s => 
+    s.paymentMethod !== 'apertura' && 
+    s.paymentMethod !== 'cierre' && 
+    s.paymentMethod !== 'ingreso' && 
+    s.paymentMethod !== 'egreso'
+  );
   
+  const totalSalesCount = ventasReales.length;
   const totalProductsCount = ventasReales.reduce((acc, sale) => {
     const itemsCount = sale.Sale_items ? sale.Sale_items.reduce((sum: any, item: any) => sum + item.quantity, 0) : 0;
     return acc + itemsCount;
@@ -60,47 +65,60 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
             )}
           </>
         )}
-
       </div>
 
-      {/* BANNER TOTALIZADOR - Solo se renderiza si isFiltering es true */}
       {isFiltering && (
         <div style={{ 
           position: 'fixed', bottom: 0, left: 0, width: '100%', 
-          background: '#fff', borderTop: '4px solid #000', padding: '15px 20px', 
-          display: 'flex', justifyContent: 'center', boxShadow: '0 -4px 10px rgba(0,0,0,0.1)', zIndex: 100
+          background: '#555843', 
+          padding: '15px 20px', 
+          display: 'flex', justifyContent: 'center', 
+          boxShadow: '0 -10px 20px rgba(0,0,0,0.2)', 
+          zIndex: 100
         }}>
           <div style={{ maxWidth: '900px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#374151', textTransform: 'uppercase' }}>
-                TOTAL DE TODAS LAS CAJAS EN ESE RANGO
+              <span style={{ fontWeight: 'bold', fontSize: '14px', color: 'white', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                TOTAL EN RANGO
               </span>
-              <span style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
-                Ventas realizadas: <strong>{totalSalesCount}</strong> | Productos vendidos: <strong>{totalProductsCount}</strong>
+              <span style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>
+                Ventas: <strong style={{ color: 'white' }}>{totalSalesCount}</strong> | Productos: <strong style={{ color: 'white' }}>{totalProductsCount}</strong>
               </span>
             </div>
-            <div>
-               <span style={{ fontSize: '26px', fontWeight: 'bold', color: '#0ea5e9' }}>
-                 ${totalMoney.toFixed(2)}
-               </span>
-            </div>
+            
+            <span style={{ fontSize: '28px', fontWeight: 'bold', color: '#38bdf8' }}>
+              ${totalMoney.toFixed(2)}
+            </span>
+
           </div>
         </div>
       )}
-
     </div>
   )
 }
 
+const DashboardViewInternal = ({ onOpenModal }: { onOpenModal: () => void }) => {
+  const { refreshData } = useDashboardContext();
+
+  useEffect(() => {
+    const handleCajaCambiada = () => {
+      refreshData();
+    };
+    window.addEventListener('caja-actualizada', handleCajaCambiada);
+    return () => window.removeEventListener('caja-actualizada', handleCajaCambiada);
+  }, [refreshData]);
+
+  return <DashboardContent onOpenModal={onOpenModal} />;
+}
+
 export const DashboardView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
-
+  
   return (
     <DashboardProvider>
-      <DashboardContent onOpenModal={() => setIsModalOpen(true)} />
-      {isModalOpen && (
-        <DashboardMovementModal onClose={() => setIsModalOpen(false)} />
-      )}
+      <DashboardViewInternal onOpenModal={() => setIsModalOpen(true)} />
+      {isModalOpen && <DashboardMovementModal onClose={() => setIsModalOpen(false)} />}
     </DashboardProvider>
   )
 }

@@ -19,12 +19,12 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
     else if (method === 'ingreso') { 
       bgColor = '#dcfce7'; color = '#16a34a';
       // Verificamos si la plata entró en efectivo o por transferencia
-      displayText = sale.cashAmount > 0 ? 'INGRESO (EFECTIVO)' : 'INGRESO (TRANSF.)';
+      displayText = sale.cashAmount > 0 ? 'INGRESO EFECTIVO' : 'INGRESO TRANSFERENCIA';
     }
     else if (method === 'egreso') { 
       bgColor = '#fee2e2'; color = '#ef4444';
       // Lo mismo para los egresos
-      displayText = sale.cashAmount > 0 ? 'EGRESO (EFECTIVO)' : 'EGRESO (TRANSF.)';
+      displayText = sale.cashAmount > 0 ? 'EGRESO EFECTIVO' : 'EGRESO TRANSFERENCIA';
     }
     else if (method === 'apertura') { bgColor = '#fef08a'; color = '#a16207' }
     else if (method === 'cierre') { bgColor = '#cbd5e1'; color = '#334155' } 
@@ -64,19 +64,19 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
       transferAmount: 0,
       date: cashBox.closed_at,
       Sale_items: [],
-      description: `Cierre de Caja. Monto final declarado.`
+      description: `Cierre de Caja`
     } as any);
   }
 
   return (
     <div className="dashboard-history" style={{ background: 'white', padding: '25px', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
       <h3 style={{ margin: '0 0 20px 0', color: '#475569', fontSize: '15px', textTransform: 'uppercase', fontWeight: 'bold' }}>
-        HISTORIAL DE ESTA CAJA
+        HISTORIAL
       </h3>
       
       <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '400px', overflowY: 'auto' }}>
         {displaySales.length === 0 ? (
-           <p style={{ color: 'gray', textAlign: 'center', fontSize: '14px', padding: '20px 0' }}>No hay movimientos en esta caja.</p>
+           <p style={{ color: 'gray', textAlign: 'center', fontSize: '14px', padding: '20px 0' }}>No hay movimientos en esta caja</p>
         ) : (
           displaySales.map((sale) => (
             <div key={sale.sales_id} style={{ 

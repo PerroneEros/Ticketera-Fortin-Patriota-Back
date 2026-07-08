@@ -30,10 +30,10 @@ export interface Sale {
 interface DashboardContextType {
   dateRange: DateRange; 
   setDateRange: (range: DateRange) => void; 
-  isAllTime: boolean; 
-  setIsAllTime: (val: boolean) => void; 
-  isFiltering: boolean; // <-- NUEVO ESTADO
-  setIsFiltering: (val: boolean) => void; // <-- NUEVO ESTADO
+  isAllTime: boolean;
+  setIsAllTime: (val: boolean) => void;
+  isFiltering: boolean;
+  setIsFiltering: (val: boolean) => void;
   sales: Sale[]        
   registersList: any[]; 
   isLoading: boolean
@@ -47,8 +47,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const today = new Date().toISOString().split('T')[0];
   const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today })
   
-  const [isAllTime, setIsAllTime] = useState(false) 
-  const [isFiltering, setIsFiltering] = useState(false) // Arranca falso, muestra solo caja actual
+  const [isAllTime, setIsAllTime] = useState(false)
+  const [isFiltering, setIsFiltering] = useState(false)
   
   const [sales, setSales] = useState<Sale[]>([])
   const [registersList, setRegistersList] = useState<any[]>([]) 
@@ -59,6 +59,17 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1)
   }
+
+  useEffect(() => {
+    const handleCajaCambiada = () => {
+      refreshData();
+    };
+
+    window.addEventListener('caja-actualizada', handleCajaCambiada);
+    return () => {
+      window.removeEventListener('caja-actualizada', handleCajaCambiada);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -86,11 +97,16 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
 
     fetchDashboardData()
-  }, [dateRange, isAllTime, refreshTrigger]) 
+  }, [dateRange, isAllTime, refreshTrigger])
 
   return (
     <DashboardContext.Provider value={{ 
-      dateRange, setDateRange, isAllTime, setIsAllTime, isFiltering, setIsFiltering, sales, registersList, isLoading, refreshData, currentCashBox 
+      dateRange, setDateRange, 
+      isAllTime, setIsAllTime, 
+      isFiltering, setIsFiltering, 
+      sales, registersList, 
+      isLoading, refreshData, 
+      currentCashBox 
     }}>
       {children}
     </DashboardContext.Provider>

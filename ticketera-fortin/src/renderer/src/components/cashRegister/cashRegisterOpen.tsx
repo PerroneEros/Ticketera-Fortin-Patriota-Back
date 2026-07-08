@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-Wimport { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { CashRegisterContext } from '../context/cashRegisterContext';
 import { openRegister } from '../service/cashRegisterService';
 import '../Styles/cashRegisterOpen.css';
@@ -29,7 +29,7 @@ export const CashRegisterOpen = () => {
   if (!context) return null;
   const { activeRegister, loadActiveRegister } = context;
 
-  const handleOpenSubmit = async (e: React.FormEvent) => {
+const handleOpenSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg('');
@@ -46,6 +46,11 @@ export const CashRegisterOpen = () => {
       await loadActiveRegister();
       setShowModal(false);
       setOpeningAmount('');
+
+      setTimeout(() => {
+        window.dispatchEvent(new Event('caja-actualizada'));
+      }, 500);
+
     } catch (error: any) {
       setErrorMsg(error.response?.data?.message || error.message);
     } finally {

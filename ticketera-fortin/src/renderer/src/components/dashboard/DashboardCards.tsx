@@ -1,48 +1,73 @@
-import React from 'react'
-import { Sale } from '../context/dashboardContext'
+import React from 'react';
+import { Sale } from '../context/dashboardContext';
 
 export const DashboardCards = ({ sales }: { sales: Sale[] }) => {
+
+  const ventasReales = sales.filter(s => 
+    s.paymentMethod !== 'apertura' && 
+    s.paymentMethod !== 'cierre' && 
+    s.paymentMethod !== 'ingreso' && 
+    s.paymentMethod !== 'egreso'
+  );
+
+  const cantidadVentas = ventasReales.length;
   
-  //Filtramos para ignorar aperturas, cierres, ingresos y egresos manuales.
-  const ventasReales = sales.filter(sale => 
-    sale.paymentMethod !== 'ingreso' && 
-    sale.paymentMethod !== 'egreso' && 
-    sale.paymentMethod !== 'apertura' &&
-    sale.paymentMethod !== 'cierre'
-  )
+  const cantidadProductos = ventasReales.reduce((acc, sale) => {
+    const itemsCount = sale.Sale_items ? sale.Sale_items.reduce((sum: any, item: any) => sum + (Number(item.quantity) || 0), 0) : 0;
+    return acc + itemsCount;
+  }, 0);
 
-  const totalVentas = ventasReales.length
-
-  // Sumamos el total SOLO de las ventas reales
-  const totalIngresos = ventasReales.reduce((acc, sale) => acc + sale.total, 0)
-
-  const totalProductos = ventasReales.reduce((acc, sale) => {
-    const itemsCount = sale.Sale_items ? sale.Sale_items.reduce((sum: any, item: any) => sum + item.quantity, 0) : 0
-    return acc + itemsCount
-  }, 0)
+  let granTotal = 0;
   
+  sales.forEach(sale => {
+    if (sale.paymentMethod === 'cierre') return; 
+    
+    const cash = Number(sale.cashAmount) || 0;
+    const transfer = Number(sale.transferAmount) || 0;
+    const sumaMovimiento = cash + transfer;
+
+    if (sale.paymentMethod === 'egreso') {
+      granTotal -= sumaMovimiento; 
+    } else {
+      granTotal += sumaMovimiento; 
+    }
+  });
+
   const cardStyle = {
     background: 'white',
     padding: '20px',
     borderRadius: '10px',
     boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-    flex: 1
-  }
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px'
+  };
 
   return (
-  <div className="dashboard-cards" style={{ display: 'flex', gap: '20px' }}>
+    <div className="dashboard-cards" style={{ display: 'flex', gap: '20px', width: '100%' }}>
+      
       <div style={cardStyle}>
-        <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Ventas</p>
-        <h2 style={{ margin: '5px 0 0 0', color: '#1f2937' }}>{totalVentas}</h2>
+        <span style={{ color: 'gray', fontSize: '14px' }}>Ventas</span>
+        <span style={{ fontSize: '24px', color: '#334155' }}>
+          {cantidadVentas}
+        </span>
       </div>
+      
       <div style={cardStyle}>
-        <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Total ventas</p>
-        <h2 style={{ margin: '5px 0 0 0', color: '#0ea5e9' }}>${totalIngresos.toFixed(2)}</h2>
+        <span style={{ color: 'gray', fontSize: '14px' }}>Total en Caja</span>
+        <span style={{ fontSize: '24px', color: '#0ea5e9' }}>
+          ${granTotal.toFixed(2)}
+        </span>
       </div>
+      
       <div style={cardStyle}>
-        <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Productos</p>
-        <h2 style={{ margin: '5px 0 0 0', color: '#1f2937' }}>{totalProductos}</h2>
+        <span style={{ color: 'gray', fontSize: '14px' }}>Productos</span>
+        <span style={{ fontSize: '24px', color: '#334155' }}>
+          {cantidadProductos}
+        </span>
       </div>
-  </div>
-  )
-}
+
+    </div>
+  );
+};
