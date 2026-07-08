@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './Styles/productModals.css'
+import { parseInputValue } from './utils/formatters'
 
 export default function Payment({ method, total, onClose, onConfirm, onBack }) {
   const [cash, setCash] = useState(method === 'efectivo' ? total : 0)
@@ -7,7 +8,7 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
   const [errorMsg, setErrorMsg] = useState('')
 
   const handleCashChange = (val) => {
-    const num = Number(val)
+    const num = parseInputValue(val)
     setCash(num)
     if (method === 'combinado') {
       const remainder = total - num
@@ -16,7 +17,7 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
   }
 
   const handleTransferChange = (val) => {
-    const num = Number(val)
+    const num = parseInputValue(val)
     setTransfer(num)
     if (method === 'combinado') {
       const remainder = total - num
@@ -29,13 +30,16 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
     setErrorMsg('')
 
     if (method === 'efectivo' && cash !== total) {
-      setErrorMsg(`Debe abonar exactamente $${total}.`); return
+      setErrorMsg(`Debe abonar exactamente $${total}.`)
+      return
     }
     if (method === 'transferencia' && transfer !== total) {
-      setErrorMsg(`Debe abonar exactamente $${total}.`); return
+      setErrorMsg(`Debe abonar exactamente $${total}.`)
+      return
     }
-    if (method === 'combinado' && (cash + transfer !== total)) {
-      setErrorMsg(`La suma debe ser exactamente $${total}.`); return
+    if (method === 'combinado' && cash + transfer !== total) {
+      setErrorMsg(`La suma debe ser exactamente $${total}.`)
+      return
     }
 
     onConfirm({ method: method, cashAmount: cash, transferAmount: transfer })
@@ -45,14 +49,18 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
     <div className="modal-prod-overlay">
       <div className="modal-ticket-content">
         <div className="modal-ticket-header">
-          <button className="btn-ticket-back" onClick={onBack}>← Volver</button>
-          <button className="btn-ticket-cancel" onClick={onClose}>Cancelar</button>
+          <button className="btn-ticket-back" onClick={onBack}>
+            ← Volver
+          </button>
+          <button className="btn-ticket-cancel" onClick={onClose}>
+            Cancelar
+          </button>
         </div>
 
         <div className="modal-ticket-body">
           <div className="ticket-total-display">
             <p>Monto a cobrar</p>
-            <h2>${total}</h2>
+            <h2>${total.toLocaleString('es-AR')}</h2>
           </div>
 
           <form onSubmit={handlePayment} className="payment-form">
@@ -64,9 +72,10 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
                   <div className="payment-modal-wrapper">
                     <span className="payment-modal-currency">$</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       min="0"
-                      value={cash === 0 ? '' : cash}
+                      value={cash === 0 ? '' : cash.toLocaleString('es-AR')}
                       placeholder="0"
                       onChange={(e) => handleCashChange(e.target.value)}
                     />
@@ -81,9 +90,10 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
                   <div className="payment-modal-wrapper">
                     <span className="payment-modal-currency">$</span>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="numeric"
                       min="0"
-                      value={transfer === 0 ? '' : transfer}
+                      value={transfer === 0 ? '' : transfer.toLocaleString('es-AR')}
                       placeholder="0"
                       onChange={(e) => handleTransferChange(e.target.value)}
                     />
@@ -95,7 +105,9 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
             {errorMsg && <p className="error-text payment-error">{errorMsg}</p>}
 
             <div className="modal-prod-actions center-actions">
-              <button type="submit" className="btn-confirm-payment">Confirmar Pago</button>
+              <button type="submit" className="btn-confirm-payment">
+                Confirmar Pago
+              </button>
             </div>
           </form>
         </div>

@@ -20,7 +20,7 @@ export default function ListProducts() {
     try {
       if (productToToggle.isActive) {
         await deleteProducts(productToToggle.id_product)
-        toast.success('Producto desactivado')
+        toast.success('Producto deshabilitado')
       } else {
         await reactivateProducts(productToToggle.id_product)
         toast.success('Producto habilitado')
@@ -43,13 +43,13 @@ export default function ListProducts() {
           className={`filter-btn ${filter === 'active' ? 'active' : ''}`}
           onClick={() => setFilter('active')}
         >
-          Activos
+          Habilitados
         </button>
         <button
           className={`filter-btn ${filter === 'disabled' ? 'active' : ''}`}
           onClick={() => setFilter('disabled')}
         >
-          Desactivados
+          Deshabilitados
         </button>
       </div>
 
@@ -80,13 +80,13 @@ export default function ListProducts() {
                     <td>
                       <b>{p.name}</b>
                     </td>
-                    <td>$ {p.price}</td>
+                    <td>$ {(p.price || 0).toLocaleString('es-AR')}</td>
                     <td>{p.Category?.name || 'Sin categoría'}</td>
-                    <td>{p.isActive ? '✅ Activo' : '❌ Desactivado'}</td>
+                    <td>{p.isActive ? '✅ Habilitado' : '❌ Deshabilitado'}</td>
                     <td>
                       {p.isActive && <button onClick={() => setProductToEdit(p)}>Editar</button>}
                       <button onClick={() => handleOpenConfirm(p)}>
-                        {p.isActive ? 'Desactivar' : 'Habilitar'}
+                        {p.isActive ? 'Deshabilitar' : 'Habilitar'}
                       </button>
                     </td>
                   </tr>
@@ -108,11 +108,11 @@ export default function ListProducts() {
       )}
       {productToToggle && (
         <WindowConfirm
-          text={productToToggle.isActive ? 'desactivar este producto' : 'habilitar este producto'}
+          text={productToToggle.isActive ? 'deshabilitar este producto' : 'habilitar este producto'}
           onConfirm={handleToggle}
           onClose={() => setProductToToggle(null)}
         />
       )}
     </>
-  );
+  )
 }

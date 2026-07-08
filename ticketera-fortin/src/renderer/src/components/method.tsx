@@ -23,14 +23,16 @@ export default function Method({ total, onClose, onConfirm }) {
         {/* Encabezado oscuro */}
         <div className="modal-ticket-header">
           <h3>Seleccionar método de pago</h3>
-          <button className="btn-ticket-cancel" onClick={onClose}>Cancelar</button>
+          <button className="btn-ticket-cancel" onClick={onClose}>
+            Cancelar
+          </button>
         </div>
 
         <div className="modal-ticket-body">
           {/* Total a cobrar */}
           <div className="ticket-total-display">
             <p>Total a cobrar</p>
-            <h2>${total}</h2>
+            <h2>${total.toLocaleString('es-AR')}</h2>
           </div>
 
           <p className="ticket-subtitle">Selecciona método de pago</p>
@@ -46,7 +48,10 @@ export default function Method({ total, onClose, onConfirm }) {
               <div className="method-arrow">→</div>
             </button>
 
-            <button className="ticket-method-card transfer" onClick={() => setSelectMethod('transferencia')}>
+            <button
+              className="ticket-method-card transfer"
+              onClick={() => setSelectMethod('transferencia')}
+            >
               <div className="method-icon-box">📱</div>
               <div className="method-text-box">
                 <h4>Transferencia</h4>
@@ -55,7 +60,10 @@ export default function Method({ total, onClose, onConfirm }) {
               <div className="method-arrow">→</div>
             </button>
 
-            <button className="ticket-method-card mixed" onClick={() => setSelectMethod('combinado')}>
+            <button
+              className="ticket-method-card mixed"
+              onClick={() => setSelectMethod('combinado')}
+            >
               <div className="method-icon-box">🔀</div>
               <div className="method-text-box">
                 <h4>Pago combinado</h4>
