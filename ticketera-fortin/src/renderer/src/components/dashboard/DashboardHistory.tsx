@@ -1,29 +1,41 @@
 import React from 'react'
-import { useDashboardContext } from '../context/dashboardContext'
+import { Sale } from '../context/dashboardContext'
 
-export const DashboardHistory = () => {
-  const { sales, isLoading, currentCashBox, timeFilter } = useDashboardContext()
+interface Props {
+  sales: Sale[];
+  cashBox: any; 
+}
 
-  const filteredSales = (timeFilter === 'Día' && currentCashBox) 
-    ? sales.filter(s => new Date(s.date).getTime() >= new Date(currentCashBox.opened_at).getTime())
-    : sales
+export const DashboardHistory = ({ sales, cashBox }: Props) => {
 
-  const getMethodBadge = (method: string) => {
-    let bgColor = '#e5e7eb'; let color = 'gray'
+  const getMethodBadge = (sale: any) => {
+    const method = sale.paymentMethod;
+    let bgColor = '#e5e7eb'; let color = 'gray';
+    let displayText = method;
+
     if (method === 'combinado') { bgColor = '#dbeafe'; color = '#3b82f6' }
     else if (method === 'efectivo') { bgColor = '#dcfce7'; color = '#22c55e' }
     else if (method === 'transferencia') { bgColor = '#f3e8ff'; color = '#a855f7' }
-    else if (method === 'ingreso') { bgColor = '#dcfce7'; color = '#16a34a' }
-    else if (method === 'egreso') { bgColor = '#fee2e2'; color = '#ef4444' }
+    else if (method === 'ingreso') { 
+      bgColor = '#dcfce7'; color = '#16a34a';
+      // Verificamos si la plata entró en efectivo o por transferencia
+      displayText = sale.cashAmount > 0 ? 'INGRESO (EFECTIVO)' : 'INGRESO (TRANSF.)';
+    }
+    else if (method === 'egreso') { 
+      bgColor = '#fee2e2'; color = '#ef4444';
+      // Lo mismo para los egresos
+      displayText = sale.cashAmount > 0 ? 'EGRESO (EFECTIVO)' : 'EGRESO (TRANSF.)';
+    }
     else if (method === 'apertura') { bgColor = '#fef08a'; color = '#a16207' }
+    else if (method === 'cierre') { bgColor = '#cbd5e1'; color = '#334155' } 
 
     return (
       <span style={{ 
-        background: bgColor, color: color, padding: '2px 8px', borderRadius: '12px', 
+        background: bgColor, color: color, padding: '4px 10px', borderRadius: '12px', 
         fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase',
         display: 'inline-block'
       }}>
-        {method}
+        {displayText}
       </span>
     )
   }
@@ -32,51 +44,71 @@ export const DashboardHistory = () => {
     if (sale.paymentMethod === 'combinado') {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
-          {getMethodBadge('combinado')}
-          <span style={{ fontSize: '9px', color: '#6b7280' }}>
-            Efectivo: ${sale.cashAmount?.toFixed(2)} | Transf: ${sale.transferAmount?.toFixed(2)}
+          {getMethodBadge(sale)}
+          <span style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
+            Efvo: ${sale.cashAmount?.toFixed(2)} | Transf: ${sale.transferAmount?.toFixed(2)}
           </span>
         </div>
       )
     }
-    return getMethodBadge(sale.paymentMethod)
+    return getMethodBadge(sale)
   }
 
-  if (isLoading) return <p>Cargando historial...</p>
+  const displaySales = [...sales];
+  if (cashBox.status === 'closed') {
+    displaySales.unshift({
+      sales_id: cashBox.cash_register_id + 900000, 
+      total: cashBox.closing,
+      paymentMethod: 'cierre',
+      cashAmount: 0,
+      transferAmount: 0,
+      date: cashBox.closed_at,
+      Sale_items: [],
+      description: `Cierre de Caja. Monto final declarado.`
+    } as any);
+  }
 
   return (
     <div className="dashboard-history" style={{ background: 'white', padding: '25px', borderRadius: '10px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-      <h3 style={{ margin: '0 0 20px 0', color: 'gray', fontSize: '16px' }}>
-        Historial {currentCashBox && timeFilter === 'Día' ? '(Turno Actual)' : '(General)'}
+      <h3 style={{ margin: '0 0 20px 0', color: '#475569', fontSize: '15px', textTransform: 'uppercase', fontWeight: 'bold' }}>
+        HISTORIAL DE ESTA CAJA
       </h3>
       
       <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '400px', overflowY: 'auto' }}>
-        {filteredSales.map((sale) => (
-          <div key={sale.sales_id} style={{ 
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            padding: '16px 0', borderBottom: '1px solid #f3f4f6'
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              {renderMethodDetails(sale)}
-              
-              <span style={{ fontSize: '12px', color: '#9ca3af', marginTop: '6px' }}>
-                {new Date(sale.date).toLocaleString()}
-              </span>
-              
-              {sale.description && (
-                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                  Descripción: <strong>{sale.description}</strong>
-                </div>
-              )}
-            </div>
+        {displaySales.length === 0 ? (
+           <p style={{ color: 'gray', textAlign: 'center', fontSize: '14px', padding: '20px 0' }}>No hay movimientos en esta caja.</p>
+        ) : (
+          displaySales.map((sale) => (
+            <div key={sale.sales_id} style={{ 
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '16px 0', borderBottom: '1px solid #f8fafc'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                
+                {renderMethodDetails(sale)}
+                
+                <span style={{ fontSize: '12px', color: '#94a3b8', marginTop: '6px' }}>
+                  {new Date(sale.date).toLocaleString()}
+                </span>
+                
+                {sale.description && (
+                  <div style={{ fontSize: '13px', color: '#475569', marginTop: '6px' }}>
+                    {sale.description}
+                  </div>
+                )}
+              </div>
 
-            <div style={{ textAlign: 'right' }}>
-              <strong style={{ color: sale.paymentMethod === 'egreso' ? '#ef4444' : '#0ea5e9', fontSize: '16px' }}>
-                {sale.paymentMethod === 'egreso' ? '-' : ''}${sale.total.toFixed(2)}
-              </strong>
+              <div style={{ textAlign: 'right' }}>
+                <strong style={{ 
+                  color: sale.paymentMethod === 'egreso' ? '#ef4444' : '#0ea5e9', 
+                  fontSize: '18px' 
+                }}>
+                  {sale.paymentMethod === 'egreso' ? '-' : ''}${sale.total.toFixed(2)}
+                </strong>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   )

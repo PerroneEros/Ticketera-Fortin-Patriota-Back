@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { useDashboardContext } from '../context/dashboardContext'
+import { registerMovement } from '../service/cashRegisterService'
 
 interface Props {
   onClose: () => void
@@ -16,12 +16,10 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
 
   const { refreshData } = useDashboardContext()
 
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // CLÁUSULA REQUIRE: El cliente verifica la validez del estado antes de actuar.
     const numAmount = parseFloat(amount)
     if (isNaN(numAmount) || numAmount <= 0) {
       setError('El monto debe ser mayor a 0.')
@@ -35,10 +33,7 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
     setIsSubmitting(true)
 
     try {
-      // ACA VA LA RUTA NUEVA: Esta es la que tienen que armar en el backend
-      const ENDPOINT_MOVIMIENTOS = 'http://localhost:34567/api/movements' 
-
-      await axios.post(ENDPOINT_MOVIMIENTOS, {
+      await registerMovement({
         type,
         amount: numAmount,
         description,
@@ -47,16 +42,16 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
       })
 
       refreshData() 
-      
       onClose() 
 
     } catch (err: any) {
       console.error(err)
-      setError(err.response?.data?.message || 'Error al conectar con el servidor. Revisá que el backend soporte este endpoint.')
+      setError(err.response?.data?.message || 'Error al guardar el movimiento.')
     } finally {
       setIsSubmitting(false)
     }
   }
+
 
   return (
     <div style={{

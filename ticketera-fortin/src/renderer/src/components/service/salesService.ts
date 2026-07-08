@@ -13,6 +13,13 @@ export const salesServiceFront = {
     })
     return response.data
   },
+  
+  async getSalesByDateRange(from: string, to: string) {
+    const response = await axios.get(API_URL, {
+      params: { from, to }
+    })
+    return response.data
+  },
   async createSale(saleData: any) {
     try {
       const response = await axios.post(API_URL, saleData)

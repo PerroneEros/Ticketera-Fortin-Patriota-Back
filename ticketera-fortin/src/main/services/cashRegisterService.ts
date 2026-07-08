@@ -1,3 +1,4 @@
+import { Op } from 'sequelize' // <-- Necesitamos importar Op
 import Cash_register from '../model/cash_registers'
 import Sales from '../model/sales'
 import Cash_movements from '../model/cash_movements'
@@ -52,7 +53,31 @@ export const cashRegisterService = {
     return { efectivo, transferencia }
   },
 
-  async getCurrentRegister() { return await Cash_register.findOne({ where: { status: 'open' } }) },
-  async getAllRegisters() { return await Cash_register.findAll({ order: [['opened_at', 'DESC']] }) },
-  async getRegisterById(id: string) { return await Cash_register.findByPk(id) }
+  async getCurrentRegister() { 
+    return await Cash_register.findOne({ where: { status: 'open' } }) 
+  },
+  
+ 
+  async getAllRegisters(from?: string, to?: string) { 
+    let whereClause: any = {}
+
+    if (from && to) {
+      const startDate = new Date(from);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(to);
+      endDate.setHours(23, 59, 59, 999);
+
+      whereClause = { opened_at: { [Op.between]: [startDate, endDate] } };
+    }
+
+    return await Cash_register.findAll({ 
+      where: whereClause,
+      order: [['opened_at', 'DESC']] 
+    }) 
+  },
+  
+  async getRegisterById(id: string) { 
+    return await Cash_register.findByPk(id) 
+  }
 }

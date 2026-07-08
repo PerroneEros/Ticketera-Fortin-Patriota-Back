@@ -4,16 +4,13 @@ import { createSaleSchema } from '../schemas/salesSchema'
 
 export const createSale = async (req: Request, res: Response): Promise<void> => {
   try {
-    //Pasamos el body por el escáner de Zod usando el esquema que armamos
     const validation = createSaleSchema.safeParse(req.body)
 
-    //Si falla la validación, cortamos acá y le avisamos al front
     if (!validation.success) {
       res.status(400).json({ message: validation.error.issues[0].message })
       return
     }
 
-    // 3. Si está todo joya, le pasamos la data validada al servicio
     const result = await salesService.executeSale(validation.data)
     
     res.status(201).json({ 
@@ -29,10 +26,10 @@ export const createSale = async (req: Request, res: Response): Promise<void> => 
 
 export const getSales = async (req: Request, res: Response): Promise<void> => {
   try {
-    const filter = req.query.filter as string
 
-    // Le pasamos el filtro al servicio para que haga el recorte de fechas
-    const sales = await salesService.getAllSales(filter)
+    const { from, to, filter } = req.query;
+
+    const sales = await salesService.getAllSales(from as string, to as string, filter as string)
     
     res.status(200).json(sales)
   } catch (error) {

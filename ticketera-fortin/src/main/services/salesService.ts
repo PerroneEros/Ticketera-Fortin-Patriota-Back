@@ -9,7 +9,6 @@ import { CreateSaleInput } from '../schemas/salesSchema'
 import { printerService } from './printerService'
 
 export const salesService = {
-  //Registrar venta y generar tickets individuales
   async executeSale(data: CreateSaleInput) {
     const t = await sequelize.transaction()
 
@@ -37,7 +36,6 @@ export const salesService = {
         created_at: Date
       }[] = []
 
-      //Buscamos precios, calcular totales y GENERAR 1 TICKET POR UNIDAD
       for (const item of items) {
         const product = await Product.findByPk(item.id_product)
         if (!product) {
@@ -60,7 +58,6 @@ export const salesService = {
         }
       }
 
-      //Lógica para el Pago Combinado
       let finalCash = 0
       let finalTransfer = 0
 
@@ -78,7 +75,6 @@ export const salesService = {
         finalTransfer = transferAmount || 0
       }
 
-      //Crear la venta usando la caja activa
       const newSale = await Sales.create(
         {
           cash_register_id: activeRegister.cash_register_id,
@@ -113,12 +109,25 @@ export const salesService = {
     }
   },
 
-  //Trae el historial completo unificado y filtrado por tiempo
-  async getAllSales(filter?: string) {
-    let whereClause = {}
-    let registerWhereClause = {}
+  // Recibe from, to y filter 
+  async getAllSales(from?: string, to?: string, filter?: string) {
+    let whereClause: any = {}
+    let registerWhereClause: any = {}
 
-    if (filter && filter !== 'todo') {
+    // Si nos pasan fechas exactas, usamos Op.between
+    if (from && to) {
+      // Ajustamos las horas para abarcar todo el día seleccionado
+      const startDate = new Date(from);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(to);
+      endDate.setHours(23, 59, 59, 999);
+
+      whereClause = { date: { [Op.between]: [startDate, endDate] } };
+      registerWhereClause = { opened_at: { [Op.between]: [startDate, endDate] } };
+    
+    // Si no hay fechas, pero hay filtro viejo (por compatibilidad temporal)
+    } else if (filter && filter !== 'todo') {
       const now = new Date()
       let startDate = new Date()
 
@@ -131,7 +140,7 @@ export const salesService = {
       }
 
       whereClause = { date: { [Op.gte]: startDate } }
-      registerWhereClause = { opened_at: { [Op.gte]: startDate } } // Filtro para la caja
+      registerWhereClause = { opened_at: { [Op.gte]: startDate } } 
     }
 
     const sales = await Sales.findAll({
@@ -197,7 +206,6 @@ export const salesService = {
     return sale
   },
 
-  //Trae todas las ventas y movimientos de una caja particular
   async getSalesByRegister(cash_register_id: string) {
     const sales = await Sales.findAll({
       where: { cash_register_id },
@@ -247,7 +255,7 @@ export const salesService = {
     }))
 
     return [...formattedSales, ...formattedMovements, ...formattedRegisters].sort((a, b) => {
-      return new Date(a.date).getTime() - new Date(a.date).getTime()
+      return new Date(b.date).getTime() - new Date(a.date).getTime()
     })
   },
 

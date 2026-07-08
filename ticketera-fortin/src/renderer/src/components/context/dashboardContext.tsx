@@ -2,7 +2,10 @@ import React, { createContext, useState, ReactNode, useContext, useEffect } from
 import { salesServiceFront } from '../service/salesService'
 import * as cashRegisterService from '../service/cashRegisterService'
 
-export type TimeFilter = 'Día' | 'Semana' | 'Mes' | 'Todo'
+export interface DateRange {
+  from: string; 
+  to: string;
+}
 
 export interface SaleItem {
   sale_items_id: number
@@ -16,7 +19,7 @@ export interface SaleItem {
 export interface Sale {
   sales_id: number
   total: number
-  paymentMethod: 'efectivo' | 'transferencia' | 'combinado' | 'ingreso' | 'egreso'| 'apertura'
+  paymentMethod: 'efectivo' | 'transferencia' | 'combinado' | 'ingreso' | 'egreso'| 'apertura' | 'cierre'
   cashAmount: number
   transferAmount: number
   date: string
@@ -25,9 +28,12 @@ export interface Sale {
 }
 
 interface DashboardContextType {
-  timeFilter: TimeFilter
-  setTimeFilter: (filter: TimeFilter) => void
-  sales: Sale[]         
+  dateRange: DateRange; 
+  setDateRange: (range: DateRange) => void; 
+  isAllTime: boolean;
+  setIsAllTime: (val: boolean) => void; 
+  sales: Sale[]        
+  registersList: any[]; 
   isLoading: boolean
   refreshData: () => void 
   currentCashBox: any | null 
@@ -36,40 +42,53 @@ interface DashboardContextType {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined)
 
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('Día')
+  const today = new Date().toISOString().split('T')[0];
+  const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today })
+  
+  const [isAllTime, setIsAllTime] = useState(false) 
+  
   const [sales, setSales] = useState<Sale[]>([])
+  const [registersList, setRegistersList] = useState<any[]>([]) 
   const [isLoading, setIsLoading] = useState(false)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
-  const [currentCashBox, setCurrentCashBox] = useState<any | null>(null) // MODIFICACIÓN: Estado inicial para la caja
+  const [currentCashBox, setCurrentCashBox] = useState<any | null>(null)
 
   const refreshData = () => {
     setRefreshTrigger(prev => prev + 1)
   }
 
-useEffect(() => {
-  const fetchSales = async () => {
-    setIsLoading(true)
-    try {
-      const [salesData, activeBox] = await Promise.all([
-          timeFilter === 'Todo' ? salesServiceFront.getSales() : salesServiceFront.getSalesByFilter(timeFilter.toLowerCase()),
-          cashRegisterService.getCurrentRegister() // ¡Ahora sí llama a tu servicio real!
-      ])
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      setIsLoading(true)
+      try {
+        const fromLocal = isAllTime ? '' : `${dateRange.from}T00:00:00`;
+        const toLocal = isAllTime ? '' : `${dateRange.to}T23:59:59`;
 
-      setSales(Array.isArray(salesData) ? salesData : [])
-      setCurrentCashBox(activeBox)
-    } catch (error) {
-      console.error('Error al traer los datos:', error)
-      setSales([]) 
-    } finally {
-      setIsLoading(false)
+        const [salesData, registersData, activeBox] = await Promise.all([
+          salesServiceFront.getSalesByDateRange(fromLocal, toLocal),
+          cashRegisterService.getRegistersByDateRange(fromLocal, toLocal),
+          cashRegisterService.getCurrentRegister() 
+        ])
+
+        setSales(Array.isArray(salesData) ? salesData : [])
+        setRegistersList(Array.isArray(registersData) ? registersData : [])
+        setCurrentCashBox(activeBox)
+      } catch (error) {
+        console.error('Error al traer los datos del dashboard:', error)
+        setSales([]) 
+        setRegistersList([])
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }
 
-  fetchSales()
-}, [timeFilter, refreshTrigger])
+    fetchDashboardData()
+  }, [dateRange, isAllTime, refreshTrigger]) 
 
   return (
-    <DashboardContext.Provider value={{ timeFilter, setTimeFilter, sales, isLoading, refreshData, currentCashBox }}>
+    <DashboardContext.Provider value={{ 
+      dateRange, setDateRange, isAllTime, setIsAllTime, sales, registersList, isLoading, refreshData, currentCashBox 
+    }}>
       {children}
     </DashboardContext.Provider>
   )

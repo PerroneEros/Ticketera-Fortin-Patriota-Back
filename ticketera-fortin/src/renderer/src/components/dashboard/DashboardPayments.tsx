@@ -1,22 +1,47 @@
 import React from 'react'
-import { useDashboardContext } from '../context/dashboardContext'
+import { Sale } from '../context/dashboardContext'
 
-export const DashboardPayments = () => {
-  // Nos traemos las ventas reales desde el contexto
-  const { sales, isLoading } = useDashboardContext()
+export const DashboardPayments = ({ sales }: { sales: Sale[] }) => {
+  
+  let totalEfectivo = 0;
+  let totalTransferencia = 0;
+  let opsEfectivo = 0;
+  let opsTransferencia = 0;
 
-  //Calculamos los totales acumulados de cada método de pago
-  const totalEfectivo = sales.reduce((acc, sale) => acc + (sale.cashAmount || 0), 0)
-  const totalTransferencia = sales.reduce((acc, sale) => acc + (sale.transferAmount || 0), 0)
+  // Recorremos todos los movimientos de la caja
+  sales.forEach(sale => {
+    if (sale.paymentMethod === 'cierre') return; // Ignoramos el cierre informativo
 
-  //Contamos cuántas transacciones tocaron cada método
-  const ventasEfectivo = sales.filter(sale => sale.cashAmount > 0).length
-  const ventasTransferencia = sales.filter(sale => sale.transferAmount > 0).length
+    const cash = Number(sale.cashAmount) || 0;
+    const transfer = Number(sale.transferAmount) || 0;
 
-  //Calculamos los porcentajes para las barras de progreso
-  const granTotal = totalEfectivo + totalTransferencia
-  const porcEfectivo = granTotal > 0 ? (totalEfectivo / granTotal) * 100 : 0
-  const porcTransferencia = granTotal > 0 ? (totalTransferencia / granTotal) * 100 : 0
+    // Lógica para el Efectivo
+    if (cash > 0) {
+      if (sale.paymentMethod === 'egreso') {
+        totalEfectivo -= cash; // Si es egreso, restamos plata
+      } else {
+        totalEfectivo += cash; // Aperturas, ventas e ingresos suman plata
+      }
+      opsEfectivo++; // Contamos que hubo un movimiento
+    }
+
+    // Lógica para la Transferencia
+    if (transfer > 0) {
+      if (sale.paymentMethod === 'egreso') {
+        totalTransferencia -= transfer;
+      } else {
+        totalTransferencia += transfer;
+      }
+      opsTransferencia++; 
+    }
+  });
+  
+  const efectivoVisual = Math.max(0, totalEfectivo);
+  const transferenciaVisual = Math.max(0, totalTransferencia);
+  const granTotal = efectivoVisual + transferenciaVisual;
+  
+  const porcEfectivo = granTotal > 0 ? (efectivoVisual / granTotal) * 100 : 0;
+  const porcTransferencia = granTotal > 0 ? (transferenciaVisual / granTotal) * 100 : 0;
 
   const cardStyle = {
     background: 'white',
@@ -37,27 +62,19 @@ export const DashboardPayments = () => {
     overflow: 'hidden'
   }
 
-  if (isLoading) {
-    return (
-      <div className="dashboard-payments" style={{ display: 'flex', gap: '20px', width: '100%' }}>
-        <div style={cardStyle}><p style={{ color: 'gray', textAlign: 'center', margin: 0 }}>Cargando montos...</p></div>
-      </div>
-    )
-  }
-
   return (
     <div className="dashboard-payments" style={{ display: 'flex', gap: '20px' }}>
       
       {/* Caja de Efectivo */}
       <div style={cardStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <span style={{ color: 'gray', fontSize: '14px' }}>Efectivo</span>
+          <span style={{ color: 'gray', fontSize: '14px' }}>Efectivo Total</span>
           <span style={{ color: '#10b981', fontSize: '20px', fontWeight: 'bold' }}>
             ${totalEfectivo.toFixed(2)}
           </span>
         </div>
         <span style={{ color: 'gray', fontSize: '12px' }}>
-          {ventasEfectivo} {ventasEfectivo === 1 ? 'operación' : 'operaciones'}
+          {opsEfectivo} {opsEfectivo === 1 ? 'movimiento' : 'movimientos'}
         </span>
         <div style={progressTrackStyle}>
           <div style={{ 
@@ -72,13 +89,13 @@ export const DashboardPayments = () => {
       {/* Caja de Transferencia */}
       <div style={cardStyle}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <span style={{ color: 'gray', fontSize: '14px' }}>Transferencia</span>
+          <span style={{ color: 'gray', fontSize: '14px' }}>Transferencia Total</span>
           <span style={{ color: '#3b82f6', fontSize: '20px', fontWeight: 'bold' }}>
             ${totalTransferencia.toFixed(2)}
           </span>
         </div>
         <span style={{ color: 'gray', fontSize: '12px' }}>
-          {ventasTransferencia} {ventasTransferencia === 1 ? 'operación' : 'operaciones'}
+          {opsTransferencia} {opsTransferencia === 1 ? 'movimiento' : 'movimientos'}
         </span>
         <div style={progressTrackStyle}>
           <div style={{ 

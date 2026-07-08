@@ -1,36 +1,26 @@
 import React from 'react'
-import { useDashboardContext } from '../context/dashboardContext'
+import { Sale } from '../context/dashboardContext'
 
-export const DashboardCards = () => {
-  //Nos traemos la lista de ventas y el estado de carga desde el contexto
-  const { sales, isLoading } = useDashboardContext()
-
+export const DashboardCards = ({ sales }: { sales: Sale[] }) => {
   
-  // Filtro para separar las ventas reales de los movimientos de caja Y de la apertura
+  //Filtramos para ignorar aperturas, cierres, ingresos y egresos manuales.
   const ventasReales = sales.filter(sale => 
     sale.paymentMethod !== 'ingreso' && 
     sale.paymentMethod !== 'egreso' && 
-    sale.paymentMethod !== 'apertura' 
+    sale.paymentMethod !== 'apertura' &&
+    sale.paymentMethod !== 'cierre'
   )
 
-  // Total de tickets vendidos 
   const totalVentas = ventasReales.length
 
-  // Suma de la plata de todos los tickets 
-  const totalIngresos = sales.reduce((acc, sale) => {
-    if (sale.paymentMethod === 'egreso') {
-      return acc - sale.total 
-    }
-    return acc + sale.total   
-  }, 0)
+  // Sumamos el total SOLO de las ventas reales
+  const totalIngresos = ventasReales.reduce((acc, sale) => acc + sale.total, 0)
 
-  // Suma de todos los productos
   const totalProductos = ventasReales.reduce((acc, sale) => {
     const itemsCount = sale.Sale_items ? sale.Sale_items.reduce((sum: any, item: any) => sum + item.quantity, 0) : 0
     return acc + itemsCount
   }, 0)
   
-
   const cardStyle = {
     background: 'white',
     padding: '20px',
@@ -39,35 +29,20 @@ export const DashboardCards = () => {
     flex: 1
   }
 
-  // Si está cargando la data del backend, mostramos un mensajito 
-  if (isLoading) {
-    return (
-      <div className="dashboard-cards" style={{ display: 'flex', gap: '20px', width: '100%' }}>
-        <div style={cardStyle}>
-          <p style={{ margin: 0, color: 'gray', fontSize: '14px', textAlign: 'center' }}>Cargando datos...</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
   <div className="dashboard-cards" style={{ display: 'flex', gap: '20px' }}>
-      
       <div style={cardStyle}>
         <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Ventas</p>
         <h2 style={{ margin: '5px 0 0 0', color: '#1f2937' }}>{totalVentas}</h2>
       </div>
-
       <div style={cardStyle}>
-        <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Total ingresos</p>
+        <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Total ventas</p>
         <h2 style={{ margin: '5px 0 0 0', color: '#0ea5e9' }}>${totalIngresos.toFixed(2)}</h2>
       </div>
-
       <div style={cardStyle}>
         <p style={{ margin: 0, color: 'gray', fontSize: '14px' }}>Productos</p>
         <h2 style={{ margin: '5px 0 0 0', color: '#1f2937' }}>{totalProductos}</h2>
       </div>
-
   </div>
   )
 }
