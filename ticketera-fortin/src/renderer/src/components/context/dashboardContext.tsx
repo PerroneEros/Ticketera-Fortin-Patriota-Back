@@ -30,8 +30,10 @@ export interface Sale {
 interface DashboardContextType {
   dateRange: DateRange; 
   setDateRange: (range: DateRange) => void; 
-  isAllTime: boolean;
+  isAllTime: boolean; 
   setIsAllTime: (val: boolean) => void; 
+  isFiltering: boolean; // <-- NUEVO ESTADO
+  setIsFiltering: (val: boolean) => void; // <-- NUEVO ESTADO
   sales: Sale[]        
   registersList: any[]; 
   isLoading: boolean
@@ -46,6 +48,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [dateRange, setDateRange] = useState<DateRange>({ from: today, to: today })
   
   const [isAllTime, setIsAllTime] = useState(false) 
+  const [isFiltering, setIsFiltering] = useState(false) // Arranca falso, muestra solo caja actual
   
   const [sales, setSales] = useState<Sale[]>([])
   const [registersList, setRegistersList] = useState<any[]>([]) 
@@ -87,7 +90,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <DashboardContext.Provider value={{ 
-      dateRange, setDateRange, isAllTime, setIsAllTime, sales, registersList, isLoading, refreshData, currentCashBox 
+      dateRange, setDateRange, isAllTime, setIsAllTime, isFiltering, setIsFiltering, sales, registersList, isLoading, refreshData, currentCashBox 
     }}>
       {children}
     </DashboardContext.Provider>
