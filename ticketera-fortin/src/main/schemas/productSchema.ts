@@ -7,7 +7,10 @@ export const createProductSchema = z.object({
     })
     .trim()
     .min(2, 'El nombre debe tener al menos 2 caracteres.')
-    .regex(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo debe contener letras y espacios.'),
+    .regex(
+      /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]+$/,
+      'El nombre solo debe contener letras, numeros y espacios.'
+    ),
 
   price: z
     .number({
