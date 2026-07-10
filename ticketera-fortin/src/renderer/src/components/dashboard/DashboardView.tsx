@@ -5,7 +5,7 @@ import { DashboardProvider, useDashboardContext } from '../context/dashboardCont
 import { DashboardCashBox } from './DashboardCashBox'
 
 const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
-  const { registersList, sales, isLoading, currentCashBox, isFiltering } = useDashboardContext()
+  const { registersList, sales, isLoading, currentCashBox, isFiltering, dateRange } = useDashboardContext()
 
   const boxesToShow = isFiltering ? registersList : currentCashBox ? [currentCashBox] : []
 
@@ -75,7 +75,7 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
         ) : (
           <>
             {boxesToShow.length === 0 ? (
-              <p style={{ textAlign: 'center', marginTop: '50px', color: 'gray' }}>
+              <p style={{ textAlign: 'center', marginTop: '50px', color: 'white' }}>
                 {!isFiltering
                   ? 'No hay ninguna caja abierta actualmente.'
                   : 'No se encontraron cajas en las fechas seleccionadas.'}
@@ -123,7 +123,7 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
                   letterSpacing: '0.5px'
                 }}
               >
-                TOTAL EN RANGO
+                TOTAL DE VENTAS DESDE: <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>{dateRange.from.split('-').reverse().join('/')} </strong> HASTA: <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>{dateRange.to.split('-').reverse().join('/')}</strong>
               </span>
               <span style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>
                 Ventas: <strong style={{ color: 'white' }}>{totalSalesCount}</strong> | Productos:{' '}
