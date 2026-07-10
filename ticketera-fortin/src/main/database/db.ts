@@ -1,8 +1,8 @@
+import { app } from 'electron'
 import { Sequelize } from 'sequelize'
 import path from 'path'
 
-// Se creará en la raíz de tu proyecto con este nombre
-const dbPath = path.join(__dirname, '..', 'ticketera_fortin.sqlite')
+const dbPath = path.join(app.getPath('userData'), 'baseTicketera.sqlite')
 
 const sequelize = new Sequelize({
   dialect: 'sqlite',
