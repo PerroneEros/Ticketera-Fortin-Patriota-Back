@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useDashboardContext } from '../context/dashboardContext'
 import { registerMovement } from '../service/cashRegisterService'
+import { parseInputValue } from '../utils/formatters'
 
 interface Props {
   onClose: () => void
@@ -8,7 +9,7 @@ interface Props {
 
 export const DashboardMovementModal = ({ onClose }: Props) => {
   const [type, setType] = useState<'ingreso' | 'egreso'>('ingreso')
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState(0)
   const [description, setDescription] = useState('')
   const [method, setMethod] = useState<'efectivo' | 'transferencia'>('efectivo')
   const [error, setError] = useState('')
@@ -20,7 +21,7 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
     e.preventDefault()
     setError('')
 
-    const numAmount = parseFloat(amount)
+    const numAmount = Number(amount)
     if (isNaN(numAmount) || numAmount <= 0) {
       setError('El monto debe ser mayor a 0.')
       return
@@ -41,9 +42,8 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
         date: new Date().toISOString()
       })
 
-      refreshData() 
-      onClose() 
-
+      refreshData()
+      onClose()
     } catch (err: any) {
       console.error(err)
       setError(err.response?.data?.message || 'Error al guardar el movimiento.')
@@ -52,98 +52,252 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
     }
   }
 
-
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-      background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(3px)',
-      display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000
-    }}>
-      <div style={{
-        background: 'white', padding: '30px', borderRadius: '15px',
-        width: '100%', maxWidth: '400px', boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
-        position: 'relative'
-      }}>
-        
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px', marginBottom: '20px' }}>
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(3px)',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000
+      }}
+    >
+      <div
+        style={{
+          background: 'white',
+          padding: '30px',
+          borderRadius: '15px',
+          width: '100%',
+          maxWidth: '400px',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+          position: 'relative'
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid #f3f4f6',
+            paddingBottom: '15px',
+            marginBottom: '20px'
+          }}
+        >
           <h2 style={{ margin: 0, fontSize: '18px', color: '#1f2937' }}>Registrar movimiento</h2>
-          <button onClick={onClose} style={{ background: 'transparent', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'gray' }}>✕</button>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer',
+              color: 'gray'
+            }}
+          >
+            ✕
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
+        >
           <div style={{ display: 'flex', gap: '10px' }}>
-            <button type="button" onClick={() => setType('ingreso')}
+            <button
+              type="button"
+              onClick={() => setType('ingreso')}
               style={{
-                flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', gap: '8px',
+                flex: 1,
+                padding: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '8px',
                 background: type === 'ingreso' ? '#ecfdf5' : '#f9fafb',
                 color: type === 'ingreso' ? '#10b981' : 'gray',
                 border: type === 'ingreso' ? '2px solid #10b981' : '1px solid #e5e7eb'
-              }}>
+              }}
+            >
               ↑ Ingreso
             </button>
-            <button type="button" onClick={() => setType('egreso')}
+            <button
+              type="button"
+              onClick={() => setType('egreso')}
               style={{
-                flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', display: 'flex', justifyContent: 'center', gap: '8px',
+                flex: 1,
+                padding: '12px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '8px',
                 background: type === 'egreso' ? '#fef2f2' : '#f9fafb',
                 color: type === 'egreso' ? '#ef4444' : 'gray',
                 border: type === 'egreso' ? '2px solid #ef4444' : '1px solid #e5e7eb'
-              }}>
+              }}
+            >
               ↓ Egreso
             </button>
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Monto ($)</label>
-            <input type="number" step="0.01" placeholder="$ 0.00" value={amount} onChange={(e) => setAmount(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f4f0ec', fontSize: '16px', outline: 'none' }} />
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                color: 'gray',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Monto ($)
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="$ 0.00"
+              value={Number(amount).toLocaleString('es-AR')}
+              onChange={(e) => setAmount(parseInputValue(e.target.value))}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                background: '#f4f0ec',
+                fontSize: '16px',
+                outline: 'none'
+              }}
+            />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Descripción</label>
-            <input type="text" placeholder="Ej: Compra de insumos..." value={description} onChange={(e) => setDescription(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #e5e7eb', background: '#f4f0ec', fontSize: '16px', outline: 'none' }} />
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                color: 'gray',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Descripción
+            </label>
+            <input
+              type="text"
+              placeholder="Ej: Compra de insumos..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #e5e7eb',
+                background: '#f4f0ec',
+                fontSize: '16px',
+                outline: 'none'
+              }}
+            />
           </div>
 
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', color: 'gray', fontSize: '14px', fontWeight: 'bold' }}>Método</label>
+            <label
+              style={{
+                display: 'block',
+                marginBottom: '8px',
+                color: 'gray',
+                fontSize: '14px',
+                fontWeight: 'bold'
+              }}
+            >
+              Método
+            </label>
             <div style={{ display: 'flex', gap: '10px' }}>
-              <button type="button" onClick={() => setMethod('efectivo')}
+              <button
+                type="button"
+                onClick={() => setMethod('efectivo')}
                 style={{
-                  flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold',
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
                   background: method === 'efectivo' ? '#10b981' : '#f9fafb',
                   color: method === 'efectivo' ? 'white' : 'gray',
                   border: method === 'efectivo' ? 'none' : '1px solid #e5e7eb'
-                }}>
+                }}
+              >
                 Efectivo
               </button>
-              <button type="button" onClick={() => setMethod('transferencia')}
+              <button
+                type="button"
+                onClick={() => setMethod('transferencia')}
                 style={{
-                  flex: 1, padding: '12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold',
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
                   background: method === 'transferencia' ? '#0ea5e9' : '#f9fafb',
                   color: method === 'transferencia' ? 'white' : 'gray',
                   border: method === 'transferencia' ? 'none' : '1px solid #e5e7eb'
-                }}>
+                }}
+              >
                 Transferencia
               </button>
             </div>
           </div>
 
-          {error && <p style={{ color: '#ef4444', margin: 0, fontSize: '14px', textAlign: 'center' }}>{error}</p>}
+          {error && (
+            <p style={{ color: '#ef4444', margin: 0, fontSize: '14px', textAlign: 'center' }}>
+              {error}
+            </p>
+          )}
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-            <button type="button" onClick={onClose} disabled={isSubmitting}
-              style={{ flex: 1, padding: '14px', borderRadius: '8px', cursor: 'pointer', background: 'white', color: 'gray', border: '1px solid #e5e7eb', fontWeight: 'bold' }}>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                background: 'white',
+                color: 'gray',
+                border: '1px solid #e5e7eb',
+                fontWeight: 'bold'
+              }}
+            >
               Cancelar
             </button>
-            <button type="submit" disabled={isSubmitting}
-              style={{ flex: 1, padding: '14px', borderRadius: '8px', cursor: isSubmitting ? 'not-allowed' : 'pointer', color: 'white', border: 'none', fontWeight: 'bold',
-                background: type === 'ingreso' ? '#10b981' : '#ef4444', opacity: isSubmitting ? 0.7 : 1
-              }}>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                flex: 1,
+                padding: '14px',
+                borderRadius: '8px',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                color: 'white',
+                border: 'none',
+                fontWeight: 'bold',
+                background: type === 'ingreso' ? '#10b981' : '#ef4444',
+                opacity: isSubmitting ? 0.7 : 1
+              }}
+            >
               {isSubmitting ? 'Guardando...' : `Registrar ${type}`}
             </button>
           </div>
-
         </form>
       </div>
     </div>
