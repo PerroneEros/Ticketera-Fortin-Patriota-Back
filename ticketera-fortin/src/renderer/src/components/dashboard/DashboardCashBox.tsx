@@ -59,11 +59,15 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
             }}
           >
             CAJA DEL:{' '}
-            {new Date(cashBox.opened_at).toLocaleTimeString('es-AR', {
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false
-            })}
+            <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '15px' }}>
+              {new Date(cashBox.opened_at).toLocaleTimeString('es-AR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+              })}</strong>
           </h2>
 
           <span
