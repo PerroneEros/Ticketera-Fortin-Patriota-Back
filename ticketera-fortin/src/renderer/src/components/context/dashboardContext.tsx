@@ -71,7 +71,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const fetchDashboardData = async () => {
       setIsLoading(true)
       try {
@@ -84,9 +84,29 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
           cashRegisterService.getCurrentRegister() 
         ])
 
-        setSales(Array.isArray(salesData) ? salesData : [])
-        setRegistersList(Array.isArray(registersData) ? registersData : [])
+        const salesArray = Array.isArray(salesData) ? salesData : [];
+        const registersArray = Array.isArray(registersData) ? registersData : [];
+
+        setSales(salesArray)
+        setRegistersList(registersArray)
         setCurrentCashBox(activeBox)
+
+        if (isAllTime && registersArray.length > 0) {
+          const getLocalDate = (dateString: string) => {
+            const d = new Date(dateString);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          };
+
+          const newestDate = getLocalDate(registersArray[0].opened_at);
+          const oldestDate = getLocalDate(registersArray[registersArray.length - 1].opened_at);
+
+          setDateRange(prev => {
+            if (prev.from !== oldestDate || prev.to !== newestDate) {
+              return { from: oldestDate, to: newestDate };
+            }
+            return prev;
+          });
+        }
       } catch (error) {
         console.error('Error al traer los datos del dashboard:', error)
         setSales([]) 

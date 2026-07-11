@@ -52,7 +52,7 @@ export const DashboardHeader = ({ onOpenModal }: { onOpenModal: () => void }) =>
           <span style={{ fontWeight: 'bold', color: 'white', fontSize: '14px' }}>Desde:</span>
           <input 
             type="date" value={dateRange.from} onChange={(e) => handleDateChange(e, 'from')}
-            style={{ border: 'none', background: 'white', padding: '6px 12px', borderRadius: '20px', color: colorOliva, cursor: 'pointer', outline: 'none', opacity: (!isFiltering || isAllTime) ? 0.5 : 1, fontWeight: 'bold' }}
+            style={{ border: 'none', background: 'white', padding: '6px 12px', borderRadius: '20px', color: colorOliva, cursor: 'pointer', outline: 'none', opacity: !isFiltering ? 0.5 : 1, fontWeight: 'bold' }}
           />
         </div>
         
@@ -60,7 +60,7 @@ export const DashboardHeader = ({ onOpenModal }: { onOpenModal: () => void }) =>
           <span style={{ fontWeight: 'bold', color: 'white', fontSize: '14px' }}>Hasta:</span>
           <input 
             type="date" value={dateRange.to} onChange={(e) => handleDateChange(e, 'to')}
-            style={{ border: 'none', background: 'white', padding: '6px 12px', borderRadius: '20px', color: colorOliva, cursor: 'pointer', outline: 'none', opacity: (!isFiltering || isAllTime) ? 0.5 : 1, fontWeight: 'bold' }}
+            style={{ border: 'none', background: 'white', padding: '6px 12px', borderRadius: '20px', color: colorOliva, cursor: 'pointer', outline: 'none', opacity: !isFiltering ? 0.5 : 1, fontWeight: 'bold' }}
           />
         </div>
 
