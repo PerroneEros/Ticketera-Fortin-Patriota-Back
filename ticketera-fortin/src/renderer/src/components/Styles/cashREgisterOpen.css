@@ -1,0 +1,215 @@
+/* =========================================
+   ESTILOS PARA HOME.TSX (APERTURA DE CAJA)
+   ========================================= */
+
+/* Fondo oscuro desenfocado */
+.open-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* La tarjeta principal */
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  position: relative;
+}
+
+/* =========================================
+   MITAD SUPERIOR (Fondo Oscuro y Logo)
+   ========================================= */
+.card-header-black {
+  background-color: #000000;
+  padding: 30px 20px 20px 20px;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+}
+
+/* Botón de cerrar X */
+.open-btn-close-x {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.open-btn-close-x:hover {
+  color: white;
+}
+
+.home-logo {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 15px auto;
+  border-radius: 50%;
+  background-color: #ffffff;
+  object-fit: contain; 
+  padding: 12px; 
+  border: 4px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: block;
+}
+
+.home-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.home-subtitle {
+  margin: 4px 0 16px 0;
+  font-size: 13px;
+  color: #d5cfbd;
+  font-weight: normal;
+}
+
+.home-date {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* =========================================
+   MITAD INFERIOR (Formulario Blanco)
+   ========================================= */
+.card-body-white {
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+.open-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Contenedor del input estilo beige (Asegurado) */
+.input-container {
+  display: flex;
+  align-items: center;
+  background-color: #f1ede3 !important;
+  border: 1px solid #d5cfbd !important;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 50px;
+}
+
+/* Símbolo de moneda aislado y blindado */
+.open-currency-symbol {
+  color: #475569 !important; /* Forzamos color gris oscuro visible */
+  font-size: 18px !important;
+  font-weight: bold !important;
+  margin-right: 12px !important; /* Separación estricta del input */
+  display: inline-block !important;
+}
+
+/* Campo de texto numérico */
+.amount-input {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 18px !important;
+  font-weight: bold !important;
+  color: #334155 !important;
+  width: 100%;
+}
+
+/* Remueve las flechitas por defecto de los inputs numéricos */
+.amount-input::-webkit-outer-spin-button,
+.amount-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-helper {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.open-error-text {
+  color: #ef4444;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+}
+
+/* =========================================
+   BOTONES
+   ========================================= */
+.open-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-open-register {
+  width: 100%;
+  padding: 16px;
+  background-color: #555843;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-open-register:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-open-register:hover:not(:disabled) {
+  background-color: #38bdf8;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 14px;
+  background-color: transparent;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #f8fafc;
+  color: #334155;
+}

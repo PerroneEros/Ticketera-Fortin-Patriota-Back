@@ -10,6 +10,7 @@ class Product
   declare name: string
   declare price: number
   declare category_id: number
+  declare isActive: boolean
 }
 Product.init(
   {
@@ -34,6 +35,11 @@ Product.init(
         key: 'category_id'
       },
       allowNull: false
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true // Todo producto nuevo nace activo
     }
   },
   {
@@ -42,6 +48,5 @@ Product.init(
     timestamps: true,
     underscored: true
   }
-)
-
+  )
 export default Product

@@ -1,0 +1,53 @@
+/* ==============================================================
+   LISTA DE PRODUCTOS DESACTIVADOS (Estilo Refinado)
+   ============================================================== */
+.Card-ProductsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1000px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+
+.activate-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  align-items: center;
+  gap: 15px;
+  background: white;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.2s;
+  list-style: none;
+}
+
+.activate-item:hover {
+  border-color: #555843;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.activate-item b { color: #1e293b; font-size: 15px; }
+.activate-item div { color: #475569; font-size: 14px; }
+
+/* Botón de Habilitar */
+.btn-activate {
+  background-color: #555843;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-activate:hover { background-color: #38bdf8; }
+
+.status-badge {
+  color: #ef4444;
+  font-weight: 600;
+  font-size: 13px;
+}

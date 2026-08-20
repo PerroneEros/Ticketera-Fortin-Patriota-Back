@@ -1,7 +1,9 @@
 import { DataTypes, Model, Optional } from 'sequelize'
 import cash_registerAttributes from './interface/cash_registersAttributes'
 import sequelize from '../database/db'
+
 type cash_registerCreationAttributes = Optional<cash_registerAttributes, 'cash_register_id'>
+
 class Cash_register
   extends Model<cash_registerAttributes, cash_registerCreationAttributes>
   implements cash_registerAttributes
@@ -13,6 +15,7 @@ class Cash_register
   declare closed_at: Date
   declare status: string
 }
+
 Cash_register.init(
   {
     cash_register_id: {

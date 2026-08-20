@@ -1,0 +1,106 @@
+/* ==============================================================
+   MODALES DE PRODUCTO (Estilo Refinado)
+   ============================================================== */
+.modal-prod-overlay { 
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+  background: rgba(0,0,0,0.4); 
+  display: flex; justify-content: center; align-items: center; 
+  z-index: 9999; 
+  backdrop-filter: blur(2px); 
+}
+
+.modal-prod-content { 
+  background: white; 
+  width: 100%; 
+  max-width: 440px; 
+  border-radius: 12px; 
+  overflow: hidden; 
+  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  border: none;
+}
+
+.modal-prod-header { 
+  background: #555843; 
+  color: white; 
+  padding: 18px 24px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+}
+
+.modal-prod-header h3 { font-size: 16px; font-weight: 600; margin: 0; }
+
+.modal-prod-body { 
+  padding: 24px; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px; 
+}
+
+.prod-input-group { display: flex; flex-direction: column; gap: 6px; }
+
+.prod-input-group label { 
+  font-size: 13px; 
+  font-weight: 600; 
+  color: #475569; 
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.prod-input-group input, .prod-input-group select { 
+  width: 100%; 
+  padding: 12px; 
+  border: 1px solid #e2e8f0; 
+  border-radius: 8px; 
+  background-color: #f8fafc; 
+  outline: none; 
+  transition: border-color 0.2s;
+  
+  /* Flecha personalizada para el select */
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.prod-input-group input:focus, .prod-input-group select:focus { border-color: #555843; }
+
+.modal-prod-actions { 
+  padding: 16px 24px; 
+  display: flex; 
+  justify-content: flex-end; 
+  gap: 12px; 
+  background-color: #fafafa;
+}
+
+.btn-prod-confirm { 
+  padding: 10px 24px; 
+  border-radius: 8px; 
+  border: none; 
+  background-color: #555843; 
+  color: white; 
+  font-weight: 600; 
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-prod-confirm:hover { background-color: #3f4233; }
+
+.btn-prod-cancel { 
+  padding: 10px 24px; 
+  border-radius: 8px; 
+  border: 1px solid #e2e8f0; 
+  background-color: white; 
+  color: #64748b; 
+  font-weight: 600; 
+  cursor: pointer; 
+}
+.btn-prod-cancel:hover { background-color: #f1f5f9; }
+
+.btn-prod-close { 
+  background: none; border: none; color: white; 
+  cursor: pointer; font-size: 18px; opacity: 0.8; 
+}
+.btn-prod-close:hover { opacity: 1; }

@@ -1,33 +1,31 @@
-import Versions from './components/Versions'
-import electronLogo from './assets/electron.svg'
+import logo from './assets/logo.jpeg'
+import Header from './components/header/header'
+import { ProductListProvider } from './components/context/productListContext'
+import { CategoryProvider } from './components/context/categoryContext'
+import { ProductListProviderDisable } from './components/context/productListDisableContext'
+import { CashRegisterProvider } from './components/context/cashRegisterContext'
+import Routs from './routes'
+import CartListProvider from './components/context/cartListContext'
+import { Toaster } from 'react-hot-toast'
 
 function App(): React.JSX.Element {
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
     <>
-      <img alt="logo" className="logo" src={electronLogo} />
-      <div className="creator">Powered by electron-vite</div>
-      <div className="text">
-        Build an Electron app with <span className="react">React</span>
-        &nbsp;and <span className="ts">TypeScript</span>
-      </div>
-      <p className="tip">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-      <div className="actions">
-        <div className="action">
-          <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="action">
-          <a target="_blank" rel="noreferrer" onClick={ipcHandle}>
-            Send IPC
-          </a>
-        </div>
-      </div>
-      <Versions></Versions>
+      <Toaster position="bottom-center" reverseOrder={false} />
+      <CashRegisterProvider>
+        <CategoryProvider>
+          <CartListProvider>
+            <ProductListProviderDisable>
+              <ProductListProvider>
+                <Header />
+                <Routs />
+              </ProductListProvider>
+            </ProductListProviderDisable>
+          </CartListProvider>
+        </CategoryProvider>
+      </CashRegisterProvider>
     </>
   )
 }

@@ -1,74 +1,87 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
-
+import icon from '../../resources/logo.jpeg?asset'
+import { initDB } from './database/initDb'
+import express from 'express'
+import cors from 'cors'
+import apiRouter from './routes/index'
+// evita el error de eslint de any porque .listen devuelve server de http
+import { Server } from 'http'
+// es como se crea la ventana
 function createWindow(): void {
-  // Create the browser window.
+  // indica el tamaño de la ventana
   const mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
-
+  // la ventana se mantiene invisble y cuando esta lista se despliega
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
   })
-
+  // hace que los links se abran en un navegador y no en la app
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
-
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
+  //si estas en modo dev hace que los cambias se reflejen en tiempo real si esta en modo .exe lee index.html
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+// variable para guardar el servidor cuando se encuentra y despues poder cerrarlo
+// al asignarle tipo server evitamos que salte el error de eslint por usar la variable any
+let expressServer: Server | null = null
+// este metodo se llama cuando electron se termina de armar
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
   // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // IPC test
+  // Si desde tu HTML le mandan un mensaje llamado 'ping', él responde 'pong' en la consola.
+  // Acá mismo es donde vas a poner tus escuchadores para imprimir tickets o buscar productos en SQLite
   ipcMain.on('ping', () => console.log('pong'))
-
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
+  //inicia la base de datos
+  try {
+    await initDB()
+  } catch (error) {
+    console.error('no se pudo iniciar la base de datos ', error)
+    return
   }
+  //creacion de express
+  const expressAPP = express()
+  expressAPP.use(cors())
+  // se usa para que express acepte json
+  expressAPP.use(express.json())
+  expressAPP.use('/api', apiRouter)
+  //log para mostrar donde funciona express reemplazar en el futuro para que busque el puerto libre solo
+  expressServer = expressAPP.listen(34567, () => {
+    console.log('el servidor esta escuchando en el puerto http://localhost:34567 ')
+  })
+
+  //llama a la funcion para que aparezca la ventana
+  createWindow()
 })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// hace que cuando se cierra la ventana deje de andar la app lo de darwin es para mac
+app.on('window-all-closed', () => {
+  // express se para cuando se cierra la ventana
+  if (expressServer) {
+    expressServer.close()
+    console.log('server cerrado')
+  }
+  app.quit()
+})
