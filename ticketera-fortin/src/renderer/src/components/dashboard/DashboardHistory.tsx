@@ -7,6 +7,20 @@ interface Props {
 }
 
 export const DashboardHistory = ({ sales, cashBox }: Props) => {
+  let expectedTotal = 0
+  sales.forEach((sale) => {
+    if (sale.paymentMethod === 'cierre') return
+
+    const cash = Number(sale.cashAmount) || 0
+    const transfer = Number(sale.transferAmount) || 0
+    const sumaMovimiento = cash + transfer
+
+    if (sale.paymentMethod === 'egreso') {
+      expectedTotal -= sumaMovimiento
+    } else {
+      expectedTotal += sumaMovimiento
+    }
+  })
   const getMethodBadge = (sale: any) => {
     const method = sale.paymentMethod
     let bgColor = '#e5e7eb'
@@ -25,12 +39,10 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
     } else if (method === 'ingreso') {
       bgColor = '#dcfce7'
       color = '#16a34a'
-      // Verificamos si la plata entró en efectivo o por transferencia
       displayText = sale.cashAmount > 0 ? 'INGRESO EFECTIVO' : 'INGRESO TRANSFERENCIA'
     } else if (method === 'egreso') {
       bgColor = '#fee2e2'
       color = '#ef4444'
-      // Lo mismo para los egresos
       displayText = sale.cashAmount > 0 ? 'EGRESO EFECTIVO' : 'EGRESO TRANSFERENCIA'
     } else if (method === 'apertura') {
       bgColor = '#fef08a'
@@ -64,12 +76,12 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginTop: '4px' }}>
           {getMethodBadge(sale)}
           <span style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>
-            Efvo: $
+            Efectivo: $
             {sale.cashAmount?.toLocaleString('es-AR', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             })}{' '}
-            | Transf: $
+            | Transferencia: $
             {sale.transferAmount?.toLocaleString('es-AR', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
@@ -83,15 +95,19 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
 
   const displaySales = [...sales]
   if (cashBox.status === 'closed') {
+const finalAmount = Number(cashBox.closing) || 0
+    const closingDifference = finalAmount - expectedTotal
+
     displaySales.unshift({
       sales_id: cashBox.cash_register_id + 900000,
-      total: cashBox.closing,
+      total: finalAmount,
       paymentMethod: 'cierre',
       cashAmount: 0,
       transferAmount: 0,
       date: cashBox.closed_at,
       Sale_items: [],
-      description: `Cierre de Caja`
+      description: `Cierre de Caja`,
+      difference: closingDifference
     } as any)
   }
 
@@ -125,7 +141,7 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
             No hay movimientos en esta caja
           </p>
         ) : (
-          displaySales.map((sale) => (
+          displaySales.map((sale:any) => (
             <div
               key={sale.sales_id}
               style={{
@@ -163,6 +179,22 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
                     maximumFractionDigits: 2
                   })}
                 </strong>
+             {sale.paymentMethod === 'cierre' && sale.difference !== undefined && (
+          <div
+            style={{
+              fontSize: '14px',
+              marginTop: '4px',
+              fontWeight: 'bold',
+              color: sale.difference > 0 ? '#22c55e' : sale.difference < 0 ? '#ef4444' : '#9ca3af'
+            }}
+          >
+            Diferencia: {sale.difference > 0 ? '+' : ''}$
+            {sale.difference.toLocaleString('es-AR', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          </div>
+                )}
               </div>
             </div>
           ))
