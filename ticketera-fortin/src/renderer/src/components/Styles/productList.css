@@ -1,6 +1,4 @@
-/* ==============================================================
-   1. LAYOUT GENERAL (Liberamos la pantalla)
-   ============================================================== */
+
 .products-manager { 
   display: flex;
   flex-direction: column;
@@ -10,9 +8,6 @@
   box-sizing: border-box;
 }
 
-/* ==============================================================
-   2. FILTROS Y ACCIONES
-   ============================================================== */
 .Card-ProductsList {
   width: 100%; 
   max-width: 1000px; 
@@ -68,9 +63,6 @@
   color: #555843; 
 }
 
-/* ==============================================================
-   3. CONTENEDOR CON SCROLL PARA LA TABLA (Altura Estricta)
-   ============================================================== */
 .table-scroll-wrapper {
   width: 100%;
   max-width: 1000px;

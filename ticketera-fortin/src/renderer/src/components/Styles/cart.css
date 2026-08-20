@@ -1,6 +1,4 @@
-/* ==============================================================
-   AJUSTE DE LAYOUT (products.css)
-   ============================================================== */
+
 /* Asegúrate de que .home-container tenga flex-direction: row ahora */
 .home-container {
   display: flex;
@@ -24,9 +22,7 @@
   flex-shrink: 0;
 }
 
-/* ==============================================================
-   ESTILOS DEL CARRITO (TICKET)
-   ============================================================== */
+
 .cart-container {
   background-color: #ffffff;
   border-radius: 12px;
@@ -98,14 +94,14 @@
 
 .cart-item-name {
   margin: 0;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
   color: #1e293b;
 }
 
 .cart-item-price {
   margin: 0;
-  font-size: 14px;
+  font-size: 18px;
   color: #555843;
   font-weight: 700;
 }
@@ -117,6 +113,7 @@
   background-color: #f1f5f9;
   border-radius: 6px;
   padding: 2px;
+
 }
 
 .cart-item-controls button {
@@ -142,7 +139,7 @@
 .cart-item-qty {
   width: 24px;
   text-align: center;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 600;
   color: #1e293b;
 }
@@ -161,14 +158,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: #1e293b;
 }
 
 .cart-total-amount {
   color: #38bdf8;
-  font-size: 22px;
+  font-size: 25px;
 }
 
 /* Botones de acción */

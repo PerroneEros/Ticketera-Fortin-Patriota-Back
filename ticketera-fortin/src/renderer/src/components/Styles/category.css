@@ -20,15 +20,14 @@
   align-items: center;
   gap: 8px;
   transition: background 0.2s;
+  font-size: 16px;
 }
 
 .btn-orange:hover {
   background-color: #38bdf8;
 }
 
-/* ==============================================================
-   2. PÍLDORAS DE CATEGORÍA
-   ============================================================== */
+
 .category-filter-container {
   display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
   padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;
@@ -36,7 +35,7 @@
 
 .category-pill {
   padding: 8px 20px; border-radius: 25px; border: 1px solid #dcd7c9;
-  background-color: #fff; color: #000; font-weight: 600; font-size: 14px;
+  background-color: #fff; color: #000; font-weight: 600; font-size: 17px;
   cursor: pointer; transition: all 0.2s;
 }
 
@@ -192,6 +191,7 @@
   border-radius: 6px; /* Bordes redondeados en cada item */
   margin-bottom: 2px; /* Pequeña separación entre opciones */
   transition: all 0.2s ease;
+  font-size: 18px; /* Tamaño de fuente ligeramente más grande para mejor legibilidad */
 }
 
 /* Hover suave para agregar y editar */
