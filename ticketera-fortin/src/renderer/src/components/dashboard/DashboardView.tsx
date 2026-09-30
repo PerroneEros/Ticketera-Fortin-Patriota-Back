@@ -61,7 +61,7 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
           gap: '20px',
           display: 'flex',
           flexDirection: 'column',
-          maxWidth: '900px',
+          maxWidth: '1200px',
           margin: '0 auto',
           paddingBottom: '120px'
         }}
