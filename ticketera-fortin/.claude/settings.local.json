@@ -1,0 +1,5 @@
+{
+  "permissions": {
+    "allow": ["Bash(node tools/license/generate-license.mjs:*)"]
+  }
+}
