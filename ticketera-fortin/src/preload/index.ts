@@ -1,27 +1,13 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
 
-// Custom APIs for renderer
+// Only these calls reach the main process; the renderer gets no generic ipcRenderer access.
 const api = {
   checkLicense: () => ipcRenderer.invoke('check-license'),
 
   // Función para mandarle la clave tipeada a Electron
-  activateLicense: (key: string) => ipcRenderer.invoke('activate-license', key)
+  activateLicense: (key: string) => ipcRenderer.invoke('activate-license', key),
+
+  getApiToken: () => ipcRenderer.invoke('get-api-token')
 }
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
-  }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
-}
+contextBridge.exposeInMainWorld('api', api)

@@ -1,39 +1,10 @@
 import React from 'react'
-import { Sale } from '../context/dashboardContext'
+import { SalesSummary } from '../service/salesService'
 
-export const DashboardCards = ({ sales }: { sales: Sale[] }) => {
-  const ventasReales = sales.filter(
-    (s) =>
-      s.paymentMethod !== 'apertura' &&
-      s.paymentMethod !== 'cierre' &&
-      s.paymentMethod !== 'ingreso' &&
-      s.paymentMethod !== 'egreso'
-  )
-
-  const cantidadVentas = ventasReales.length
-
-  const cantidadProductos = ventasReales.reduce((acc, sale) => {
-    const itemsCount = sale.Sale_items
-      ? sale.Sale_items.reduce((sum: any, item: any) => sum + (Number(item.quantity) || 0), 0)
-      : 0
-    return acc + itemsCount
-  }, 0)
-
-  let granTotal = 0
-
-  sales.forEach((sale) => {
-    if (sale.paymentMethod === 'cierre') return
-
-    const cash = Number(sale.cashAmount) || 0
-    const transfer = Number(sale.transferAmount) || 0
-    const sumaMovimiento = cash + transfer
-
-    if (sale.paymentMethod === 'egreso') {
-      granTotal -= sumaMovimiento
-    } else {
-      granTotal += sumaMovimiento
-    }
-  })
+export const DashboardCards = ({ summary }: { summary: SalesSummary }) => {
+  const cantidadVentas = summary.salesCount
+  const cantidadProductos = summary.unitsCount
+  const granTotal = summary.money.total
 
   const cardStyle = {
     background: 'white',

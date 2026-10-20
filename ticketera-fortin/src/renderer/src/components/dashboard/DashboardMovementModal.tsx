@@ -38,8 +38,7 @@ export const DashboardMovementModal = ({ onClose }: Props) => {
         type,
         amount: numAmount,
         description,
-        method,
-        date: new Date().toISOString()
+        method
       })
 
       refreshData()

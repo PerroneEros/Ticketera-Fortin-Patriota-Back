@@ -1,4 +1,3 @@
-import logo from './assets/logo.jpeg'
 import Header from './components/header/header'
 import { ProductListProvider } from './components/context/productListContext'
 import { CategoryProvider } from './components/context/categoryContext'
@@ -14,7 +13,6 @@ function App(): React.JSX.Element {
   const [loading, setLoading] = useState(true)
   const [isLicensed, setIsLicensed] = useState(false)
   const [machineId, setMachineId] = useState('')
-  const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
   useEffect(() => {
     const checkAuth = async () => {
       const result = await window.api.checkLicense()

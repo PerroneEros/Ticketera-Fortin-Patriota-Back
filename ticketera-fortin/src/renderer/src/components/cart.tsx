@@ -2,7 +2,6 @@ import toast from 'react-hot-toast'
 import { useCartList } from './context/cartListContext'
 import { useState } from 'react'
 import Method from './method'
-import { getCurrentRegister } from './service/cashRegisterService'
 import { salesServiceFront } from './service/salesService'
 import './Styles/cart.css'
 
@@ -24,33 +23,28 @@ export default function Cart() {
 
   const handlePrintandSell = async (paymentDetails) => {
     setErrorMsg('')
-    console.log('detalle del pago', paymentDetails)
-    toast.success('Pago confirmado')
     try {
-      const cash_register = await getCurrentRegister()
-      const newSale = {
-        cash_register_id: cash_register.cash_register_id,
-        date: new Date(),
-        total: total,
+      await salesServiceFront.createSale({
         paymentMethod: paymentDetails.method,
         cashAmount: paymentDetails.cashAmount || 0,
         transferAmount: paymentDetails.transferAmount || 0,
+        expectedTotal: total,
         items: cartList.map((prod) => ({
           id_product: prod.id_product,
-          quantity: prod.quantity || 1,
-          unit_price: prod.price,
-          total: prod.price * (prod.quantity || 1),
-          printed: true,
-          created_at: new Date()
+          quantity: prod.quantity || 1
         }))
-      }
-      await salesServiceFront.createSale(newSale)
+      })
       setCartList([])
       setShowPaymentMethod(false)
-      toast.success('Venta finalizada')
+      toast.success('Venta registrada')
     } catch (error) {
       console.error(error)
-      setErrorMsg('Error: no se imprimió.')
+      const apiMessage = (error as { response?: { data?: { message?: string } } }).response?.data
+        ?.message
+      const message = apiMessage || 'Error: no se pudo registrar la venta.'
+      // The payment modal covers the cart, so the reason is also shown as a toast
+      toast.error(message)
+      setErrorMsg(message)
     }
   }
 

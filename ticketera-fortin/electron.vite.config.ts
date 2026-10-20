@@ -3,7 +3,8 @@ import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  main: {},
+  // V8 bytecode makes the license check much harder to read or patch than plain JS.
+  main: { build: { bytecode: true } },
   preload: {},
   renderer: {
     resolve: {

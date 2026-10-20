@@ -4,7 +4,10 @@ import { CashMovementsAttributes } from './interface/cashMovementsAttributes'
 
 type CashMovementsCreationAttributes = Optional<CashMovementsAttributes, 'movement_id'>
 
-class Cash_movements extends Model<CashMovementsAttributes, CashMovementsCreationAttributes> implements CashMovementsAttributes {
+class Cash_movements
+  extends Model<CashMovementsAttributes, CashMovementsCreationAttributes>
+  implements CashMovementsAttributes
+{
   declare movement_id: number
   declare cash_register_id: number
   declare type: 'ingreso' | 'egreso'
@@ -25,7 +28,7 @@ Cash_movements.init(
     cash_register_id: {
       type: DataTypes.INTEGER,
       references: {
-        model: 'cash_register', 
+        model: 'cash_register',
         key: 'cash_register_id'
       },
       allowNull: false
@@ -35,7 +38,8 @@ Cash_movements.init(
       allowNull: false
     },
     amount: {
-      type: DataTypes.DECIMAL(10, 2), 
+      // Whole pesos; migration 0002 rounded old values and its triggers reject decimals.
+      type: DataTypes.INTEGER,
       allowNull: false
     },
     description: {

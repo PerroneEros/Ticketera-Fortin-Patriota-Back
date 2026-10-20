@@ -1,27 +1,21 @@
 import { Router } from 'express'
-import { 
-  createSale, 
-  getSales, 
-  getSaleById, 
-  getSalesByCashRegister, 
-  deleteSale 
+import {
+  createSale,
+  getSalesByCashRegister,
+  getSalesSummary
 } from '../controllers/salesController'
 
 const router = Router()
 
 // POST - Registrar una nueva venta (El backend busca la caja abierta automáticamente)
-router.post('/', createSale)//ver
+router.post('/', createSale)
 
-// GET - Ver el historial completo de todas las ventas
-router.get('/', getSales) 
-
-// GET - Ver el detalle de una sola venta por ID ( ver/imprimir el detalle)
-router.get('/:id', getSaleById) //podemos usarlo para ver los productos que se vendieron y usarlo para ver cantidad de cada producto que se vendio?
+// GET - Totales del dashboard calculados en el servidor (por rango, por caja o de siempre)
+router.get('/summary', getSalesSummary)
 
 // GET - Ver todas las ventas que se hicieron durante un turno
-router.get('/cash-register/:cash_register_id', getSalesByCashRegister) 
+router.get('/cash-register/:cash_register_id', getSalesByCashRegister)
 
-// DELETE - Eliminar una venta mal cargada por su ID (Borra venta y tickets)
-router.delete('/:id', deleteSale) //para despues 
+// Las ventas nunca se borran: no hay DELETE (constitución, principio 4)
 
 export default router

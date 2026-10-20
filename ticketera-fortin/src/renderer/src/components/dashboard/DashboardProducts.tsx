@@ -1,27 +1,9 @@
 import React from 'react'
-import { Sale } from '../context/dashboardContext'
+import { SalesSummary } from '../service/salesService'
 
-export const DashboardProducts = ({ sales }: { sales: Sale[] }) => {
-  const productStats: Record<string, { quantity: number; total: number }> = {}
-
-  sales.forEach((sale) => {
-    if (sale.paymentMethod !== 'ingreso' && sale.paymentMethod !== 'egreso' && sale.Sale_items) {
-      sale.Sale_items.forEach((item) => {
-        const productName = item.Product?.name || `Producto #${item.id_product}`
-
-        if (!productStats[productName]) {
-          productStats[productName] = { quantity: 0, total: 0 }
-        }
-
-        productStats[productName].quantity += item.quantity
-        productStats[productName].total += item.total
-      })
-    }
-  })
-
-  const sortedProducts = Object.entries(productStats)
-    .map(([name, stats]) => ({ name, ...stats }))
-    .sort((a, b) => b.quantity - a.quantity)
+export const DashboardProducts = ({ summary }: { summary: SalesSummary }) => {
+  // Already grouped by name and sorted by quantity by the API.
+  const sortedProducts = summary.products
 
   const maxQuantity = sortedProducts.length > 0 ? sortedProducts[0].quantity : 1
 

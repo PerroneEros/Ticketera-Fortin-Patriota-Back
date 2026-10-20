@@ -28,21 +28,6 @@ export const productService = {
       order: [['name', 'ASC']]
     })
   },
-  // Busca un producto
-  async getProductById(id: string) {
-    // findOne nos permite buscar por ID, pero agregando más condiciones (como isActive)
-    const product = await Product.findOne({
-      where: { id_product: id, isActive: true },
-      include: [{ model: Category, attributes: ['name'] }]
-    })
-
-    // Si no existe, o si existe pero su isActive es false, tiramos error.
-    // Este error será atrapado por el bloque 'catch' del controlador.
-    if (!product) throw new Error('Producto no encontrado.')
-
-    return product
-  },
-
   // Crea un producto en la base de datos (con auto-reactivación)
   async createProduct(data: CreateProductInput) {
     // 1. REGLA DE NEGOCIO: Validar que la categoría exista

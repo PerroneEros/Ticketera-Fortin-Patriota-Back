@@ -4,20 +4,13 @@ import { useProductList } from '../context/productListContext'
 import '../Styles/category.css'
 
 export const CategoryFilter = () => {
+  // Los hooks van antes de cualquier return (reglas de hooks de React)
   const context = useContext(CategoryContext)
-  if (!context) return null
   const { productList } = useProductList()
+  if (!context) return null
   const { categories, activeCategory, setActiveCategory } = context
-  const contProducts = (category_id: number) => {
-    let cantProduct = 0
-    for (let i = 0; i < productList.length; i++) {
-      let product = productList[i]
-      if (category_id == product.category_id) {
-        cantProduct++
-      }
-    }
-    return cantProduct
-  }
+  const contProducts = (category_id: number): number =>
+    productList.filter((product) => product.category_id == category_id).length
 
   return (
     <div className="category-filter-container">

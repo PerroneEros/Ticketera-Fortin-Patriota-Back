@@ -1,5 +1,6 @@
 import React from 'react'
 import { Sale } from '../context/dashboardContext'
+import { ClosingBreakdown } from './ClosingBreakdown'
 
 interface Props {
   sales: Sale[]
@@ -7,20 +8,6 @@ interface Props {
 }
 
 export const DashboardHistory = ({ sales, cashBox }: Props) => {
-  let expectedTotal = 0
-  sales.forEach((sale) => {
-    if (sale.paymentMethod === 'cierre') return
-
-    const cash = Number(sale.cashAmount) || 0
-    const transfer = Number(sale.transferAmount) || 0
-    const sumaMovimiento = cash + transfer
-
-    if (sale.paymentMethod === 'egreso') {
-      expectedTotal -= sumaMovimiento
-    } else {
-      expectedTotal += sumaMovimiento
-    }
-  })
   const getMethodBadge = (sale: any) => {
     const method = sale.paymentMethod
     let bgColor = '#e5e7eb'
@@ -95,8 +82,7 @@ export const DashboardHistory = ({ sales, cashBox }: Props) => {
 
   const displaySales = [...sales]
   if (cashBox.status === 'closed') {
-const finalAmount = Number(cashBox.closing) || 0
-    const closingDifference = finalAmount - expectedTotal
+    const finalAmount = Number(cashBox.closing) || 0
 
     displaySales.unshift({
       sales_id: cashBox.cash_register_id + 900000,
@@ -106,8 +92,7 @@ const finalAmount = Number(cashBox.closing) || 0
       transferAmount: 0,
       date: cashBox.closed_at,
       Sale_items: [],
-      description: `Cierre de Caja`,
-      difference: closingDifference
+      description: `Cierre de Caja`
     } as any)
   }
 
@@ -141,7 +126,7 @@ const finalAmount = Number(cashBox.closing) || 0
             No hay movimientos en esta caja
           </p>
         ) : (
-          displaySales.map((sale:any) => (
+          displaySales.map((sale: any) => (
             <div
               key={sale.sales_id}
               style={{
@@ -179,22 +164,7 @@ const finalAmount = Number(cashBox.closing) || 0
                     maximumFractionDigits: 2
                   })}
                 </strong>
-             {sale.paymentMethod === 'cierre' && sale.difference !== undefined && (
-          <div
-            style={{
-              fontSize: '14px',
-              marginTop: '4px',
-              fontWeight: 'bold',
-              color: sale.difference > 0 ? '#22c55e' : sale.difference < 0 ? '#ef4444' : '#9ca3af'
-            }}
-          >
-            Diferencia: {sale.difference > 0 ? '+' : ''}$
-            {sale.difference.toLocaleString('es-AR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2
-            })}
-          </div>
-                )}
+                {sale.paymentMethod === 'cierre' && <ClosingBreakdown register={cashBox} />}
               </div>
             </div>
           ))

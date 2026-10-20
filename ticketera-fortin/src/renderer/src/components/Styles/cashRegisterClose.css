@@ -128,11 +128,23 @@
   color: #334155;
 }
 
-.close-fund { background-color: #f1ede3; }
-.close-sales-cash { background-color: #e8fbf0; color: #10b981; }
-.close-sales-cash p { color: #10b981; }
-.close-sales-transfers { background-color: #eff6ff; color: #3b82f6; }
-.close-sales-transfers p { color: #3b82f6; }
+.close-fund {
+  background-color: #f1ede3;
+}
+.close-sales-cash {
+  background-color: #e8fbf0;
+  color: #10b981;
+}
+.close-sales-cash p {
+  color: #10b981;
+}
+.close-sales-transfers {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+.close-sales-transfers p {
+  color: #3b82f6;
+}
 
 /* Secciones de Conteo */
 .close-count-section {
@@ -161,8 +173,14 @@
   font-size: 14px;
 }
 
-.close-cash-section .close-section-header span:first-child { color: #059669; font-weight: 600; }
-.close-transfer-section .close-section-header span:first-child { color: #2563eb; font-weight: 600; }
+.close-cash-section .close-section-header span:first-child {
+  color: #059669;
+  font-weight: 600;
+}
+.close-transfer-section .close-section-header span:first-child {
+  color: #2563eb;
+  font-weight: 600;
+}
 
 .close-count-input-row {
   display: flex;
@@ -182,14 +200,16 @@
   transition: border-color 0.2s;
 }
 
-.close-count-input-row input:focus { border-color: #94a3b8; }
+.close-count-input-row input:focus {
+  border-color: #94a3b8;
+}
 
 .close-btn-confirm-count {
   border: none;
   padding: 0 20px;
   border-radius: 8px;
   font-weight: 600;
-  color: white !important; 
+  color: white !important;
   cursor: pointer;
   transition: opacity 0.2s;
   display: flex;
@@ -197,11 +217,19 @@
   justify-content: center;
 }
 
-.close-btn-cash { background-color: #10b981 !important; }
-.close-btn-cash:hover:not(:disabled) { background-color: #059669 !important; }
+.close-btn-cash {
+  background-color: #10b981 !important;
+}
+.close-btn-cash:hover:not(:disabled) {
+  background-color: #059669 !important;
+}
 
-.close-btn-transfer { background-color: #3b82f6 !important; }
-.close-btn-transfer:hover:not(:disabled) { background-color: #2563eb !important; }
+.close-btn-transfer {
+  background-color: #3b82f6 !important;
+}
+.close-btn-transfer:hover:not(:disabled) {
+  background-color: #2563eb !important;
+}
 
 /* Fila confirmada (Diseño como en la Imagen 2) */
 .close-count-confirmed-row {
@@ -252,19 +280,31 @@
 }
 
 /* Diferencias */
-.close-modal-content .diff-text, 
-.close-diff-text { font-weight: bold; }
-.close-modal-content .text-diff-positive { color: #10b981; }
-.close-modal-content .text-diff-negative { color: #ef4444; }
-.close-modal-content .text-diff-neutral { color: #94a3b8; }
+.close-modal-content .diff-text,
+.close-diff-text {
+  font-weight: bold;
+}
+.close-modal-content .text-diff-positive {
+  color: #10b981;
+}
+.close-modal-content .text-diff-negative {
+  color: #ef4444;
+}
+.close-modal-content .text-diff-neutral {
+  color: #94a3b8;
+}
 
 .close-total-diff-section {
   padding: 16px;
   border-radius: 12px;
 }
 
-.close-bg-positive { background-color: #e8fbf0; }
-.close-bg-negative { background-color: #fef2f2; }
+.close-bg-positive {
+  background-color: #e8fbf0;
+}
+.close-bg-negative {
+  background-color: #fef2f2;
+}
 
 .close-total-diff-header {
   display: flex;
@@ -274,15 +314,21 @@
   margin-bottom: 4px;
 }
 
-.close-total-diff-header span { color: #059669; }
-.close-bg-negative .close-total-diff-header span { color: #dc2626; }
+.close-total-diff-header span {
+  color: #059669;
+}
+.close-bg-negative .close-total-diff-header span {
+  color: #dc2626;
+}
 
 .close-total-diff-msg {
   margin: 0;
   font-size: 13px;
   color: #059669;
 }
-.close-bg-negative .close-total-diff-msg { color: #dc2626; }
+.close-bg-negative .close-total-diff-msg {
+  color: #dc2626;
+}
 
 /* Botón Final */
 .close-footer {
@@ -296,11 +342,11 @@
   gap: 10px !important;
   width: 100% !important;
   padding: 16px !important;
-  background-color: #555843 !important; 
-  color: #ffffff !important; 
-  -webkit-text-fill-color: #ffffff !important; 
+  background-color: #555843 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   border: none !important;
-  border-radius: 8px !important; 
+  border-radius: 8px !important;
   font-size: 16px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
@@ -325,4 +371,9 @@
   margin: 0;
   font-weight: 500;
   text-align: center;
+}
+.close-movements-note {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #64748b;
 }

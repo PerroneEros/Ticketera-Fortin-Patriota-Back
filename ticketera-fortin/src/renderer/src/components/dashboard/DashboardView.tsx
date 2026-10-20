@@ -1,48 +1,21 @@
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { DashboardHeader } from './DashboardHeader'
 import { DashboardMovementModal } from './DashboardMovementModal'
 import { DashboardProvider, useDashboardContext } from '../context/dashboardContext'
 import { DashboardCashBox } from './DashboardCashBox'
+import { isEmptySummary } from '../service/salesService'
 
-const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
-  const { registersList, sales, isLoading, currentCashBox, isFiltering, dateRange } = useDashboardContext()
+export const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
+  const { registersList, summary, isLoading, currentCashBox, isFiltering, dateRange } =
+    useDashboardContext()
 
   const boxesToShow = isFiltering ? registersList : currentCashBox ? [currentCashBox] : []
 
-  const ventasReales = sales.filter(
-    (s) =>
-      s.paymentMethod !== 'apertura' &&
-      s.paymentMethod !== 'cierre' &&
-      s.paymentMethod !== 'ingreso' &&
-      s.paymentMethod !== 'egreso'
-  )
-
-  const totalSalesCount = ventasReales.length
-  const totalProductsCount = ventasReales.reduce((acc, sale) => {
-    const itemsCount = sale.Sale_items
-      ? sale.Sale_items.reduce((sum: any, item: any) => sum + item.quantity, 0)
-      : 0
-    return acc + itemsCount
-  }, 0)
-
-  let globalEfectivo = 0
-  let globalTransferencia = 0
-
-  sales.forEach((s) => {
-    if (s.paymentMethod === 'cierre') return
-    const cash = Number(s.cashAmount) || 0
-    const transfer = Number(s.transferAmount) || 0
-
-    if (s.paymentMethod === 'egreso') {
-      globalEfectivo -= cash
-      globalTransferencia -= transfer
-    } else {
-      globalEfectivo += cash
-      globalTransferencia += transfer
-    }
-  })
-
-  const totalMoney = globalEfectivo + globalTransferencia
+  const totalSalesCount = summary?.salesCount ?? 0
+  const totalProductsCount = summary?.unitsCount ?? 0
+  const totalMoney = summary?.money.total ?? 0
+  const emptyPeriod =
+    isFiltering && boxesToShow.length === 0 && (!summary || isEmptySummary(summary))
 
   return (
     <div
@@ -78,11 +51,13 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
               <p style={{ textAlign: 'center', marginTop: '50px', color: 'white' }}>
                 {!isFiltering
                   ? 'No hay ninguna caja abierta actualmente.'
-                  : 'No se encontraron cajas en las fechas seleccionadas.'}
+                  : emptyPeriod
+                    ? 'Sin movimientos en el período'
+                    : 'No se encontraron cajas en las fechas seleccionadas.'}
               </p>
             ) : (
               boxesToShow.map((box) => (
-                <DashboardCashBox key={box.cash_register_id} cashBox={box} sales={sales} />
+                <DashboardCashBox key={box.cash_register_id} cashBox={box} />
               ))
             )}
           </>
@@ -123,7 +98,14 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
                   letterSpacing: '0.5px'
                 }}
               >
-                TOTAL DE VENTAS DESDE: <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>{dateRange.from.split('-').reverse().join('/')} </strong> HASTA: <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>{dateRange.to.split('-').reverse().join('/')}</strong>
+                TOTAL DE VENTAS DESDE:{' '}
+                <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>
+                  {dateRange.from.split('-').reverse().join('/')}{' '}
+                </strong>{' '}
+                HASTA:{' '}
+                <strong style={{ color: '#38bdf8', fontWeight: 'bold', fontSize: '20px' }}>
+                  {dateRange.to.split('-').reverse().join('/')}
+                </strong>
               </span>
               <span style={{ fontSize: '13px', color: '#cbd5e1', marginTop: '4px' }}>
                 Ventas: <strong style={{ color: 'white' }}>{totalSalesCount}</strong> | Productos:{' '}
@@ -145,26 +127,12 @@ const DashboardContent = ({ onOpenModal }: { onOpenModal: () => void }) => {
   )
 }
 
-const DashboardViewInternal = ({ onOpenModal }: { onOpenModal: () => void }) => {
-  const { refreshData } = useDashboardContext()
-
-  useEffect(() => {
-    const handleCajaCambiada = () => {
-      refreshData()
-    }
-    window.addEventListener('caja-actualizada', handleCajaCambiada)
-    return () => window.removeEventListener('caja-actualizada', handleCajaCambiada)
-  }, [refreshData])
-
-  return <DashboardContent onOpenModal={onOpenModal} />
-}
-
 export const DashboardView = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   return (
     <DashboardProvider>
-      <DashboardViewInternal onOpenModal={() => setIsModalOpen(true)} />
+      <DashboardContent onOpenModal={() => setIsModalOpen(true)} />
       {isModalOpen && <DashboardMovementModal onClose={() => setIsModalOpen(false)} />}
     </DashboardProvider>
   )

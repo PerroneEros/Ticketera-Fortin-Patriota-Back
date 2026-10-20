@@ -14,6 +14,10 @@ class Cash_register
   declare opened_at: Date
   declare closed_at: Date
   declare status: string
+  declare counted_cash: number | null
+  declare counted_transfer: number | null
+  declare expected_cash: number | null
+  declare expected_transfer: number | null
 }
 
 Cash_register.init(
@@ -43,6 +47,23 @@ Cash_register.init(
     status: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    // Closing breakdown (migration 0003): NULL while open or if closed by an older version.
+    counted_cash: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    counted_transfer: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    expected_cash: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    expected_transfer: {
+      type: DataTypes.INTEGER,
+      allowNull: true
     }
   },
   {

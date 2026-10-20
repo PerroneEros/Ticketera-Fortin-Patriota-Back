@@ -1,116 +1,223 @@
-import React, { useState, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { CashRegisterContext } from '../context/cashRegisterContext'
-import { closeRegister, getTurnSales } from '../service/cashRegisterService'
+import { closeRegister, CloseSummary, getCloseSummary } from '../service/cashRegisterService'
 import '../Styles/cashRegisterClose.css'
 import { parseInputValue } from '../utils/formatters'
 
-export const CashRegisterClose = () => {
+const money = (amount: number): string =>
+  amount.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+
+const formatDiff = (diff: number): string => {
+  if (diff > 0) return `↗ +$${money(Math.abs(diff))}`
+  if (diff < 0) return `↘ -$${money(Math.abs(diff))}`
+  return `$0.00`
+}
+
+const getDiffClass = (diff: number): string => {
+  if (diff > 0) return 'text-diff-positive'
+  if (diff < 0) return 'text-diff-negative'
+  return 'text-diff-neutral'
+}
+
+// One count per payment method. A count that does not match the expected amount has to be
+// confirmed twice (RF-6); the second confirmation accepts the difference (RF-7).
+interface Count {
+  value: number
+  confirmed: boolean
+  // Value the cashier already confirmed once despite not matching the expected amount.
+  mismatchSeen: number | null
+}
+
+const emptyCount: Count = { value: 0, confirmed: false, mismatchSeen: null }
+
+function confirmCount(count: Count, expected: number): Count {
+  if (count.value === expected || count.mismatchSeen === count.value) {
+    return { ...count, confirmed: true }
+  }
+  return { ...count, mismatchSeen: count.value }
+}
+
+interface CountSectionProps {
+  title: string
+  className: string
+  buttonClassName: string
+  expected: number | null
+  count: Count
+  disabled: boolean
+  onChange: (count: Count) => void
+}
+
+const CountSection = ({
+  title,
+  className,
+  buttonClassName,
+  expected,
+  count,
+  disabled,
+  onChange
+}: CountSectionProps): React.JSX.Element => {
+  const diff = expected === null ? 0 : count.value - expected
+  const awaitingReconfirm = !count.confirmed && count.mismatchSeen === count.value
+
+  return (
+    <div className={`close-count-section ${className}`}>
+      <div className="close-section-header">
+        <span>{title}</span>
+        <span>
+          Esperado: <strong>${expected === null ? '...' : money(expected)}</strong>
+        </span>
+      </div>
+
+      {!count.confirmed ? (
+        <>
+          <div className="close-count-input-row">
+            <input
+              type="text"
+              inputMode="numeric"
+              placeholder="$ Monto contado..."
+              aria-label={`${title} contado`}
+              value={count.value.toLocaleString('es-AR')}
+              onChange={(e) => onChange({ ...count, value: parseInputValue(e.target.value) })}
+              disabled={disabled}
+            />
+            <button
+              className={`close-btn-confirm-count ${buttonClassName}`}
+              onClick={() => expected !== null && onChange(confirmCount(count, expected))}
+              disabled={disabled}
+            >
+              {awaitingReconfirm ? 'Confirmar de nuevo' : 'Confirmar'}
+            </button>
+          </div>
+          {awaitingReconfirm && (
+            <p className="close-error-text" role="alert">
+              No coincide con el esperado (diferencia {formatDiff(diff)}). Volvé a contar y confirmá
+              de nuevo.
+            </p>
+          )}
+        </>
+      ) : (
+        <div className="close-count-confirmed-row">
+          <span className="close-confirmed-text">
+            <span className="close-check-icon">✓</span> Contado:{' '}
+            <strong>${money(count.value)}</strong>
+          </span>
+          <div className="close-confirmed-actions">
+            <span className={`close-diff-text ${getDiffClass(diff)}`}>{formatDiff(diff)}</span>
+            <button
+              type="button"
+              className="close-btn-edit"
+              onClick={() => onChange({ ...count, confirmed: false })}
+            >
+              Editar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+interface ApiError {
+  response?: { status?: number; data?: { code?: string; message?: string } }
+  message?: string
+}
+
+export const CashRegisterClose = (): React.JSX.Element | null => {
   const navigate = useNavigate()
 
-  // Estados generales del Modal
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [cash, setCash] = useState<Count>(emptyCount)
+  const [transfer, setTransfer] = useState<Count>(emptyCount)
+  const [summary, setSummary] = useState<CloseSummary | null>(null)
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
 
-  // Variables de lo que cuenta físicamente el empleado
-  const [countedCash, setCountedCash] = useState(0)
-  const [countedTransfers, setCountedTransfers] = useState(0)
-
-  // Booleanos de confirmación
-  const [cashConfirmed, setCashConfirmed] = useState(false)
-  const [transfersConfirmed, setTransfersConfirmed] = useState(false)
-
-  // Ventas desde la BD
-  const [ventasEfectivo, setVentasEfectivo] = useState<number>(0)
-  const [ventasTransferencia, setVentasTransferencia] = useState<number>(0)
-  const [isLoadingSales, setIsLoadingSales] = useState<boolean>(false)
-
-  // Contexto
   const context = useContext(CashRegisterContext)
-
   if (!context) return null
   const { activeRegister, loadActiveRegister } = context
 
-  const fondoInicial = activeRegister ? Number(activeRegister.opening) : 0
-  const esperadoEfectivo = fondoInicial + ventasEfectivo
-  const esperadoTransferencia = ventasTransferencia
-  const totalFacturado = ventasEfectivo + ventasTransferencia + fondoInicial;
+  const expectedCash = summary?.expected.cash ?? null
+  const expectedTransfer = summary?.expected.transfer ?? null
+  const fondoInicial = summary?.opening ?? Number(activeRegister?.opening ?? 0)
+  const ventasEfectivo = summary?.sales.cash ?? 0
+  const ventasTransferencia = summary?.sales.transfer ?? 0
+  const totalFacturado = fondoInicial + ventasEfectivo + ventasTransferencia
 
-  const diffEfectivo = Number(countedCash) - esperadoEfectivo
-  const diffTransferencia = Number(countedTransfers) - esperadoTransferencia
+  const diffEfectivo = cash.value - (expectedCash ?? 0)
+  const diffTransferencia = transfer.value - (expectedTransfer ?? 0)
   const diffTotal = diffEfectivo + diffTransferencia
+  const bothConfirmed = cash.confirmed && transfer.confirmed
+  const countsDisabled = isLoadingSummary || summary === null
 
-  const handleOpenCloseModal = async () => {
-    setErrorMsg('')
-    setCountedCash(0)
-    setCountedTransfers(0)
-    setCashConfirmed(false)
-    setTransfersConfirmed(false)
-
-    if (activeRegister) {
-      setIsLoadingSales(true)
-      setShowModal(true)
-
-      try {
-        const sales = await getTurnSales(activeRegister.cash_register_id)
-        setVentasEfectivo(sales.efectivo || 0)
-        setVentasTransferencia(sales.transferencia || 0)
-      } catch (error) {
-        setErrorMsg('No se pudieron cargar las ventas del turno.')
-      } finally {
-        setIsLoadingSales(false)
-      }
+  const loadSummary = async (): Promise<void> => {
+    if (!activeRegister) return
+    setIsLoadingSummary(true)
+    try {
+      setSummary(await getCloseSummary(activeRegister.cash_register_id))
+    } catch {
+      setSummary(null)
+      setErrorMsg('No se pudieron cargar los montos esperados. Cerrá y volvé a intentar.')
+    } finally {
+      setIsLoadingSummary(false)
     }
   }
 
-  const handleCloseSubmit = async () => {
+  const handleOpenCloseModal = async (): Promise<void> => {
+    setErrorMsg('')
+    setCash(emptyCount)
+    setTransfer(emptyCount)
+    setSummary(null)
+    if (!activeRegister) return
+    setShowModal(true)
+    await loadSummary()
+  }
+
+  const handleCloseSubmit = async (): Promise<void> => {
+    if (!activeRegister || expectedCash === null || expectedTransfer === null) return
     setIsLoading(true)
     setErrorMsg('')
-
-    const totalCounted = Number(countedCash) + Number(countedTransfers)
-
     try {
-      if (!activeRegister) throw new Error('No hay ninguna caja abierta.')
-
-      await closeRegister(activeRegister.cash_register_id, totalCounted)
+      await closeRegister(activeRegister.cash_register_id, {
+        countedCash: cash.value,
+        countedTransfer: transfer.value,
+        shownExpectedCash: expectedCash,
+        shownExpectedTransfer: expectedTransfer
+      })
       await loadActiveRegister()
       setShowModal(false)
-
       navigate('/')
-    } catch (error: any) {
-      setErrorMsg(error.response?.data?.message || error.message)
+    } catch (error) {
+      const { response, message } = error as ApiError
+      const serverMessage = response?.data?.message
+      if (response?.data?.code === 'EXPECTED_CHANGED') {
+        // RF-12: show the new expected amounts and ask to confirm both counts again.
+        setCash((c) => ({ ...c, confirmed: false, mismatchSeen: null }))
+        setTransfer((t) => ({ ...t, confirmed: false, mismatchSeen: null }))
+        await loadSummary()
+        setErrorMsg(serverMessage ?? 'Los montos esperados cambiaron. Volvé a confirmar.')
+      } else if (response?.data?.code === 'ALREADY_CLOSED') {
+        toast.error(serverMessage ?? 'Esta caja ya está cerrada.')
+        setShowModal(false)
+        await loadActiveRegister()
+      } else {
+        setErrorMsg(serverMessage ?? message ?? 'No se pudo cerrar la caja.')
+      }
     } finally {
       setIsLoading(false)
     }
   }
 
-  const formatDiff = (diff: number) => {
-    const formattedNum = Math.abs(diff).toLocaleString('es-AR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })
-    if (diff > 0) return `↗ +$${formattedNum}`
-    if (diff < 0) return `↘ -$${formattedNum}`
-    return `$0.00`
-  }
-
-  const getDiffClass = (diff: number) => {
-    if (diff > 0) return 'text-diff-positive'
-    if (diff < 0) return 'text-diff-negative'
-    return 'text-diff-neutral'
-  }
-
   return (
     <>
-      {/* 2. BOTÓN LIMPIO SIN CSS EN LÍNEA */}
       {activeRegister && (
         <button className="close-btn-header-close" onClick={handleOpenCloseModal}>
           Cerrar Caja
         </button>
       )}
 
-      {/* VENTANA MODAL: ARQUEO Y CIERRE DE CAJA */}
       {showModal && (
         <div className="close-modal-overlay">
           <div className="close-modal-content">
@@ -127,15 +234,7 @@ export const CashRegisterClose = () => {
                   ✕
                 </span>
                 <p>Total facturado</p>
-                <h4>
-                  $
-                  {isLoadingSales
-                    ? '...'
-                    : totalFacturado.toLocaleString('es-AR', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      })}
-                </h4>
+                <h4>${isLoadingSummary ? '...' : money(totalFacturado)}</h4>
               </div>
             </div>
 
@@ -143,169 +242,47 @@ export const CashRegisterClose = () => {
               <div className="close-summary-cards">
                 <div className="close-summary-card close-fund">
                   <p>Fondo inicial</p>
-                  <strong>
-                    $
-                    {fondoInicial.toLocaleString('es-AR', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
-                  </strong>
+                  <strong>${money(fondoInicial)}</strong>
                 </div>
                 <div className="close-summary-card close-sales-cash">
                   <p>Efectivo ventas</p>
-                  <strong>
-                    $
-                    {isLoadingSales
-                      ? '...'
-                      : ventasEfectivo.toLocaleString('es-AR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                  </strong>
+                  <strong>${isLoadingSummary ? '...' : money(ventasEfectivo)}</strong>
                 </div>
                 <div className="close-summary-card close-sales-transfers">
                   <p>Transferencias</p>
-                  <strong>
-                    $
-                    {isLoadingSales
-                      ? '...'
-                      : ventasTransferencia.toLocaleString('es-AR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                  </strong>
+                  <strong>${isLoadingSummary ? '...' : money(ventasTransferencia)}</strong>
                 </div>
               </div>
 
-              <div className="close-count-section close-cash-section">
-                <div className="close-section-header">
-                  <span>💵 Efectivo en caja</span>
-                  <span>
-                    Esperado:{' '}
-                    <strong>
-                      $
-                      {isLoadingSales
-                        ? '...'
-                        : esperadoEfectivo.toLocaleString('es-AR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })}
-                    </strong>
-                  </span>
-                </div>
+              {summary && (
+                <p className="close-movements-note">
+                  Movimientos — efectivo: +${money(summary.movements.cashIn)} / -$
+                  {money(summary.movements.cashOut)} · transferencias: +$
+                  {money(summary.movements.transferIn)} / -${money(summary.movements.transferOut)}
+                </p>
+              )}
 
-                {!cashConfirmed ? (
-                  <div className="close-count-input-row">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      step="0.01"
-                      placeholder="$ Monto contado..."
-                      value={countedCash.toLocaleString('es-AR')}
-                      onChange={(e) => setCountedCash(parseInputValue(e.target.value))}
-                      disabled={isLoadingSales}
-                    />
-                    <button
-                      className="close-btn-confirm-count close-btn-cash"
-                      onClick={() => setCashConfirmed(true)}
-                      disabled={isLoadingSales}
-                    >
-                      Confirmar
-                    </button>
-                  </div>
-                ) : (
-                  <div className="close-count-confirmed-row">
-                    <span className="close-confirmed-text">
-                      <span className="close-check-icon">✓</span> Contado:{' '}
-                      <strong>
-                        $
-                        {Number(countedCash).toLocaleString('es-AR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                      </strong>
-                    </span>
-                    <div className="close-confirmed-actions">
-                      <span className={`close-diff-text ${getDiffClass(diffEfectivo)}`}>
-                        {formatDiff(diffEfectivo)}
-                      </span>
-                      <button
-                        type="button"
-                        className="close-btn-edit"
-                        onClick={() => setCashConfirmed(false)}
-                      >
-                        Editar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <CountSection
+                title="💵 Efectivo en caja"
+                className="close-cash-section"
+                buttonClassName="close-btn-cash"
+                expected={expectedCash}
+                count={cash}
+                disabled={countsDisabled}
+                onChange={setCash}
+              />
 
-              <div className="close-count-section close-transfer-section">
-                <div className="close-section-header">
-                  <span>📱 Transferencias recibidas</span>
-                  <span>
-                    Esperado:{' '}
-                    <strong>
-                      $
-                      {isLoadingSales
-                        ? '...'
-                        : esperadoTransferencia.toLocaleString('es-AR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                          })}
-                    </strong>
-                  </span>
-                </div>
+              <CountSection
+                title="📱 Transferencias recibidas"
+                className="close-transfer-section"
+                buttonClassName="close-btn-transfer"
+                expected={expectedTransfer}
+                count={transfer}
+                disabled={countsDisabled}
+                onChange={setTransfer}
+              />
 
-                {!transfersConfirmed ? (
-                  <div className="close-count-input-row">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      step="0.01"
-                      placeholder="$ Monto contado..."
-                      value={countedTransfers.toLocaleString('es-AR')}
-                      onChange={(e) => setCountedTransfers(parseInputValue(e.target.value))}
-                      disabled={isLoadingSales}
-                    />
-                    <button
-                      className="close-btn-confirm-count close-btn-transfer"
-                      onClick={() => setTransfersConfirmed(true)}
-                      disabled={isLoadingSales}
-                    >
-                      Confirmar
-                    </button>
-                  </div>
-                ) : (
-                  <div className="close-count-confirmed-row">
-                    <span className="close-confirmed-text">
-                      <span className="close-check-icon">✓</span> Contado:{' '}
-                      <strong>
-                        $
-                        {Number(countedTransfers).toLocaleString('es-AR', {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2
-                        })}
-                      </strong>
-                    </span>
-                    <div className="close-confirmed-actions">
-                      <span className={`close-diff-text ${getDiffClass(diffTransferencia)}`}>
-                        {formatDiff(diffTransferencia)}
-                      </span>
-                      <button
-                        type="button"
-                        className="close-btn-edit"
-                        onClick={() => setTransfersConfirmed(false)}
-                      >
-                        Editar
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {cashConfirmed && transfersConfirmed && (
+              {bothConfirmed && (
                 <div
                   className={`close-total-diff-section ${diffTotal >= 0 ? 'close-bg-positive' : 'close-bg-negative'}`}
                 >
@@ -318,6 +295,12 @@ export const CashRegisterClose = () => {
                     {diffTotal < 0 && 'Falta dinero respecto a lo esperado.'}
                     {diffTotal === 0 && 'El cierre de caja es exacto.'}
                   </p>
+                  {(diffEfectivo !== 0 || diffTransferencia !== 0) && (
+                    <p className="close-total-diff-msg" role="alert">
+                      Atención: la caja se va a cerrar con diferencia (efectivo{' '}
+                      {formatDiff(diffEfectivo)} · transferencias {formatDiff(diffTransferencia)}).
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -327,7 +310,7 @@ export const CashRegisterClose = () => {
             <div className="close-footer">
               <button
                 className="close-btn-final-close"
-                disabled={!cashConfirmed || !transfersConfirmed || isLoading || isLoadingSales}
+                disabled={!bothConfirmed || isLoading || countsDisabled}
                 onClick={handleCloseSubmit}
               >
                 🔒 Cerrar Caja y Nuevo Turno

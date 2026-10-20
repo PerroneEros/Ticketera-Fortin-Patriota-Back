@@ -1,4 +1,5 @@
 import { Op } from 'sequelize'
+import sequelize from '../database/db'
 import Category from '../model/category'
 import Product from '../model/product'
 import { CreateCategoryInput, UpdateCategoryInput } from '../model/interface/categoryInputs'
@@ -17,26 +18,13 @@ export const categoryService = {
   },
 
   async createCategory(data: CreateCategoryInput) {
-    // 1. Limpiamos el nombre
-    const cleanedName = data.name.trim()
-
-    // 2. Traemos todas las categorías (LOG PARA DEPURAR)
-    const all = await Category.findAll()
-    console.log(
-      'Categorías en BD:',
-      all.map((c) => c.name)
-    )
-    console.log('Buscando nombre:', cleanedName)
-
-    // 3. Comparamos manualmente para estar seguros
-    const exists = all.some((c) => c.name.trim().toLowerCase() === cleanedName.toLowerCase())
-
+    const name = data.name.trim()
+    // LIKE without wildcards compares case-insensitively in SQLite
+    const exists = await Category.findOne({ where: { name: { [Op.like]: name } } })
     if (exists) {
-      console.log('¡DUPLICADO DETECTADO!')
       throw new Error('Ya existe una categoría registrada con este nombre.')
     }
-
-    return await Category.create(data as any)
+    return await Category.create({ name })
   },
 
   async updateCategory(id: string, data: UpdateCategoryInput) {
@@ -83,13 +71,14 @@ export const categoryService = {
     // REASIGNACIÓN MASIVA:
     // Actualizamos el category_id a la categoría General SOLO en los
     // productos que pertenecían a la categoría que estamos a punto de borrar.
-    await Product.update(
-      { category_id: defaultCategory.category_id },
-      { where: { category_id: id } }
-    )
-
-    // Una vez que los productos están a salvo en "General", borramos la categoría original
-    await category.destroy()
+    // Reasignación y borrado juntos: si algo falla, los productos quedan donde estaban
+    await sequelize.transaction(async (transaction) => {
+      await Product.update(
+        { category_id: defaultCategory.category_id },
+        { where: { category_id: id }, transaction }
+      )
+      await category.destroy({ transaction })
+    })
     return true
   }
 }

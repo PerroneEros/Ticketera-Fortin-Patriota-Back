@@ -13,6 +13,7 @@ export const createProductSchema = z.object({
     .number({
       message: 'El precio es obligatorio y debe ser un número.'
     })
+    .int('El precio debe ser un número entero.')
     .min(0, 'El precio no puede ser negativo.'),
 
   category_id: z

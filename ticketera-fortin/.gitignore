@@ -4,3 +4,5 @@ out
 .DS_Store
 .eslintcache
 *.log*
+# License private keys must never be committed
+*.pem

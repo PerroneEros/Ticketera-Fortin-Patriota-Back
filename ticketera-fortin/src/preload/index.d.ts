@@ -1,8 +1,11 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
 declare global {
   interface Window {
-    electron: ElectronAPI
-    api: unknown
+    api: {
+      checkLicense: () => Promise<{ isLicensed: boolean; machineId: string }>
+      activateLicense: (key: string) => Promise<boolean>
+      getApiToken: () => Promise<string>
+    }
   }
 }
+
+export {}

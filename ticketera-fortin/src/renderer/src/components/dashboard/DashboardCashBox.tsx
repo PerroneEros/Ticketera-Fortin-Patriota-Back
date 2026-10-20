@@ -1,98 +1,102 @@
-import React, { useState } from 'react'
+import { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import { Sale, useDashboardContext } from '../context/dashboardContext'
+import { salesServiceFront, SalesSummary } from '../service/salesService'
+import { escapeHtml } from '../utils/escapeHtml'
 import { DashboardHistory } from './DashboardHistory'
 import { DashboardCards } from './DashboardCards'
 import { DashboardPayments } from './DashboardPayments'
 import { DashboardProducts } from './DashboardProducts'
 
-
 interface Props {
   cashBox: any
+}
+
+interface Detail {
+  summary: SalesSummary
   sales: Sale[]
 }
 
-export const DashboardCashBox = ({ cashBox, sales }: Props) => {
+type DetailState =
+  | { status: 'idle' }
+  | { status: 'error' }
+  | { status: 'ready'; detail: Detail; key: number }
+
+// Detail of one register (totals + history list). Loaded only while the register is expanded
+// (RF-20, RF-21), kept when it is collapsed, and reloaded after the dashboard refreshes. While
+// reloading, the previous detail (or error) stays on screen until the new one arrives.
+function useRegisterDetail(
+  cashRegisterId: number,
+  isExpanded: boolean,
+  refreshKey: number
+): { state: DetailState; retry: () => void } {
+  const [state, setState] = useState<DetailState>({ status: 'idle' })
+  const [attempt, setAttempt] = useState(0)
+  const upToDate = state.status === 'ready' && state.key === refreshKey
+
+  useEffect(() => {
+    if (!isExpanded || upToDate) return
+    let cancelled = false
+    Promise.all([
+      salesServiceFront.getSummary({ cash_register_id: cashRegisterId }),
+      salesServiceFront.getSalesByRegister(cashRegisterId)
+    ])
+      .then(([summary, sales]) => {
+        if (!cancelled) setState({ status: 'ready', detail: { summary, sales }, key: refreshKey })
+      })
+      .catch((error) => {
+        console.error('Error al cargar el detalle de la caja:', error)
+        if (!cancelled) setState({ status: 'error' })
+      })
+    return () => {
+      cancelled = true
+    }
+    // upToDate is derived from state: listing it would refetch on every state change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cashRegisterId, isExpanded, refreshKey, attempt])
+
+  return { state, retry: () => setAttempt((n) => n + 1) }
+}
+
+export const DashboardCashBox = ({ cashBox }: Props) => {
+  const { refreshKey } = useDashboardContext()
   const [isExpanded, setIsExpanded] = useState(cashBox.status === 'open')
-  const {registerList} = useDashboardContext()
-  const boxSales = sales.filter((s) => {
-    const saleTime = new Date(s.date).getTime()
-    const openTime = new Date(cashBox.opened_at).getTime()
-    const closeTime = cashBox.closed_at
-      ? new Date(cashBox.closed_at).getTime()
-      : new Date().getTime()
-    return saleTime >= openTime && saleTime <= closeTime
-  })
-  const imprimirPDFLista = () =>{
-    const productStats: Record<string, { quantity: number; total: number }> = {};
-    let totalEfectivo = 0;
-    let totalTransferencia = 0;
-    let totalIngreso = 0
-    let totalEgreso = 0
-    let ingresoEfectivo = 0
-    let egresoEfectivo = 0
-    let ingresoTransferencia = 0
-    let egresoTransferencia = 0
-   boxSales.forEach((sale) => {
-      // Sumar para los totales (ignorando el cierre)
-      if (sale.paymentMethod !== 'cierre') {
-        const cash = Number(sale.cashAmount) || 0;
-        const transfer = Number(sale.transferAmount) || 0;
-        if (sale.paymentMethod === 'egreso') {
-          totalEfectivo -= cash;
-          totalTransferencia -= transfer;
-          egresoEfectivo -= cash
-          egresoTransferencia -= transfer
-          totalEgreso += cash+transfer
-        } else {
-          totalEfectivo += cash;
-          totalTransferencia += transfer;
-          ingresoEfectivo += cash
-          ingresoTransferencia += transfer
-          totalIngreso += cash+transfer
-        }
-      }
+  const { state, retry } = useRegisterDetail(cashBox.cash_register_id, isExpanded, refreshKey)
 
-      // Agrupar productos
-      if (sale.paymentMethod !== 'ingreso' && sale.paymentMethod !== 'egreso' && sale.Sale_items) {
-        sale.Sale_items.forEach((item) => {
-          const productName = item.Product?.name || `Producto #${item.id_product}`;
-          if (!productStats[productName]) {
-            productStats[productName] = { quantity: 0, total: 0 };
-          }
-          productStats[productName].quantity += Number(item.quantity) || 0;
-          productStats[productName].total += Number(item.total) || 0;
-        });
-      }
-    });
+  // The PDF only needs the register's totals, so a collapsed register asks just for those.
+  const imprimirPDFLista = async (): Promise<void> => {
+    let summary: SalesSummary
+    try {
+      summary =
+        state.status === 'ready' && state.key === refreshKey
+          ? state.detail.summary
+          : await salesServiceFront.getSummary({ cash_register_id: cashBox.cash_register_id })
+    } catch (error) {
+      console.error('Error al preparar el PDF de la caja:', error)
+      toast.error('No se pudieron cargar los datos de la caja para el PDF.')
+      return
+    }
+    const totalEfectivo = summary.money.cashBalance
+    const totalTransferencia = summary.money.transferBalance
+    const ingresoEfectivo = summary.money.cashIn
+    const egresoEfectivo = summary.money.cashOut
+    const ingresoTransferencia = summary.money.transferIn
+    const egresoTransferencia = summary.money.transferOut
+    const totalIngreso = summary.money.cashIn + summary.money.transferIn
+    const totalEgreso = summary.money.cashOut + summary.money.transferOut
 
-    // 2. Armar las filas HTML de los productos
-    const filasProductos = Object.entries(productStats)
-      .sort((a, b) => b[1].quantity - a[1].quantity)
-      .map(([name, stats]) => `
+    // 2. Armar las filas HTML de los productos (ya agrupados y ordenados por cantidad)
+    const filasProductos = summary.products
+      .map(
+        (product) => `
         <tr>
-          <td>${name}</td>
-          <td style="text-align: center;">${stats.quantity}</td>
-          <td style="text-align: right;">$${stats.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+          <td>${escapeHtml(product.name)}</td>
+          <td style="text-align: center;">${product.quantity}</td>
+          <td style="text-align: right;">$${product.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
         </tr>
-      `).join("");
-
-    // 3. Armar las filas HTML del historial de movimientos
-    const filasMovimientos = boxSales.map((sale) => {
-      const fecha = new Date(sale.date).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-      const total = Number(sale.total) || 0;
-      const esEgreso = sale.paymentMethod === 'egreso';
-      return `
-        <tr>
-          <td>${fecha}</td>
-          <td style="text-transform: uppercase;">${sale.paymentMethod}</td>
-          <td>$${(Number(sale.cashAmount) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-          <td>$${(Number(sale.transferAmount) || 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-          <td style="text-align: right; font-weight: bold; color: ${esEgreso ? '#ef4444' : '#16a34a'};">
-            ${esEgreso ? '-' : ''}$${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-          </td>
-        </tr>
-      `;
-    }).join("");
+      `
+      )
+      .join('')
 
     // 4. Construir el documento HTML completo
     const htmlContent = `
@@ -233,33 +237,33 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
         </table>
       </body>
     </html>
-    `;
+    `
 
     // 5. Abrir ventana oculta y disparar la impresión (Genera el PDF en el navegador)
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
+    const iframe = document.createElement('iframe')
+    iframe.style.display = 'none'
+    document.body.appendChild(iframe)
 
     // Escribir el contenido HTML en el iframe
     if (iframe.contentDocument) {
-      iframe.contentDocument.open();
-      iframe.contentDocument.write(htmlContent);
-      iframe.contentDocument.close();
+      iframe.contentDocument.open()
+      iframe.contentDocument.write(htmlContent)
+      iframe.contentDocument.close()
 
       // Esperar un instante a que el DOM del iframe renderice y mandar a imprimir
       setTimeout(() => {
         if (iframe.contentWindow) {
-          iframe.contentWindow.focus();
-          iframe.contentWindow.print();
+          iframe.contentWindow.focus()
+          iframe.contentWindow.print()
         }
-        
+
         // Limpiar: Borrar el iframe después de un ratito para no consumir memoria
         setTimeout(() => {
           if (document.body.contains(iframe)) {
-            document.body.removeChild(iframe);
+            document.body.removeChild(iframe)
           }
-        }, 1000);
-      }, 250);
+        }, 1000)
+      }, 250)
     }
   }
   return (
@@ -307,7 +311,8 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
-              })}</strong>
+              })}
+            </strong>
           </h2>
 
           <span
@@ -328,9 +333,10 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
         </div>
         <div>
           <button
-          onClick={(e)=>{
-            e.stopPropagation();
-            imprimirPDFLista()}}
+            onClick={(e) => {
+              e.stopPropagation()
+              imprimirPDFLista()
+            }}
             style={{
               padding: '6px 12px',
               borderRadius: '6px',
@@ -339,7 +345,8 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
               color: 'white',
               fontWeight: 'bold',
               cursor: 'pointer'
-            }}>
+            }}
+          >
             Imprimir PDF
           </button>
         </div>
@@ -369,10 +376,25 @@ export const DashboardCashBox = ({ cashBox, sales }: Props) => {
             borderRadius: '0 0 12px 12px'
           }}
         >
-          <DashboardCards sales={boxSales} />
-          <DashboardPayments sales={boxSales} />
-          <DashboardProducts sales={boxSales} />
-          <DashboardHistory sales={boxSales} cashBox={cashBox} />
+          {state.status === 'idle' && (
+            <p style={{ textAlign: 'center', color: 'gray' }}>Cargando caja...</p>
+          )}
+          {state.status === 'error' && (
+            <div role="alert" style={{ textAlign: 'center', color: '#ef4444' }}>
+              No se pudo cargar el detalle de esta caja.{' '}
+              <button type="button" onClick={retry}>
+                Reintentar
+              </button>
+            </div>
+          )}
+          {state.status === 'ready' && (
+            <>
+              <DashboardCards summary={state.detail.summary} />
+              <DashboardPayments summary={state.detail.summary} />
+              <DashboardProducts summary={state.detail.summary} />
+              <DashboardHistory sales={state.detail.sales} cashBox={cashBox} />
+            </>
+          )}
         </div>
       )}
     </div>

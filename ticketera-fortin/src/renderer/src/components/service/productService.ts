@@ -1,8 +1,14 @@
-import axios from 'axios'
-const API_URL = 'http://localhost:34567/api'
+import { apiClient } from './apiClient'
+
+interface ProductData {
+  name: string
+  price: number
+  category_id: number
+}
+
 export const getAllProducts = async () => {
   try {
-    const response = await axios.get(`${API_URL}/products`)
+    const response = await apiClient.get('/products')
     return response.data
   } catch (error) {
     console.error('Error fetching products:', error)
@@ -11,25 +17,25 @@ export const getAllProducts = async () => {
 }
 export const getAllProductsDisable = async () => {
   try {
-    const response = await axios.get(`${API_URL}/products/disable`)
+    const response = await apiClient.get('/products/disable')
     return response.data
   } catch (error) {
     console.error('Error fetching products:', error)
     return []
   }
 }
-export const createProducts = async (productData: any) => {
+export const createProducts = async (productData: ProductData) => {
   try {
-    const response = await axios.post(`${API_URL}/products`, productData)
+    const response = await apiClient.post('/products', productData)
     return response.data
   } catch (error) {
-    console.error('Error fetching products:', error)
+    console.error('Error creating product:', error)
     throw error
   }
 }
-export const editProducts = async (id: number, productData: any) => {
+export const editProducts = async (id: number, productData: Partial<ProductData>) => {
   try {
-    const response = await axios.put(`${API_URL}/products/${id}`, productData)
+    const response = await apiClient.put(`/products/${id}`, productData)
     return response.data
   } catch (error) {
     console.error(`Error updating product ${id}:`, error)
@@ -39,7 +45,7 @@ export const editProducts = async (id: number, productData: any) => {
 
 export const deleteProducts = async (id: number) => {
   try {
-    const response = await axios.delete(`${API_URL}/products/${id}`)
+    const response = await apiClient.delete(`/products/${id}`)
     return response.data
   } catch (error) {
     console.error('error eliminando producto', error)
@@ -48,7 +54,7 @@ export const deleteProducts = async (id: number) => {
 }
 export const reactivateProducts = async (id: number) => {
   try {
-    const response = await axios.put(`${API_URL}/products/activate/${id}`)
+    const response = await apiClient.put(`/products/activate/${id}`)
     return response.data
   } catch (error) {
     console.error('error activando el  producto', error)

@@ -113,6 +113,9 @@
 
 ## 16. Estado actual
 - Qué ya existe y funciona: ver sección 3. Último trabajo: impresión a PDF y "cambios final" (2026-09-30).
+- Spec 001 "Cierre auditable y migraciones" (2026-10-20, rama `chore/claude-sdd-setup`, sin commitear): implementada con tests (`specs/001-cierre-auditable-y-migraciones/`).
+  - Hecho: migraciones propias con copia previa (últimas 5) y reporte; cierre con esperado/contado por medio de pago calculado en el servidor; resumen del dashboard en el servidor y detalle por caja al expandir; montos de movimientos enteros; índices.
+  - Pendiente (manual): ver la actualización y el cierre en la app real (`npm run dev` o instalador), comparar el PDF con la versión anterior, probar volver atrás con la versión anterior instalada, medir en una PC de 4 GB y build ia32. Detalle en `validacion.md` y `tasks.md` de la spec.
 - Backlog (2026-10-20):
   1. Bug: impresión doble de tickets al presionar dos veces "cobrar".
   2. Ofuscar el código.
@@ -124,7 +127,8 @@
   8. Backups automáticos al cerrar caja (base + PDF) y exportación a pendrive.
 - Bugs y deuda técnica conocidos:
   - Sin tests automatizados.
-  - Esquema con `sequelize.sync()` sin migraciones: cambiar un modelo puede romper bases instaladas.
+  - ~~Esquema con `sequelize.sync()` sin migraciones~~: resuelto en la spec 001 (migraciones en `src/main/database/migrations/`; todo cambio de modelo agrega una migración nueva, nunca se edita una ya publicada).
+  - Principio 6 de la constitución dice "copia de una base real", pero se acordó probar con la base de prueba del equipo: falta ajustar la redacción.
   - Configuración de build duplicada: `build` en package.json (appId com.fortinPatriotas.ticketera) y electron-builder.yml (appId com.electron.app).
   - Puerto 34567 fijo y nombre de impresora hardcodeado.
   - Dos drivers de SQLite instalados (better-sqlite3 y sqlite3).
@@ -149,3 +153,11 @@
 ## 18. Registro de decisiones y supuestos
 - [2026-10-20] Ficha creada a partir del análisis del código.
 - [2026-10-20] Ficha completada en entrevista con PerroneEros. Decisiones: sin anulaciones ni reimpresión, montos enteros, Vitest para tests, backups locales al cerrar caja, licencias por PC, contraseña de administrador única gestionada por el equipo.
+- [2026-10-20] Spec 001 (cierre auditable y migraciones). Decisiones:
+  - Migraciones con un runner propio sobre `sqlite3` y tabla `schema_migrations`, todo en una transacción (descartados Umzug, `sync({ alter })` y sequelize-cli). Copia previa con `VACUUM INTO`, se guardan las últimas 5 en `%APPDATA%\ticketera-fortin\copias-actualizacion\` junto al reporte.
+  - Montos de movimientos con centavos: se redondean al peso (0,50 hacia arriba) y quedan en el reporte. Registros inconsistentes: se conservan y se reportan.
+  - Cierre: el servidor calcula el esperado (apertura + ventas + ingresos − egresos, por medio); se guardan contado y esperado; las diferencias se calculan al mostrarlas. Si no coincide, el cajero reconfirma y se le avisa, pero puede cerrar. El esperado puede ser negativo.
+  - Cajas cerradas antes de la spec: se muestran "sin desglose", no se recalculan.
+  - Dashboard: totales calculados en el servidor; el detalle de cada caja se toma por `cash_register_id` (antes por horario) y se carga al expandir. Las aperturas siguen sumando a ingresos.
+  - Sin aviso de versiones nuevas (la app es offline). Volver atrás = restaurar la copia previa + instalar la versión anterior.
+  - Las pruebas de migración se hacen con la base de prueba del equipo (supuesto: es representativa de las cajas instaladas).

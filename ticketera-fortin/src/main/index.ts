@@ -3,15 +3,23 @@ import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/logo.jpeg?asset'
 import { initDB } from './database/initDb'
+import { describeMigration, describeStartupError } from './database/startupMessages'
 import express from 'express'
 import cors from 'cors'
 import apiRouter from './routes/index'
 // evita el error de eslint de any porque .listen devuelve server de http
 import { Server } from 'http'
+import { checkLicense, activateLicense } from './license'
+import {
+  API_HOST,
+  API_PORT,
+  API_TOKEN_HEADER,
+  createApiTokenMiddleware,
+  generateApiToken,
+  getAllowedOrigins
+} from './apiAuth'
+
 // es como se crea la ventana
-import * as fs from 'fs'
-import * as crypto from 'crypto'
-import { machineIdSync } from 'node-machine-id'
 function createWindow(): void {
   // indica el tamaño de la ventana
   const mainWindow = new BrowserWindow({
@@ -22,7 +30,7 @@ function createWindow(): void {
     icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: true
     }
   })
   // la ventana se mantiene invisble y cuando esta lista se despliega
@@ -41,9 +49,17 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 }
+
+// Una segunda instancia chocaría con el puerto y con la base de la primera
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+}
+
 // variable para guardar el servidor cuando se encuentra y despues poder cerrarlo
-// al asignarle tipo server evitamos que salte el error de eslint por usar la variable any
 let expressServer: Server | null = null
+// token nuevo en cada arranque: solo lo recibe el renderer de la app por el preload
+const apiToken = generateApiToken()
+
 // este metodo se llama cuando electron se termina de armar
 app.whenReady().then(async () => {
   // Set app user model id for windows
@@ -54,67 +70,49 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  const userDataPath = app.getPath('userData')
-  const licensePath = join(userDataPath, 'licencia.json')
-  const secret_word = 'Ticketera_UltraSecreto'
-  const currentMachineId = machineIdSync()
-  ipcMain.handle('check-license', () => {
-    const expectedKey = crypto
-      .createHmac('sha256', secret_word)
-      .update(currentMachineId)
-      .digest('hex')
-      .substring(0, 16)
-      .toUpperCase()
+  ipcMain.handle('check-license', () => checkLicense())
+  ipcMain.handle('activate-license', (_, key: unknown) => activateLicense(String(key ?? '')))
+  ipcMain.handle('get-api-token', () => apiToken)
 
-    let savedKey = ''
-    if (fs.existsSync(licensePath)) {
-      try {
-        const data = JSON.parse(fs.readFileSync(licensePath, 'utf8'))
-        savedKey = data.clave
-      } catch (e) {
-        savedKey = ''
-      }
-    }
-    return {
-      isLicensed: savedKey === expectedKey,
-      machineId: currentMachineId
-    }
-  })
-
-  ipcMain.handle('activate-license', (_, keyFromReact: string) => {
-    const expectedKey = crypto
-      .createHmac('sha256', secret_word)
-      .update(currentMachineId)
-      .digest('hex')
-      .substring(0, 16)
-      .toUpperCase()
-
-    if (keyFromReact === expectedKey) {
-      // Save the key if it matches
-      fs.writeFileSync(licensePath, JSON.stringify({ clave: keyFromReact }))
-      return true
-    }
-    return false
-  })
-  // Si desde tu HTML le mandan un mensaje llamado 'ping', él responde 'pong' en la consola.
-  // Acá mismo es donde vas a poner tus escuchadores para imprimir tickets o buscar productos en SQLite
-  ipcMain.on('ping', () => console.log('pong'))
   //inicia la base de datos
   try {
-    await initDB()
+    const migration = await initDB()
+    const notice = describeMigration(migration)
+    if (notice) {
+      await dialog.showMessageBox({ type: 'warning', title: notice.title, message: notice.message })
+    }
   } catch (error) {
     console.error('no se pudo iniciar la base de datos ', error)
+    const text = describeStartupError(error)
+    dialog.showErrorBox(text.title, text.message)
+    app.quit()
     return
   }
+
   //creacion de express
   const expressAPP = express()
-  expressAPP.use(cors())
+  // cors() responde los preflight, así que OPTIONS nunca llega al chequeo del token
+  expressAPP.use(
+    cors({
+      origin: getAllowedOrigins(process.env['ELECTRON_RENDERER_URL']),
+      allowedHeaders: ['Content-Type', API_TOKEN_HEADER]
+    })
+  )
   // se usa para que express acepte json
   expressAPP.use(express.json())
-  expressAPP.use('/api', apiRouter)
-  //log para mostrar donde funciona express reemplazar en el futuro para que busque el puerto libre solo
-  expressServer = expressAPP.listen(34567, () => {
-    console.log('el servidor esta escuchando en el puerto http://localhost:34567 ')
+  expressAPP.use('/api', createApiTokenMiddleware(apiToken), apiRouter)
+  // solo escucha en la propia PC: nada de la red puede llegar a la API
+  const server = expressAPP.listen(API_PORT, API_HOST, () => {
+    console.log(`el servidor esta escuchando en http://${API_HOST}:${API_PORT}`)
+  })
+  expressServer = server
+  server.on('error', (error) => {
+    console.error('no se pudo iniciar el servidor local ', error)
+    dialog.showErrorBox(
+      'Error al iniciar',
+      `No se pudo usar el puerto ${API_PORT}. Cerrá otras copias de la app y volvé a abrirla.`
+    )
+    app.quit()
   })
 
   //llama a la funcion para que aparezca la ventana

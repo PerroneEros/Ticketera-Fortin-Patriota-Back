@@ -11,7 +11,7 @@ export const LicenseScreen: React.FC<LicenseScreenProps> = ({ machineId, onActiv
   const [error, setError] = useState(false)
   const [copied, setCopied] = useState(false)
   const handleActivate = async () => {
-    const success = await window.api.activateLicense(key.trim().toUpperCase())
+    const success = await window.api.activateLicense(key.trim())
     if (success) {
       setError(false)
       onActivated()
