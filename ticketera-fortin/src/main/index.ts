@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/logo.jpeg?asset'
@@ -9,6 +9,9 @@ import apiRouter from './routes/index'
 // evita el error de eslint de any porque .listen devuelve server de http
 import { Server } from 'http'
 // es como se crea la ventana
+import * as fs from 'fs'
+import * as crypto from 'crypto'
+import { machineIdSync } from 'node-machine-id'
 function createWindow(): void {
   // indica el tamaño de la ventana
   const mainWindow = new BrowserWindow({
@@ -51,6 +54,48 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  const userDataPath = app.getPath('userData')
+  const licensePath = join(userDataPath, 'licencia.json')
+  const secret_word = 'Ticketera_UltraSecreto'
+  const currentMachineId = machineIdSync()
+  ipcMain.handle('check-license', () => {
+    const expectedKey = crypto
+      .createHmac('sha256', secret_word)
+      .update(currentMachineId)
+      .digest('hex')
+      .substring(0, 16)
+      .toUpperCase()
+
+    let savedKey = ''
+    if (fs.existsSync(licensePath)) {
+      try {
+        const data = JSON.parse(fs.readFileSync(licensePath, 'utf8'))
+        savedKey = data.clave
+      } catch (e) {
+        savedKey = ''
+      }
+    }
+    return {
+      isLicensed: savedKey === expectedKey,
+      machineId: currentMachineId
+    }
+  })
+
+  ipcMain.handle('activate-license', (_, keyFromReact: string) => {
+    const expectedKey = crypto
+      .createHmac('sha256', secret_word)
+      .update(currentMachineId)
+      .digest('hex')
+      .substring(0, 16)
+      .toUpperCase()
+
+    if (keyFromReact === expectedKey) {
+      // Save the key if it matches
+      fs.writeFileSync(licensePath, JSON.stringify({ clave: keyFromReact }))
+      return true
+    }
+    return false
+  })
   // Si desde tu HTML le mandan un mensaje llamado 'ping', él responde 'pong' en la consola.
   // Acá mismo es donde vas a poner tus escuchadores para imprimir tickets o buscar productos en SQLite
   ipcMain.on('ping', () => console.log('pong'))
