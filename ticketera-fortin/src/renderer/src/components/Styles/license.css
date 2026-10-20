@@ -1,0 +1,149 @@
+.license-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.license-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.license-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.license-description {
+  color: #64748b;
+  font-size: 14px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.machine-id-box {
+  margin: 20px 0;
+  padding: 14px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.machine-id-label {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.machine-id-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.machine-id-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: #334155;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  text-align: left;
+  line-height: 1.4;
+  margin: 0;
+  flex: 1;
+}
+
+.copy-btn {
+  background-color: #e2e8f0;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.copy-btn.copied {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.input-container {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.license-input {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.license-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.license-input.error {
+  border-color: #ef4444;
+}
+
+.license-input.error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 12px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.activate-button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.activate-button:hover {
+  background-color: #1d4ed8;
+}
