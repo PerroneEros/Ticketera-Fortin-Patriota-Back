@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './Styles/productModals.css'
 import { parseInputValue } from './utils/formatters'
 
@@ -6,6 +6,9 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
   const [cash, setCash] = useState(method === 'efectivo' ? total : 0)
   const [transfer, setTransfer] = useState(method === 'transferencia' ? total : 0)
   const [errorMsg, setErrorMsg] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // The ref blocks a second submit synchronously, before React re-renders the disabled button.
+  const submittingRef = useRef(false)
 
   const handleCashChange = (val) => {
     const num = parseInputValue(val)
@@ -27,6 +30,7 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
 
   const handlePayment = async (e) => {
     e.preventDefault()
+    if (submittingRef.current) return
     setErrorMsg('')
 
     if (method === 'efectivo' && cash !== total) {
@@ -42,17 +46,24 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
       return
     }
 
-    onConfirm({ method: method, cashAmount: cash, transferAmount: transfer })
+    submittingRef.current = true
+    setIsSubmitting(true)
+    try {
+      await onConfirm({ method: method, cashAmount: cash, transferAmount: transfer })
+    } finally {
+      submittingRef.current = false
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="modal-prod-overlay">
       <div className="modal-ticket-content">
         <div className="modal-ticket-header">
-          <button className="btn-ticket-back" onClick={onBack}>
+          <button className="btn-ticket-back" onClick={onBack} disabled={isSubmitting}>
             ← Volver
           </button>
-          <button className="btn-ticket-cancel" onClick={onClose}>
+          <button className="btn-ticket-cancel" onClick={onClose} disabled={isSubmitting}>
             Cancelar
           </button>
         </div>
@@ -105,8 +116,8 @@ export default function Payment({ method, total, onClose, onConfirm, onBack }) {
             {errorMsg && <p className="error-text payment-error">{errorMsg}</p>}
 
             <div className="modal-prod-actions center-actions">
-              <button type="submit" className="btn-confirm-payment">
-                Confirmar Pago
+              <button type="submit" className="btn-confirm-payment" disabled={isSubmitting}>
+                {isSubmitting ? 'Procesando…' : 'Confirmar Pago'}
               </button>
             </div>
           </form>
