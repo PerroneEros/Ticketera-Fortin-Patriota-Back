@@ -13,23 +13,23 @@ body {
   background-color: #2b2b2b; /* Color de respaldo */
   user-select: none;
   position: relative; /* Necesario para la capa falsa */
-  z-index: 1; 
+  z-index: 1;
 }
 
 /* Capa falsa de fondo: aquí ocurre la magia del desenfoque */
 body::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('./fondo2.jpg');
+  background-image: url('./fondo.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   /* Desenfoque (blur) y oscurecimiento (brightness) */
-  filter: blur(6px) brightness(0.65); 
+  filter: blur(6px) brightness(0.65);
   z-index: -1; /* Lo manda detrás de toda la aplicación */
 }
 

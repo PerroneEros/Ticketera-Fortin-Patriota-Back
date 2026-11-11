@@ -82,8 +82,8 @@ export default function Home() {
       <div className="login-card">
         <div className="card-header-black">
           <img src={logo} alt="Logo Fortín Patriotas" className="home-logo" />
-          <h1 className="home-title">Fortín Patriotas</h1>
-          <h3 className="home-subtitle">Centro Tradicionalista · Casbas</h3>
+          <h1 className="home-title">App Ticketera</h1>
+          <h3 className="home-subtitle">Nombre empresa</h3>
           <h2 className="home-date">{getCurrentDate()}</h2>
         </div>
 
