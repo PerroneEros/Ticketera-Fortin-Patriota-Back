@@ -26,7 +26,7 @@
    ARREGLO DEFINITIVO DEL LOGO (Lo obliga a ser chico)
    ============================================================== */
 .header-logo-container {
-  width: 55px !important;
+  width: 90px !important;
   height: 55px !important;
   min-width: 55px; /* Evita que se aplaste */
   border-radius: 50%;

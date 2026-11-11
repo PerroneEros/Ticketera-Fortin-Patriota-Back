@@ -1,9 +1,9 @@
 {
-  "name": "ticketera-fortin",
+  "name": "App Ticketera",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
-  "author": "Ticketera Fortin",
+  "author": "App Ticketera",
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.fortinPatriotas.ticketera",
-    "productName": "TicketeraFortin",
+    "productName": "App Ticketera",
     "win": {
       "icon": "icon.ico",
       "target": [
