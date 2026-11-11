@@ -1,1 +1,0 @@
-@ticketera-fortin/CLAUDE.md
